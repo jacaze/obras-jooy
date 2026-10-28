@@ -95,10 +95,12 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
       expect(body.erro).toBe('Credenciais invalidas')
     })
 
-    it('deve rejeitar login de usuario inativo (401 Unauthorized)', async () => {
+    it('deve rejeitar login de usuario inativo com mensagem explicativa (401 Unauthorized)', async () => {
+      const senhaHash = await bcrypt.hash('qualquerSenha', 10)
       vi.spyOn(prisma.usuario, 'findFirst').mockResolvedValueOnce({
         id: 'user-inativo',
         login: 'inativo',
+        senhaHash,
         ativo: false,
       } as any)
 
@@ -113,7 +115,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
 
       expect(response.statusCode).toBe(401)
       const body = JSON.parse(response.body)
-      expect(body.erro).toBe('Credenciais invalidas')
+      expect(body.erro).toBe('Usuario desativado. Entre em contato com o administrador.')
     })
   })
 

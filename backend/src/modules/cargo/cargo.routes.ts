@@ -26,6 +26,11 @@ export async function cargoRoutes(app: FastifyInstance) {
 
       const cargos = await prisma.cargo.findMany({
         where: somenteAtivos ? { ativo: true } : undefined,
+        include: {
+          _count: {
+            select: { usuarios: true },
+          },
+        },
         orderBy: { nome: 'asc' },
       })
 

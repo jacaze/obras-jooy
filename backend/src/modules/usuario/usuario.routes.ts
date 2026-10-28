@@ -72,13 +72,18 @@ export async function usuarioRoutes(app: FastifyInstance) {
       })
 
       // Zero Trust: Nao revela se o login existe ou se a senha esta errada
-      if (!usuario || !usuario.ativo) {
+      if (!usuario) {
         throw new UnauthorizedError('Credenciais invalidas')
       }
 
       const senhaCorreta = await bcrypt.compare(senha, usuario.senhaHash)
       if (!senhaCorreta) {
         throw new UnauthorizedError('Credenciais invalidas')
+      }
+
+      // Se usuario estiver inativo/desativado, informa o motivo com clareza
+      if (!usuario.ativo) {
+        throw new UnauthorizedError('Usuario desativado. Entre em contato com o administrador.')
       }
 
       // Gera o token JWT com payload limpo (sem dados sensiveis)

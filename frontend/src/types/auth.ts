@@ -18,6 +18,9 @@ export interface Cargo {
   nome: string
   ativo: boolean
   criadoEm: string
+  _count?: {
+    usuarios: number
+  }
 }
 
 export interface UsuarioListagem {

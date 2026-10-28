@@ -69,7 +69,7 @@ describe('UsuariosPage Component', () => {
   it('deve listar os usuarios e cargos carregados', async () => {
     renderUsuariosPage()
 
-    expect(screen.getByText('Gestao de Usuarios')).toBeInTheDocument()
+    expect(screen.getByText('Painel Administrativo')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(screen.getByText('Carlos Almoxarife')).toBeInTheDocument()
@@ -196,6 +196,35 @@ describe('UsuariosPage Component', () => {
 
     await waitFor(() => {
       expect(resetSpy).toHaveBeenCalledWith('user-1', 'NovaSenha@99')
+    })
+  })
+
+  it('deve alternar para a aba de cargos e permitir desativar cargo', async () => {
+    const toggleCargoSpy = vi.spyOn(apiClient, 'toggleCargoSituacao').mockResolvedValue({
+      id: 'cargo-1',
+      nome: 'Almoxarife',
+      ativo: false,
+      criadoEm: '2026-10-28T00:00:00Z',
+    })
+
+    renderUsuariosPage()
+
+    await waitFor(() => {
+      expect(screen.getByText('Carlos Almoxarife')).toBeInTheDocument()
+    })
+
+    const abaCargos = screen.getByRole('button', { name: /Gerenciamento de Cargos/i })
+    fireEvent.click(abaCargos)
+
+    await waitFor(() => {
+      expect(screen.getByText('Almoxarife')).toBeInTheDocument()
+    })
+
+    const btnDesativarCargo = screen.getAllByRole('button', { name: /Desativar Cargo/i })[0]
+    fireEvent.click(btnDesativarCargo)
+
+    await waitFor(() => {
+      expect(toggleCargoSpy).toHaveBeenCalledWith('cargo-1', false)
     })
   })
 })

@@ -69,6 +69,11 @@ export async function createCargo(nome: string): Promise<Cargo> {
   return response.data
 }
 
+export async function toggleCargoSituacao(id: string, ativo: boolean): Promise<Cargo> {
+  const response = await api.patch<Cargo>(`/cargos/${id}/situacao`, { ativo })
+  return response.data
+}
+
 export async function getUsuarios(): Promise<UsuarioListagem[]> {
   const response = await api.get<UsuarioListagem[]>('/usuarios')
   return response.data
