@@ -19,7 +19,7 @@ const envSchema = z.object({
 const _env = envSchema.safeParse(process.env)
 
 if (!_env.success) {
-  console.error('❌ Erro de validação das variáveis de ambiente:')
+  console.error('Erro de validacao das variaveis de ambiente:')
   console.error(JSON.stringify(_env.error.format(), null, 2))
   process.exit(1)
 }

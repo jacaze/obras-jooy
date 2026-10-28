@@ -9,8 +9,8 @@ async function start() {
       port: env.PORT,
       host: env.HOST,
     })
-    console.log(`🚀 Servidor rodando em: ${address}`)
-    console.log(`📚 Documentação Swagger disponível em: ${address}/api/docs`)
+    console.log(`Servidor rodando em: ${address}`)
+    console.log(`Documentacao Swagger disponivel em: ${address}/api/docs`)
   } catch (err) {
     app.log.error(err)
     process.exit(1)

@@ -72,7 +72,7 @@ flowchart TD
   - **Como testar:** instruções reproduzíveis passo a passo.
   - **Evidências:** checklist com `[x]` estritamente nas provas obtidas.
   - **Riscos e Observações:** impactos colaterais ou pendências.
-- 🛑 **Parada Obrigatória:** O agente **NÃO realiza o merge** por conta própria. O PR é submetido e o agente aguarda a validação e autorização explícita do usuário.
+- **Parada Obrigatória:** O agente **NÃO realiza o merge** por conta própria. O PR é submetido e o agente aguarda a validação e autorização explícita do usuário.
 
 ---
 

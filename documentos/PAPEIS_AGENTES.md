@@ -25,7 +25,7 @@ flowchart LR
 
 ---
 
-### 🛡️ Agente 1: Especialista em Banco de Dados (DBA)
+### Agente 1: Especialista em Banco de Dados (DBA)
 
 * **Missão:** Garantir a integridade, consistência, performance e versionamento do esquema de dados relacional.
 * **Ferramentas:** PostgreSQL 16, Docker Compose, Prisma ORM (`schema.prisma`), Prisma Migrate, Prisma Seed.
@@ -45,7 +45,7 @@ flowchart LR
 
 ---
 
-### ⚙️ Agente 2: Engenheiro de Back-end (API & Regras de Negócio)
+### Agente 2: Engenheiro de Back-end (API & Regras de Negócio)
 
 * **Missão:** Implementar a lógica de negócios, orquestração de casos de uso e expor endpoints RESTful seguros e de alta performance.
 * **Ferramentas:** Node.js, TypeScript (Strict), Fastify, Zod, `@fastify/jwt`, `@fastify/helmet`, `@fastify/rate-limit`, Prisma Client.
@@ -67,7 +67,7 @@ flowchart LR
 
 ---
 
-### 🎨 Agente 3: Engenheiro de Front-end (UI/UX & Integração)
+### Agente 3: Engenheiro de Front-end (UI/UX & Integração)
 
 * **Missão:** Construir interfaces rápidas, intuitivas e responsivas para o almoxarife no PC e para o encarregado no celular.
 * **Ferramentas:** React, TypeScript, Vite, React Router, TanStack Query (React Query), Axios, React Hook Form + Zod, CSS/Tailwind.
@@ -91,7 +91,7 @@ flowchart LR
 
 ---
 
-### 🧪 Agente 4: Engenheiro de Testes e Qualidade (QA & Segurança)
+### Agente 4: Engenheiro de Testes e Qualidade (QA & Segurança)
 
 * **Missão:** Blindar o sistema contra regressões, validar requisitos funcionais e não-funcionais, garantir conformidade de segurança e coletar evidências para aprovação de PR.
 * **Ferramentas:** Vitest, Supertest / Fastify Inject, Testing Library, Scripts de teste de concorrência.
@@ -116,7 +116,7 @@ flowchart LR
 
 ---
 
-### 🧠 Agente 5: Curador de Memória & Conhecimento (`graphify-curator`)
+### Agente 5: Curador de Memória & Conhecimento (`graphify-curator`)
 
 * **Missão:** Manter o grafo de conhecimento (Graphify) e o cofre do Obsidian perfeitamente sincronizados com o código e a documentação mais recentes, garantindo rastreabilidade sem custo excessivo de contexto de IA.
 * **Ferramentas:** Graphify CLI (`py -m graphify`), Obsidian Vault (`graphify-out/obsidian/`), Canvas (`graph.canvas`), Tree-sitter ASTs.
