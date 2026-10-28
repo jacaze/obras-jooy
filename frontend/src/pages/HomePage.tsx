@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { fetchHealth } from '../api/client'
+import { useAuth } from '../hooks/useAuth'
 
 export function HomePage() {
+  const { usuario } = useAuth()
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['health'],
     queryFn: fetchHealth,
@@ -14,8 +17,44 @@ export function HomePage() {
         <p style={{ color: '#64748b', margin: '0.5rem 0 0' }}>Sistema de Gestao e Estoque para Canteiros de Obras</p>
       </header>
 
+      {usuario && (
+        <section
+          style={{
+            background: '#ffffff',
+            padding: '1.25rem',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <h2 style={{ fontSize: '1.1rem', color: '#0f172a', margin: '0 0 0.5rem' }}>
+            Bem-vindo(a), {usuario.nome}!
+          </h2>
+          <p style={{ color: '#475569', fontSize: '0.9rem', margin: '0 0 1rem' }}>
+            Cargo: <strong>{usuario.cargo}</strong> • Perfil: <strong>{usuario.perfil}</strong>
+          </p>
+          {usuario.perfil === 'ADMIN' && (
+            <Link
+              to="/usuarios"
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#0284c7',
+                color: '#fff',
+                textDecoration: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '4px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+              }}
+            >
+              Gerenciar Usuarios e Cargos
+            </Link>
+          )}
+        </section>
+      )}
+
       <section style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-        <h2 style={{ fontSize: '1.25rem', color: '#334155', marginTop: 0 }}>Status de Integracao com a API</h2>
+        <h2 style={{ fontSize: '1.1rem', color: '#334155', marginTop: 0 }}>Status de Integracao com a API</h2>
 
         {isLoading && <p style={{ color: '#0284c7' }}>Verificando comunicacao com o servidor...</p>}
 

@@ -87,8 +87,8 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **SEC-01** | `main` / `develop` | Criação dos guias de segurança e fluxo operacional dos agentes | N/A (Documentação) | Concluído | Aguardando validação |
 | **T01** | `feature/T01-docker-compose` | Docker Compose seguro (PostgreSQL 16 porta 5433), .env.example e .gitignore | Teste de interpolação e falha | Concluído | Sim (PR #1 mergeado) |
 | **T02** | `feature/T02-backend-setup` | Setup backend Node.js, Fastify, Prisma, Zod, Health e Swagger | 12 testes Vitest | Concluido | Sim (PR #2 mergeado) |
-| **T03** | `feature/T03-frontend-setup` | Setup frontend React + Vite + TS, TanStack Query, Axios e proxy /api | 2 testes Vitest | Pronto para PR | Aguardando aprovacao |
-| **T04** | *(a criar)* | Autenticação JWT, Usuários e RBAC | Vitest | Pendente | Não |
+| **T03** | `feature/T03-frontend-setup` | Setup frontend React + Vite + TS, TanStack Query, Axios e proxy /api | 2 testes Vitest | Concluido | Sim (PR #3 mergeado) |
+| **T04** | `feature/T04-autenticacao-usuarios` | Autenticacao JWT, Tabela de Cargos, Gestao de Usuarios e RBAC | 41 testes Vitest (26 backend + 15 frontend) | Pronto para PR | Aguardando aprovacao |
 | **T05** | *(a criar)* | Gestão de Obra e Áreas da Obra | Vitest | Pendente | Não |
 | **T06** | *(a criar)* | Empresas e Pessoas | Vitest | Pendente | Não |
 | **T07** | *(a criar)* | Catálogo de Materiais e Unidades com Conversão | Vitest | Pendente | Não |
