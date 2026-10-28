@@ -48,3 +48,4 @@ tmp/
 
 # Graphify generated knowledge graph and Obsidian vault
 graphify-out/
+.obsidian/

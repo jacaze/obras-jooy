@@ -26,7 +26,7 @@ Siga este passo a passo para conectar o Obsidian à memória do projeto:
 
 1. **Abra o aplicativo Obsidian** no seu computador.
 2. Na tela de boas-vindas (ou clicando no ícone do cofre no canto inferior esquerdo), selecione a opção:
-   👉 **"Open folder as vault"** (ou *"Abrir pasta como cofre"*).
+   **"Open folder as vault"** (ou *"Abrir pasta como cofre"*).
 3. Navegue e selecione a pasta:
    ```
    c:\Users\Guilherme\Documents\Faculdade\Projetos\obras-jooy\graphify-out\obsidian

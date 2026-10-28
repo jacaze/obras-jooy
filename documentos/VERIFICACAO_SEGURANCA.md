@@ -11,9 +11,9 @@ Este documento estabelece as verificações e padrões obrigatórios de seguran�
 
 ### 1.1 Regra com Prisma ORM
 - **Princípio:** O Prisma utiliza consultas parametrizadas (*prepared statements*) nativamente para todos os métodos de modelo (`findMany`, `create`, `update`, `delete`, etc.). Isso neutraliza SQL Injection por padrão.
-- **Proibição Estrita de `$queryRawUnsafe`:**
-  - ❌ **Nunca** utilizar `prisma.$queryRawUnsafe("SELECT * FROM ... WHERE id = '" + id + "'")`.
-  - ✅ Em caso de necessidade de consulta SQL bruta, utilizar **obrigatoriamente** `prisma.$queryRaw` com tagged templates:
+- Proibicao Estrita de `$queryRawUnsafe`:
+  - **Nunca** utilizar `prisma.$queryRawUnsafe("SELECT * FROM ... WHERE id = '" + id + "'")`.
+  - Em caso de necessidade de consulta SQL bruta, utilizar **obrigatoriamente** `prisma.$queryRaw` com tagged templates:
     ```typescript
     // Correto: o Prisma parametriza automaticamente as variáveis no tagged template
     await prisma.$queryRaw`SELECT * FROM material WHERE codigo = ${codigo};`;
@@ -40,8 +40,8 @@ Este documento estabelece as verificações e padrões obrigatórios de seguran�
 ## 3. Política de CORS (Cross-Origin Resource Sharing)
 
 ### 3.1 Implementação com `@fastify/cors`
-- ❌ **Proibido em produção:** `origin: "*"` permitindo qualquer domínio.
-- ✅ **Configuração Restritiva:**
+- **Proibido em producao:** `origin: "*"` permitindo qualquer domínio.
+- **Configuracao Restritiva:**
   - Em desenvolvimento local: permitir exclusivamente a origem do front-end Vite (`http://localhost:5173`).
   - Em produção: permitir apenas os domínios homologados da JOOY Construtora.
   - Métodos permitidos restritos: `GET, POST, PUT, PATCH, DELETE, OPTIONS`.

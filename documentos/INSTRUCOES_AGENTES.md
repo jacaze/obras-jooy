@@ -48,7 +48,8 @@ Consulte o documento completo: [`documentos/VERIFICACAO_SEGURANCA.md`](file:///c
 ## 4. Padrões de Código e Arquitetura (Node.js + TypeScript + Prisma)
 
 1. **Tipagem Estrita:** TypeScript configurado com `strict: true`. Proibido o uso injustificado de `any`.
-2. **Clean Architecture Pragmática:**
+2. **Proibição de Emojis no Código:** Nunca utilizar emojis em código-fonte, comentários, mensagens de log, exceptions, strings de API ou commits. Utilizar apenas texto limpo e profissional.
+3. **Clean Architecture Pragmática:**
    - **Domain:** Entidades e regras puras de negócio. Não importa bibliotecas de infraestrutura.
    - **Use Cases / Application:** Casos de uso específicos (um propósito por arquivo/classe: `CriarMaterialUseCase`, `RegistrarBaixaUseCase`).
    - **Repositories:** Interfaces (portas) no domínio e implementações concretas usando Prisma na infraestrutura.
@@ -86,7 +87,7 @@ Consulte o fluxo detalhado: [`documentos/FLUXO_EXECUCAO_AGENTES.md`](file:///c:/
      - **Como testar:** passo a passo reproduzível.
      - **Evidências:** checklist com `[x]` apenas para o que foi efetivamente testado.
      - **Riscos e observações:** potenciais impactos colaterais ou pontos de atenção.
-   - 🛑 **Aprovação do Usuário:** Após tudo validado e testado, suba o PR e aguarde a aprovação do usuário. O agente nunca faz merge na `develop` ou `main` sem autorização expressa.
+   - **Aprovação do Usuário:** Após tudo validado e testado, suba o PR e aguarde a aprovação do usuário. O agente nunca faz merge na `develop` ou `main` sem autorização expressa.
    - PRs são mesclados com **Merge Commit** (`git merge --no-ff`), preservando o histórico empilhado.
 
 ---
