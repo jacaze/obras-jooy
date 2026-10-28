@@ -85,7 +85,7 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **SETUP-01** | `main` / `develop` | Inicialização do Git, .gitignore, README e plano base | N/A (Setup) | Concluído | Sim |
 | **SETUP-02** | `main` / `develop` | Criação da pasta `documentos/` e transposição da stack para Node.js + Prisma | N/A (Documentação) | Concluído | Sim |
 | **SEC-01** | `main` / `develop` | Criação dos guias de segurança e fluxo operacional dos agentes | N/A (Documentação) | Concluído | Aguardando validação |
-| **T01** | *(a criar)* | Docker Compose (PostgreSQL 16 porta 5433) e ambiente | Integrado | Pendente | Não |
+| **T01** | `feature/T01-docker-compose` | Docker Compose seguro (PostgreSQL 16 porta 5433), .env.example e .gitignore | Teste de interpolação e falha | Pronto para PR | Aguardando aprovação |
 | **T02** | *(a criar)* | Setup backend Node.js, Fastify, Prisma, Zod, Health e Swagger | Vitest | Pendente | Não |
 | **T03** | *(a criar)* | Setup frontend React + Vite + TS e proxy de API | Vitest / Lint | Pendente | Não |
 | **T04** | *(a criar)* | Autenticação JWT, Usuários e RBAC | Vitest | Pendente | Não |

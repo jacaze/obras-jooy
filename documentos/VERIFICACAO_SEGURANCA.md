@@ -118,7 +118,28 @@ Este documento estabelece as verificações e padrões obrigatórios de seguran�
 
 ---
 
-## 8. Checklist de Verificação por Pull Request (Segurança)
+## 8. Gestão Estrita de Variáveis de Ambiente e Docker Compose Seguro
+
+### 8.1 Prevenção de Vazamento no Docker Compose
+- **Sintaxe Obrigatória:** Todo valor sensível no `docker-compose.yml` deve usar interpolação estrita sem fallbacks vulneráveis:
+  ```yaml
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Variavel de ambiente POSTGRES_PASSWORD obrigatoria no .env}
+  POSTGRES_USER: ${POSTGRES_USER:?Variavel de ambiente POSTGRES_USER obrigatoria no .env}
+  POSTGRES_DB: ${POSTGRES_DB:?Variavel de ambiente POSTGRES_DB obrigatoria no .env}
+  ```
+- **Comportamento Esperado:** Se o arquivo `.env` não existir ou alguma variável obrigatória estiver vazia, o Docker Compose aborta a execução imediatamente com erro, impedindo a inicialização com senhas nulas ou default.
+- **Zero Hardcoded Secrets:** Nenhuma senha ou credencial de teste padrão (ex: `postgres`, `admin123`) pode ser escrita diretamente no `docker-compose.yml` ou em arquivos versionados.
+
+### 8.2 Proteção no `.gitignore`
+- O `.gitignore` bloqueia categoricamente `.env`, `.env.*`, `*.env`, `*.pem`, `*.key` e `docker-compose.override.yml`.
+- Apenas o `.env.example` (com valores puramente ilustrativos) é versionado.
+
+### 8.3 Validação no Back-end com Zod
+- Na inicialização do Node.js (`src/config/env.ts`), todas as variáveis de ambiente necessárias (`DATABASE_URL`, `JWT_SECRET`, etc.) são validadas contra um schema Zod estrito. Se qualquer variável for inválida ou ausente, a aplicação lança erro descritivo e encerra o processo com código 1 (`process.exit(1)`).
+
+---
+
+## 9. Checklist de Verificação por Pull Request (Segurança)
 
 Antes de submeter o PR para aprovação, confira:
 
@@ -127,5 +148,6 @@ Antes de submeter o PR para aprovação, confira:
 - [ ] As queries ao banco utilizam o Prisma Client ou `$queryRaw` parametrizado (sem interpolação de strings)?
 - [ ] O controle de perfil (RBAC) está ativo nas rotas com perfis autorizados explicitamente?
 - [ ] O campo `senhaHash` está excluído de todos os retornos JSON?
-- [ ] Nenhum segredo, senha ou chave privada está commitada nos arquivos?
+- [ ] O `docker-compose.yml` utiliza sintaxe de interpolação estrita `${VAR:?erro}` sem senhas hardcoded?
+- [ ] Nenhum arquivo `.env` ou segredo está commitado (apenas `.env.example`)?
 - [ ] Os testes automatizados cobrem cenários de acesso não autenticado (401) e perfil não autorizado (403)?

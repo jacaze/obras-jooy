@@ -9,13 +9,14 @@ build/
 out/
 .next/
 
-# Environment variables & local configurations
+# Environment variables & secrets (NUNCA versionar senhas ou chaves)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 *.env
+*.pem
+*.key
+docker-compose.override.yml
 
 # Logs
 logs
