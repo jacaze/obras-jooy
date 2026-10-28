@@ -36,9 +36,12 @@
 
 ## 3. Segurança e Segredos
 
-1. **Nunca versionar segredos:** Arquivos `.env`, senhas, tokens JWT e chaves privadas jamais devem ser commitados no Git ou expostos em logs.
-2. **Configuração via ambiente:** Utilizar `.env.example` com placeholders claros (`POSTGRES_PASSWORD=sua_senha_aqui`, etc.).
-3. **Princípio do Menor Privilégio:** Rotas e operações no back-end devem validar explicitamente o perfil do usuário (`ADMIN`, `ALMOXARIFE`, `ENGENHARIA`, `ADMINISTRACAO`, `ENCARREGADO`).
+Consulte o documento completo: [`documentos/VERIFICACAO_SEGURANCA.md`](file:///c:/Users/Guilherme/Documents/Faculdade/Projetos/obras-jooy/documentos/VERIFICACAO_SEGURANCA.md).
+
+1. **Checklist Obrigatório por PR:** Antes de submeter código, checar SQL injection (queries parametrizadas no Prisma), rate limiting (em especial no login), CORS restrito, headers com Helmet e sanitização de dados sensíveis.
+2. **Nunca versionar segredos:** Arquivos `.env`, senhas, tokens JWT e chaves privadas jamais devem ser commitados no Git ou expostos em logs.
+3. **Configuração via ambiente:** Utilizar `.env.example` com placeholders claros (`POSTGRES_PASSWORD=sua_senha_aqui`, etc.).
+4. **Princípio do Menor Privilégio:** Rotas e operações no back-end devem validar explicitamente o perfil do usuário (`ADMIN`, `ALMOXARIFE`, `ENGENHARIA`, `ADMINISTRACAO`, `ENCARREGADO`).
 
 ---
 
@@ -69,21 +72,22 @@
 
 ## 5. Fluxo de Git e Pull Requests
 
-1. **Estratégia de Branches:**
-   - `main`: Código estável pronto para produção/entrega.
-   - `develop`: Branch de integração diária.
-   - `feature/Txx-descricao`: Uma branch dedicada para cada sub-etapa de uma task (ex.: `feature/T07-unidades-medida`).
+Consulte o fluxo detalhado: [`documentos/FLUXO_EXECUCAO_AGENTES.md`](file:///c:/Users/Guilherme/Documents/Faculdade/Projetos/obras-jooy/documentos/FLUXO_EXECUCAO_AGENTES.md).
+
+1. **Uma branch por feature:** Sempre criar uma branch dedicada a partir da `develop` (`feature/Txx-descricao`). Nenhuma alteração direta em `develop` ou `main`.
 2. **Padrão de Commits (Conventional Commits):**
    - Formato: `tipo(escopo): descricao em minusculas sem ponto final e sem acento`.
    - Exemplos: `feat(obra): adicionar validacao de codigo unico`, `fix(auth): ajustar expiracao do token jwt`.
-3. **Abertura de Pull Requests:**
+3. **Testes Automatizados Obrigatórios:** Toda feature deve vir acompanhada de testes automatizados (unitários e/ou integração com Vitest).
+4. **Submissão de Pull Request para Aprovação:**
    - Sempre fornecer o texto estruturado do PR contendo:
      - **Título:** ex.: `feat(T07): cadastro de unidades de medida e categorias`
      - **O que foi feito:** lista dos itens implementados.
      - **Como testar:** passo a passo reproduzível.
      - **Evidências:** checklist com `[x]` apenas para o que foi efetivamente testado.
      - **Riscos e observações:** potenciais impactos colaterais ou pontos de atenção.
-   - PRs devem ser mesclados com **Merge Commit** (`git merge --no-ff`), preservando o histórico empilhado.
+   - 🛑 **Aprovação do Usuário:** Após tudo validado e testado, suba o PR e aguarde a aprovação do usuário. O agente nunca faz merge na `develop` ou `main` sem autorização expressa.
+   - PRs são mesclados com **Merge Commit** (`git merge --no-ff`), preservando o histórico empilhado.
 
 ---
 
