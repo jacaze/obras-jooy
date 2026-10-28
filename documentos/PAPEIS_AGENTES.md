@@ -1,13 +1,13 @@
 # Definição de Papéis e Funções dos Agentes de IA
 
 **Projeto:** Sistema de Almoxarifado de Obras (JOOY Construtora + SENAI)  
-**Especialidades:** 1. Banco de Dados · 2. Back-end · 3. Front-end · 4. Testes e Qualidade (QA)
+**Especialidades:** 1. Banco de Dados · 2. Back-end · 3. Front-end · 4. Testes e Qualidade (QA) · 5. Memória e Conhecimento (Graphify & Obsidian)
 
-Este documento define com precisão o escopo, as responsabilidades, os limites de atuação e o fluxo de colaboração entre os 4 agentes especializados no desenvolvimento do projeto.
+Este documento define com precisão o escopo, as responsabilidades, os limites de atuação e o fluxo de colaboração entre os 5 agentes especializados no desenvolvimento do projeto.
 
 ---
 
-## 1. Visão Geral dos 4 Papéis
+## 1. Visão Geral dos 5 Papéis
 
 ```mermaid
 flowchart LR
@@ -16,6 +16,7 @@ flowchart LR
     BE -.->|Casos de Uso & Rotas| QA["Agente 4<br/>Testes & Qualidade<br/>(Vitest & Segurança)"]
     FE -.->|Componentes & Fluxos| QA
     QA -->|Validação & Evidências| PR["Submissão do PR<br/>(Aprovação do Usuário)"]
+    PR -.->|Após Merge na develop| MEM["Agente 5<br/>Curador de Memória<br/>(Graphify & Obsidian)"]
 ```
 
 ---
@@ -115,18 +116,38 @@ flowchart LR
 
 ---
 
+### 🧠 Agente 5: Curador de Memória & Conhecimento (`graphify-curator`)
+
+* **Missão:** Manter o grafo de conhecimento (Graphify) e o cofre do Obsidian perfeitamente sincronizados com o código e a documentação mais recentes, garantindo rastreabilidade sem custo excessivo de contexto de IA.
+* **Ferramentas:** Graphify CLI (`py -m graphify`), Obsidian Vault (`graphify-out/obsidian/`), Canvas (`graph.canvas`), Tree-sitter ASTs.
+
+#### Responsabilidades Principais:
+1. **Sincronização Contínua:** Executar `py -m graphify update .` e `py -m graphify export obsidian` após conclusões de features ou merges na branch `develop`.
+2. **Manutenção do Cofre:** Assegurar que os arquivos Markdown do Obsidian em `graphify-out/obsidian/` contenham wikilinks íntegros e que o `graph.canvas` represente a topologia atualizada do sistema.
+3. **Consultas de Impacto e Dependência:**
+   - Calcular caminhos de dependência entre módulos e entidades (`py -m graphify path "A" "B"`).
+   - Explicar nós conceituais para apoiar decisões técnicas dos outros agentes (`py -m graphify explain "Conceito"`).
+4. **Relatório de Integridade:** Notificar a quantidade de nós, arestas e comunidades ativas, alertando sobre acoplamentos cíclicos ou código órfão.
+
+#### O que NÃO faz:
+- Não altera regras de negócio no código-fonte diretamente;
+- Não comita arquivos temporários do cofre no Git (mantém `graphify-out/` ignorado).
+
+---
+
 ## 3. Matriz RACI de Responsabilidades
 
-| Atividade | Agente 1 (Banco) | Agente 2 (Back-end) | Agente 3 (Front-end) | Agente 4 (Testes/QA) |
-|---|:---:|:---:|:---:|:---:|
-| **Criar/alterar tabela no Prisma** | **R** / **A** | C | I | C |
-| **Criar Caso de Uso e Regra de Domínio** | C | **R** / **A** | I | C |
-| **Expor Rota HTTP e Schema Zod** | I | **R** / **A** | C | C |
-| **Construir Tela / Componente React** | I | C | **R** / **A** | C |
-| **Escrever e Executar Testes Automatizados** | C | C | C | **R** / **A** |
-| **Auditar Checklist de Segurança** | C | C | C | **R** / **A** |
-| **Montar Texto do PR com Evidências** | C | C | C | **R** / **A** |
-| **Aprovar e Merge do PR** | I | I | I | I *(Exclusivo do Usuário)* |
+| Atividade | Agente 1 (Banco) | Agente 2 (Back-end) | Agente 3 (Front-end) | Agente 4 (Testes/QA) | Agente 5 (Memória) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Criar/alterar tabela no Prisma** | **R** / **A** | C | I | C | I |
+| **Criar Caso de Uso e Regra de Domínio** | C | **R** / **A** | I | C | I |
+| **Expor Rota HTTP e Schema Zod** | I | **R** / **A** | C | C | I |
+| **Construir Tela / Componente React** | I | C | **R** / **A** | C | I |
+| **Escrever e Executar Testes Automatizados** | C | C | C | **R** / **A** | I |
+| **Auditar Checklist de Segurança** | C | C | C | **R** / **A** | I |
+| **Montar Texto do PR com Evidências** | C | C | C | **R** / **A** | I |
+| **Atualizar Grafo e Cofre do Obsidian** | I | I | I | I | **R** / **A** |
+| **Aprovar e Merge do PR** | I | I | I | I | I *(Usuário)* |
 
 *Legenda:*  
 * **R (Responsible):** Quem executa a tarefa.  
@@ -152,3 +173,5 @@ Para cada task (ex: T05 - Obras e Áreas):
    - Executa a suíte completa, coleta as saídas de sucesso e redige o Pull Request estruturado.
 6. **Passo 6 (Usuário):**
    - Revisa o PR, confere as evidências e aprova o merge na branch `develop`.
+7. **Passo 7 (Agente 5 - Memória/Graphify):**
+   - Roda a sincronização da codebase (`py -m graphify update .`) e atualiza o cofre do Obsidian (`py -m graphify export obsidian`), mantendo o segundo cérebro do projeto em sincronia contínua.
