@@ -14,6 +14,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url().default('postgresql://almox:sua_senha_segura_do_banco_aqui@localhost:5433/almoxarifado?schema=public'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET deve possuir no mínimo 32 caracteres').default('chave_secreta_padrao_minimo_32_caracteres_dev'),
   JWT_EXPIRES_IN: z.string().default('8h'),
+  ADMIN_LOGIN: z.string().default('admin'),
+  ADMIN_PASSWORD: z.string().min(6).default('admin123456'),
+  ADMIN_NOME: z.string().default('Administrador do Sistema'),
 })
 
 const _env = envSchema.safeParse(process.env)

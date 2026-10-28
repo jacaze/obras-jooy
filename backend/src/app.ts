@@ -2,10 +2,13 @@ import fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
+import jwt from '@fastify/jwt'
 import { env } from './config/env.js'
 import { setupSwagger } from './config/swagger.js'
 import { errorHandler } from './shared/middlewares/errorHandler.js'
 import { healthRoutes } from './modules/health/health.routes.js'
+import { cargoRoutes } from './modules/cargo/cargo.routes.js'
+import { usuarioRoutes } from './modules/usuario/usuario.routes.js'
 
 export async function buildApp() {
   const app = fastify({
@@ -25,20 +28,27 @@ export async function buildApp() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
   })
 
-  // 3. Rate Limit Global (100 req/min por IP)
+  // 3. Autenticacao JWT
+  await app.register(jwt, {
+    secret: env.JWT_SECRET,
+  })
+
+  // 4. Rate Limit Global (100 req/min por IP)
   await app.register(rateLimit, {
     max: 100,
     timeWindow: '1 minute',
   })
 
-  // 4. Documentação OpenAPI/Swagger
+  // 5. Documentação OpenAPI/Swagger
   await setupSwagger(app)
 
-  // 5. Tratamento de Erros Global Padronizado
+  // 6. Tratamento de Erros Global Padronizado
   app.setErrorHandler(errorHandler)
 
-  // 6. Registro de Rotas (prefixo /api)
+  // 7. Registro de Rotas (prefixo /api)
   await app.register(healthRoutes, { prefix: '/api' })
+  await app.register(cargoRoutes, { prefix: '/api' })
+  await app.register(usuarioRoutes, { prefix: '/api' })
 
   return app
 }

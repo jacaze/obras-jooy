@@ -8,7 +8,47 @@ generator client {
 }
 
 // ----------------------------------------------------
-// MODELO DE VERIFICAÇÃO DE SAÚDE DA INFRAESTRUTURA
+// ENUMS DE ACESSO E SEGURANCA
+// ----------------------------------------------------
+enum PerfilUsuario {
+  ADMIN
+  ALMOXARIFE
+  ENGENHARIA
+  ADMINISTRACAO
+  ENCARREGADO
+}
+
+// ----------------------------------------------------
+// TABELAS DE USUARIO E CARGO
+// ----------------------------------------------------
+model Cargo {
+  id        String    @id @default(uuid()) @db.Uuid
+  nome      String    @unique @db.VarChar(80)
+  ativo     Boolean   @default(true)
+  criadoEm  DateTime  @default(now()) @map("criado_em")
+
+  usuarios  Usuario[]
+
+  @@map("cargo")
+}
+
+model Usuario {
+  id        String        @id @default(uuid()) @db.Uuid
+  nome      String        @db.VarChar(120)
+  login     String        @unique @db.VarChar(60)
+  senhaHash String        @map("senha_hash") @db.VarChar(255)
+  perfil    PerfilUsuario
+  cargoId   String        @map("cargo_id") @db.Uuid
+  ativo     Boolean       @default(true)
+  criadoEm  DateTime      @default(now()) @map("criado_em")
+
+  cargo     Cargo         @relation(fields: [cargoId], references: [id])
+
+  @@map("usuario")
+}
+
+// ----------------------------------------------------
+// MODELO DE VERIFICACAO DE SAUDE DA INFRAESTRUTURA
 // ----------------------------------------------------
 model HealthCheck {
   id        String   @id @default(uuid()) @db.Uuid

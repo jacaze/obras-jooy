@@ -10,12 +10,15 @@ export function errorHandler(
 ) {
   if (error instanceof ZodError) {
     const campos: Record<string, string> = {}
+    const mensagens: string[] = []
     for (const issue of error.issues) {
       const campo = issue.path.join('.') || 'root'
       campos[campo] = issue.message
+      mensagens.push(`${campo}: ${issue.message}`)
     }
     return reply.status(400).send({
       erro: 'Dados invalidos',
+      mensagem: mensagens.join('. '),
       campos,
     })
   }
