@@ -317,7 +317,7 @@ export async function materialRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { busca, categoriaId, tipoControle, somenteAtivos } =
+      const { busca, categoriaId, somenteAtivos } =
         listarMateriaisQuerySchema.parse(request.query)
 
       const where: any = {}
@@ -328,10 +328,6 @@ export async function materialRoutes(app: FastifyInstance) {
 
       if (categoriaId) {
         where.categoriaId = categoriaId
-      }
-
-      if (tipoControle) {
-        where.tipoControle = tipoControle
       }
 
       if (busca) {
@@ -418,21 +414,27 @@ export async function materialRoutes(app: FastifyInstance) {
         throw new NotFoundError('Categoria informada nao existe')
       }
 
-      const [unCompra, unConsumo] = await Promise.all([
-        prisma.unidadeMedida.findUnique({ where: { id: dados.unidadeCompraId } }),
-        prisma.unidadeMedida.findUnique({ where: { id: dados.unidadeConsumoId } }),
-      ])
-
-      if (!unCompra) {
-        throw new NotFoundError('Unidade de compra informada nao existe')
-      }
+      const unConsumo = await prisma.unidadeMedida.findUnique({
+        where: { id: dados.unidadeConsumoId },
+      })
       if (!unConsumo) {
         throw new NotFoundError('Unidade de consumo informada nao existe')
       }
 
-      // Regra de integridade: se as unidades forem identicas, o fator deve ser 1
-      let fator = dados.fatorConversao
-      if (dados.unidadeCompraId === dados.unidadeConsumoId && fator !== 1) {
+      let unCompraId = dados.unidadeCompraId || null
+      let fator = dados.fatorConversao || 1.0
+
+      if (unCompraId) {
+        const unCompra = await prisma.unidadeMedida.findUnique({
+          where: { id: unCompraId },
+        })
+        if (!unCompra) {
+          throw new NotFoundError('Unidade de compra informada nao existe')
+        }
+        if (unCompraId === dados.unidadeConsumoId) {
+          fator = 1.0
+        }
+      } else {
         fator = 1.0
       }
 
@@ -441,8 +443,7 @@ export async function materialRoutes(app: FastifyInstance) {
           codigo: dados.codigo,
           descricao: dados.descricao,
           categoriaId: dados.categoriaId,
-          tipoControle: dados.tipoControle,
-          unidadeCompraId: dados.unidadeCompraId,
+          unidadeCompraId: unCompraId,
           unidadeConsumoId: dados.unidadeConsumoId,
           fatorConversao: fator,
           ehKit: dados.ehKit,
@@ -488,21 +489,26 @@ export async function materialRoutes(app: FastifyInstance) {
         if (!cat) throw new NotFoundError('Categoria informada nao existe')
       }
 
-      const finalUnCompraId = dados.unidadeCompraId ?? materialExistente.unidadeCompraId
       const finalUnConsumoId = dados.unidadeConsumoId ?? materialExistente.unidadeConsumoId
-
-      if (dados.unidadeCompraId) {
-        const unC = await prisma.unidadeMedida.findUnique({ where: { id: dados.unidadeCompraId } })
-        if (!unC) throw new NotFoundError('Unidade de compra nao existe')
-      }
+      const finalUnCompraId =
+        dados.unidadeCompraId !== undefined ? dados.unidadeCompraId : materialExistente.unidadeCompraId
 
       if (dados.unidadeConsumoId) {
         const unU = await prisma.unidadeMedida.findUnique({ where: { id: dados.unidadeConsumoId } })
         if (!unU) throw new NotFoundError('Unidade de consumo nao existe')
       }
 
-      let fator = dados.fatorConversao !== undefined ? dados.fatorConversao : Number(materialExistente.fatorConversao)
-      if (finalUnCompraId === finalUnConsumoId) {
+      if (dados.unidadeCompraId) {
+        const unC = await prisma.unidadeMedida.findUnique({ where: { id: dados.unidadeCompraId } })
+        if (!unC) throw new NotFoundError('Unidade de compra nao existe')
+      }
+
+      let fator =
+        dados.fatorConversao !== undefined
+          ? dados.fatorConversao
+          : Number(materialExistente.fatorConversao)
+
+      if (!finalUnCompraId || finalUnCompraId === finalUnConsumoId) {
         fator = 1.0
       }
 
@@ -511,8 +517,7 @@ export async function materialRoutes(app: FastifyInstance) {
         data: {
           ...(dados.descricao && { descricao: dados.descricao }),
           ...(dados.categoriaId && { categoriaId: dados.categoriaId }),
-          ...(dados.tipoControle && { tipoControle: dados.tipoControle }),
-          ...(dados.unidadeCompraId && { unidadeCompraId: dados.unidadeCompraId }),
+          ...(dados.unidadeCompraId !== undefined && { unidadeCompraId: dados.unidadeCompraId }),
           ...(dados.unidadeConsumoId && { unidadeConsumoId: dados.unidadeConsumoId }),
           fatorConversao: fator,
           ...(dados.ehKit !== undefined && { ehKit: dados.ehKit }),

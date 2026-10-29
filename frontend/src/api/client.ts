@@ -8,6 +8,10 @@ import type {
   FiltrosMaterial,
   Material,
   UnidadeMedida,
+  Ferramenta,
+  CriarFerramentaInput,
+  AtualizarFerramentaInput,
+  FiltrosFerramenta,
 } from '../types/material'
 
 export const api = axios.create({
@@ -203,7 +207,6 @@ export async function getMateriais(filtros?: FiltrosMaterial): Promise<Material[
   const params = new URLSearchParams()
   if (filtros?.busca) params.append('busca', filtros.busca)
   if (filtros?.categoriaId) params.append('categoriaId', filtros.categoriaId)
-  if (filtros?.tipoControle) params.append('tipoControle', filtros.tipoControle)
   if (filtros?.somenteAtivos !== undefined) {
     params.append('somenteAtivos', String(filtros.somenteAtivos))
   }
@@ -230,5 +233,42 @@ export async function updateMaterial(id: string, dados: AtualizarMaterialInput):
 
 export async function toggleMaterialSituacao(id: string, ativo: boolean): Promise<Material> {
   const response = await api.patch<Material>(`/materiais/${id}/situacao`, { ativo })
+  return response.data
+}
+
+// ----------------------------------------------------
+// FERRAMENTAS RASTREAVEIS
+// ----------------------------------------------------
+
+export async function getFerramentas(filtros?: FiltrosFerramenta): Promise<Ferramenta[]> {
+  const params = new URLSearchParams()
+  if (filtros?.busca) params.append('busca', filtros.busca)
+  if (filtros?.status) params.append('status', filtros.status)
+  if (filtros?.somenteAtivas !== undefined) {
+    params.append('somenteAtivas', String(filtros.somenteAtivas))
+  }
+
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<Ferramenta[]>(`/ferramentas${queryStr}`)
+  return response.data
+}
+
+export async function createFerramenta(dados: CriarFerramentaInput): Promise<Ferramenta> {
+  const response = await api.post<Ferramenta>('/ferramentas', dados)
+  return response.data
+}
+
+export async function updateFerramenta(id: string, dados: AtualizarFerramentaInput): Promise<Ferramenta> {
+  const response = await api.patch<Ferramenta>(`/ferramentas/${id}`, dados)
+  return response.data
+}
+
+export async function registrarEmprestimoFerramenta(id: string, usuarioId: string): Promise<Ferramenta> {
+  const response = await api.post<Ferramenta>(`/ferramentas/${id}/emprestimo`, { usuarioId })
+  return response.data
+}
+
+export async function registrarDevolucaoFerramenta(id: string, comDefeito: boolean): Promise<Ferramenta> {
+  const response = await api.post<Ferramenta>(`/ferramentas/${id}/devolucao`, { comDefeito })
   return response.data
 }

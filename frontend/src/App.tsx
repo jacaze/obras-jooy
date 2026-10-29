@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage'
 import { UsuariosPage } from './pages/UsuariosPage'
 import { ObrasPage } from './pages/ObrasPage'
 import { MateriaisPage } from './pages/MateriaisPage'
+import { FerramentasPage } from './pages/FerramentasPage'
 import { SemPermissaoPage } from './pages/SemPermissaoPage'
 
 const queryClient = new QueryClient({
@@ -35,6 +36,7 @@ export function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/obras" element={<ObrasPage />} />
               <Route path="/materiais" element={<MateriaisPage />} />
+              <Route path="/ferramentas" element={<FerramentasPage />} />
             </Route>
 
             {/* Rotas Restritas Exclusivas para ADMIN */}

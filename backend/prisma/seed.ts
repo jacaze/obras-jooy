@@ -142,7 +142,6 @@ export async function seedDatabase() {
       codigo: 'MAT-001',
       descricao: 'Cimento CP-II F 32 50kg',
       categoriaId: categoriasMap['Alvenaria e Cimento'],
-      tipoControle: 'CONSUMO' as const,
       unidadeCompraId: unidadesMap['SC'],
       unidadeConsumoId: unidadesMap['KG'],
       fatorConversao: 50.0,
@@ -154,8 +153,7 @@ export async function seedDatabase() {
       codigo: 'MAT-002',
       descricao: 'Areia Media Lavada',
       categoriaId: categoriasMap['Alvenaria e Cimento'],
-      tipoControle: 'CONSUMO' as const,
-      unidadeCompraId: unidadesMap['M3'],
+      unidadeCompraId: null,
       unidadeConsumoId: unidadesMap['M3'],
       fatorConversao: 1.0,
       ehKit: false,
@@ -166,7 +164,6 @@ export async function seedDatabase() {
       codigo: 'MAT-003',
       descricao: 'Cabo Flexivel 2,5mm 750V Azul',
       categoriaId: categoriasMap['Eletrica'],
-      tipoControle: 'CONSUMO' as const,
       unidadeCompraId: unidadesMap['RL'],
       unidadeConsumoId: unidadesMap['M'],
       fatorConversao: 100.0,
@@ -178,24 +175,11 @@ export async function seedDatabase() {
       codigo: 'MAT-004',
       descricao: 'Luva de Vaqueta Mista',
       categoriaId: categoriasMap['EPIs e Seguranca'],
-      tipoControle: 'CONSUMO' as const,
-      unidadeCompraId: unidadesMap['PAR'],
+      unidadeCompraId: null,
       unidadeConsumoId: unidadesMap['PAR'],
       fatorConversao: 1.0,
       ehKit: false,
       exigeTesteQualidade: false,
-      ativo: true,
-    },
-    {
-      codigo: 'MAT-005',
-      descricao: 'Martelete Perfurador Rompedor 800W',
-      categoriaId: categoriasMap['Ferramentas Eletricas'],
-      tipoControle: 'FERRAMENTA_PATRIMONIO' as const,
-      unidadeCompraId: unidadesMap['UN'],
-      unidadeConsumoId: unidadesMap['UN'],
-      fatorConversao: 1.0,
-      ehKit: false,
-      exigeTesteQualidade: true,
       ativo: true,
     },
   ]
@@ -206,7 +190,6 @@ export async function seedDatabase() {
       update: {
         descricao: mat.descricao,
         categoriaId: mat.categoriaId,
-        tipoControle: mat.tipoControle,
         unidadeCompraId: mat.unidadeCompraId,
         unidadeConsumoId: mat.unidadeConsumoId,
         fatorConversao: mat.fatorConversao,
@@ -215,6 +198,46 @@ export async function seedDatabase() {
         ativo: mat.ativo,
       },
       create: mat,
+    })
+  }
+
+  // 7. Seed de Ferramentas Iniciais Demonstrativas
+  const ferramentasIniciais = [
+    {
+      codigo: 'FER-001',
+      nome: 'Martelete Perfurador Rompedor 800W',
+      status: 'DISPONIVEL' as const,
+      ativo: true,
+    },
+    {
+      codigo: 'FER-002',
+      nome: 'Serra Circular Manual 7.1/4"',
+      status: 'DISPONIVEL' as const,
+      ativo: true,
+    },
+    {
+      codigo: 'FER-003',
+      nome: 'Nivel a Laser Autonivelante',
+      status: 'DISPONIVEL' as const,
+      ativo: true,
+    },
+    {
+      codigo: 'FER-004',
+      nome: 'Furadeira de Impacto 1/2" 650W',
+      status: 'COM_DEFEITO' as const,
+      ativo: true,
+    },
+  ]
+
+  for (const fer of ferramentasIniciais) {
+    await prisma.ferramenta.upsert({
+      where: { codigo: fer.codigo },
+      update: {
+        nome: fer.nome,
+        status: fer.status,
+        ativo: fer.ativo,
+      },
+      create: fer,
     })
   }
 }

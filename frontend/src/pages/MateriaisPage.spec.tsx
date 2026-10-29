@@ -14,7 +14,6 @@ const mockMateriais = [
     codigo: 'CIM-01',
     descricao: 'Cimento CP-II 50kg',
     categoriaId: 'cat-1',
-    tipoControle: 'CONSUMO' as const,
     unidadeCompraId: 'un-sc',
     unidadeConsumoId: 'un-kg',
     fatorConversao: 50,
@@ -28,20 +27,19 @@ const mockMateriais = [
   },
   {
     id: 'mat-2',
-    codigo: 'MART-01',
-    descricao: 'Martelete Rompedor 800W',
-    categoriaId: 'cat-2',
-    tipoControle: 'FERRAMENTA_PATRIMONIO' as const,
-    unidadeCompraId: 'un-un',
-    unidadeConsumoId: 'un-un',
+    codigo: 'ARE-01',
+    descricao: 'Areia Media',
+    categoriaId: 'cat-1',
+    unidadeCompraId: null,
+    unidadeConsumoId: 'un-kg',
     fatorConversao: 1,
     ehKit: false,
     exigeTesteQualidade: false,
     ativo: true,
     criadoEm: '2026-10-29T10:00:00Z',
-    categoria: { id: 'cat-2', nome: 'Ferramentas Eletricas', criadaEm: '' },
-    unidadeCompra: { id: 'un-un', sigla: 'UN', descricao: 'Unidade', criadaEm: '' },
-    unidadeConsumo: { id: 'un-un', sigla: 'UN', descricao: 'Unidade', criadaEm: '' },
+    categoria: { id: 'cat-1', nome: 'Alvenaria e Cimento', criadaEm: '' },
+    unidadeCompra: null,
+    unidadeConsumo: { id: 'un-kg', sigla: 'KG', descricao: 'Quilograma', criadaEm: '' },
   },
 ]
 
@@ -96,14 +94,14 @@ describe('MateriaisPage', () => {
   it('deve listar materiais cadastrados com codigo, categoria e fator de conversao', async () => {
     renderComponent()
 
-    expect(screen.getByText('Carregando catalogo de materiais...')).toBeInTheDocument()
+    expect(screen.getByText('Carregando catálogo de materiais...')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(screen.getByText('Cimento CP-II 50kg')).toBeInTheDocument()
       expect(screen.getByText('CIM-01')).toBeInTheDocument()
       expect(screen.getByText('1 SC = 50 KG')).toBeInTheDocument()
-      expect(screen.getByText('Martelete Rompedor 800W')).toBeInTheDocument()
-      expect(screen.getAllByText('Ferramenta Patrimonial').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getByText('Areia Media')).toBeInTheDocument()
+      expect(screen.getByText('Direta (1:1)')).toBeInTheDocument()
     })
   })
 
@@ -116,14 +114,14 @@ describe('MateriaisPage', () => {
 
     fireEvent.click(screen.getByText('+ Cadastrar Material'))
 
-    expect(screen.getByRole('heading', { name: 'Novo Material' })).toBeInTheDocument()
-    expect(screen.getByLabelText(/Codigo/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Descricao Completa/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Novo Insumo' })).toBeInTheDocument()
+    expect(screen.getByLabelText(/Código/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Descrição Completa/i)).toBeInTheDocument()
   })
 
-  it('deve submeter novo material com sucesso', async () => {
+  it('deve submeter novo material simples com sucesso (sem conversao obrigatoria)', async () => {
     vi.mocked(client.createMaterial).mockResolvedValueOnce({
-      ...mockMateriais[0],
+      ...mockMateriais[1],
       id: 'mat-novo',
       codigo: 'ARE-01',
       descricao: 'Areia Media',
@@ -137,21 +135,18 @@ describe('MateriaisPage', () => {
 
     fireEvent.click(screen.getByText('+ Cadastrar Material'))
 
-    fireEvent.change(screen.getByLabelText(/Codigo/i), { target: { value: 'ARE-01' } })
-    fireEvent.change(screen.getByLabelText(/Descricao Completa/i), {
+    fireEvent.change(screen.getByLabelText(/Código/i), { target: { value: 'ARE-01' } })
+    fireEvent.change(screen.getByLabelText(/Descrição Completa/i), {
       target: { value: 'Areia Media' },
     })
     fireEvent.change(screen.getByLabelText(/Categoria \*/i), {
       target: { value: 'cat-1' },
     })
-    fireEvent.change(screen.getByLabelText(/Unidade de Compra \*/i), {
-      target: { value: 'un-sc' },
-    })
-    fireEvent.change(screen.getByLabelText(/Unidade de Estoque\/Uso \*/i), {
+    fireEvent.change(screen.getByLabelText(/Unidade Padrão de Estoque\/Uso \*/i), {
       target: { value: 'un-kg' },
     })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar Material' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar Insumo' }))
 
     await waitFor(() => {
       expect(client.createMaterial).toHaveBeenCalled()

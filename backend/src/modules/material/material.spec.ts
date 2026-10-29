@@ -254,19 +254,18 @@ describe('Modulo de Catalogo de Materiais, Categorias e Unidades', () => {
   describe('Catalogo de Materiais', () => {
     const materialId = '55555555-5555-5555-5555-555555555555'
 
-    it('deve criar material com conversao de unidades (SC -> KG, fator 50)', async () => {
+    it('deve criar material com conversao opcional (SC -> KG, fator 50)', async () => {
       vi.spyOn(prisma.material, 'findUnique').mockResolvedValueOnce(null)
       vi.spyOn(prisma.categoriaMaterial, 'findUnique').mockResolvedValueOnce({ id: categoriaAlvenariaId } as any)
       vi.spyOn(prisma.unidadeMedida, 'findUnique')
-        .mockResolvedValueOnce({ id: unidadeScId, sigla: 'SC' } as any)
         .mockResolvedValueOnce({ id: unidadeKgId, sigla: 'KG' } as any)
+        .mockResolvedValueOnce({ id: unidadeScId, sigla: 'SC' } as any)
 
       vi.spyOn(prisma.material, 'create').mockResolvedValueOnce({
         id: materialId,
         codigo: 'CIM-01',
         descricao: 'Cimento CP-II 50kg',
         categoriaId: categoriaAlvenariaId,
-        tipoControle: 'CONSUMO',
         unidadeCompraId: unidadeScId,
         unidadeConsumoId: unidadeKgId,
         fatorConversao: 50.0 as any,
@@ -287,9 +286,8 @@ describe('Modulo de Catalogo de Materiais, Categorias e Unidades', () => {
           codigo: 'CIM-01',
           descricao: 'Cimento CP-II 50kg',
           categoriaId: categoriaAlvenariaId,
-          tipoControle: 'CONSUMO',
-          unidadeCompraId: unidadeScId,
           unidadeConsumoId: unidadeKgId,
+          unidadeCompraId: unidadeScId,
           fatorConversao: 50.0,
           ehKit: false,
           exigeTesteQualidade: true,
@@ -302,6 +300,48 @@ describe('Modulo de Catalogo de Materiais, Categorias e Unidades', () => {
       expect(Number(data.fatorConversao)).toBe(50.0)
       expect(data.exigeTesteQualidade).toBe(true)
       expect(data.unidadeCompra.sigla).toBe('SC')
+      expect(data.unidadeConsumo.sigla).toBe('KG')
+    })
+
+    it('deve criar material simples sem conversao (apenas unidade de consumo)', async () => {
+      vi.spyOn(prisma.material, 'findUnique').mockResolvedValueOnce(null)
+      vi.spyOn(prisma.categoriaMaterial, 'findUnique').mockResolvedValueOnce({ id: categoriaAlvenariaId } as any)
+      vi.spyOn(prisma.unidadeMedida, 'findUnique').mockResolvedValueOnce({ id: unidadeKgId, sigla: 'KG' } as any)
+
+      vi.spyOn(prisma.material, 'create').mockResolvedValueOnce({
+        id: 'mat-simples-id',
+        codigo: 'ARE-01',
+        descricao: 'Areia Media',
+        categoriaId: categoriaAlvenariaId,
+        unidadeCompraId: null,
+        unidadeConsumoId: unidadeKgId,
+        fatorConversao: 1.0 as any,
+        ehKit: false,
+        exigeTesteQualidade: false,
+        ativo: true,
+        criadoEm: new Date(),
+        categoria: { id: categoriaAlvenariaId, nome: 'Alvenaria' },
+        unidadeCompra: null,
+        unidadeConsumo: { id: unidadeKgId, sigla: 'KG' },
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/materiais',
+        headers: { authorization: `Bearer ${almoxarifeToken}` },
+        payload: {
+          codigo: 'ARE-01',
+          descricao: 'Areia Media',
+          categoriaId: categoriaAlvenariaId,
+          unidadeConsumoId: unidadeKgId,
+        },
+      })
+
+      expect(response.statusCode).toBe(201)
+      const data = response.json()
+      expect(data.codigo).toBe('ARE-01')
+      expect(Number(data.fatorConversao)).toBe(1.0)
+      expect(data.unidadeCompra).toBeNull()
       expect(data.unidadeConsumo.sigla).toBe('KG')
     })
 

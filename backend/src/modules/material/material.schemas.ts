@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-export const TipoControleMaterialEnum = z.enum(['CONSUMO', 'FERRAMENTA_PATRIMONIO'])
-
 // Schemas de Categoria
 export const criarCategoriaSchema = z.object({
   nome: z
@@ -42,7 +40,7 @@ export const atualizarUnidadeMedidaSchema = z.object({
     .trim(),
 })
 
-// Schemas de Material
+// Schemas de Material (Insumos de Consumo)
 export const criarMaterialSchema = z.object({
   codigo: z
     .string()
@@ -56,13 +54,14 @@ export const criarMaterialSchema = z.object({
     .max(180, 'A descricao deve ter no maximo 180 caracteres')
     .trim(),
   categoriaId: z.string().uuid('ID da categoria invalido'),
-  tipoControle: TipoControleMaterialEnum.default('CONSUMO'),
-  unidadeCompraId: z.string().uuid('ID da unidade de compra invalido'),
-  unidadeConsumoId: z.string().uuid('ID da unidade de consumo invalido'),
+  unidadeConsumoId: z.string().uuid('ID da unidade de consumo/estoque invalido'),
+  // Conversao Opcional: unidadeCompraId e fatorConversao
+  unidadeCompraId: z.string().uuid('ID da unidade de compra invalido').nullable().optional(),
   fatorConversao: z
     .number()
     .positive('O fator de conversao deve ser maior que zero')
-    .default(1.0),
+    .default(1.0)
+    .optional(),
   ehKit: z.boolean().default(false),
   exigeTesteQualidade: z.boolean().default(false),
   ativo: z.boolean().default(true),
@@ -76,9 +75,8 @@ export const atualizarMaterialSchema = z.object({
     .trim()
     .optional(),
   categoriaId: z.string().uuid('ID da categoria invalido').optional(),
-  tipoControle: TipoControleMaterialEnum.optional(),
-  unidadeCompraId: z.string().uuid('ID da unidade de compra invalido').optional(),
-  unidadeConsumoId: z.string().uuid('ID da unidade de consumo invalido').optional(),
+  unidadeConsumoId: z.string().uuid('ID da unidade de consumo/estoque invalido').optional(),
+  unidadeCompraId: z.string().uuid('ID da unidade de compra invalido').nullable().optional(),
   fatorConversao: z
     .number()
     .positive('O fator de conversao deve ser maior que zero')
@@ -95,7 +93,6 @@ export const atualizarSituacaoMaterialSchema = z.object({
 export const listarMateriaisQuerySchema = z.object({
   busca: z.string().optional(),
   categoriaId: z.string().uuid().optional(),
-  tipoControle: TipoControleMaterialEnum.optional(),
   somenteAtivos: z
     .enum(['true', 'false'])
     .optional()

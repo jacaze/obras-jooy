@@ -1,5 +1,3 @@
-export type TipoControleMaterial = 'CONSUMO' | 'FERRAMENTA_PATRIMONIO'
-
 export interface UnidadeMedida {
   id: string
   sigla: string
@@ -25,8 +23,7 @@ export interface Material {
   codigo: string
   descricao: string
   categoriaId: string
-  tipoControle: TipoControleMaterial
-  unidadeCompraId: string
+  unidadeCompraId?: string | null
   unidadeConsumoId: string
   fatorConversao: number | string
   ehKit: boolean
@@ -34,7 +31,7 @@ export interface Material {
   ativo: boolean
   criadoEm: string
   categoria: CategoriaMaterial
-  unidadeCompra: UnidadeMedida
+  unidadeCompra?: UnidadeMedida | null
   unidadeConsumo: UnidadeMedida
 }
 
@@ -42,10 +39,9 @@ export interface CriarMaterialInput {
   codigo: string
   descricao: string
   categoriaId: string
-  tipoControle: TipoControleMaterial
-  unidadeCompraId: string
   unidadeConsumoId: string
-  fatorConversao: number
+  unidadeCompraId?: string | null
+  fatorConversao?: number
   ehKit?: boolean
   exigeTesteQualidade?: boolean
   ativo?: boolean
@@ -54,9 +50,8 @@ export interface CriarMaterialInput {
 export interface AtualizarMaterialInput {
   descricao?: string
   categoriaId?: string
-  tipoControle?: TipoControleMaterial
-  unidadeCompraId?: string
   unidadeConsumoId?: string
+  unidadeCompraId?: string | null
   fatorConversao?: number
   ehKit?: boolean
   exigeTesteQualidade?: boolean
@@ -66,6 +61,49 @@ export interface AtualizarMaterialInput {
 export interface FiltrosMaterial {
   busca?: string
   categoriaId?: string
-  tipoControle?: TipoControleMaterial
   somenteAtivos?: boolean
+}
+
+// ----------------------------------------------------
+// FERRAMENTAS RASTREAVEIS
+// ----------------------------------------------------
+export type StatusFerramenta = 'DISPONIVEL' | 'EMPRESTADO' | 'COM_DEFEITO'
+
+export interface UsuarioResumo {
+  id: string
+  nome: string
+  login: string
+  perfil: string
+}
+
+export interface Ferramenta {
+  id: string
+  codigo: string
+  nome: string
+  status: StatusFerramenta
+  emprestadoParaId?: string | null
+  ativo: boolean
+  criadaEm: string
+  emprestadoPara?: UsuarioResumo | null
+}
+
+export interface CriarFerramentaInput {
+  codigo: string
+  nome: string
+  status?: StatusFerramenta
+  emprestadoParaId?: string | null
+  ativo?: boolean
+}
+
+export interface AtualizarFerramentaInput {
+  nome?: string
+  status?: StatusFerramenta
+  emprestadoParaId?: string | null
+  ativo?: boolean
+}
+
+export interface FiltrosFerramenta {
+  busca?: string
+  status?: StatusFerramenta
+  somenteAtivas?: boolean
 }

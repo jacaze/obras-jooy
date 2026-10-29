@@ -15,7 +15,7 @@ import {
   deleteUnidadeMedida,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import type { Material, TipoControleMaterial, CategoriaMaterial, UnidadeMedida } from '../types/material'
+import type { Material, CategoriaMaterial, UnidadeMedida } from '../types/material'
 
 export function MateriaisPage() {
   const { usuario } = useAuth()
@@ -30,7 +30,6 @@ export function MateriaisPage() {
   // Estados de Filtro
   const [busca, setBusca] = useState('')
   const [categoriaFiltro, setCategoriaFiltro] = useState('')
-  const [tipoFiltro, setTipoFiltro] = useState('')
   const [somenteAtivos, setSomenteAtivos] = useState(true)
 
   // Estados dos Modais de Material
@@ -55,21 +54,21 @@ export function MateriaisPage() {
   const [formCodigo, setFormCodigo] = useState('')
   const [formDescricao, setFormDescricao] = useState('')
   const [formCategoriaId, setFormCategoriaId] = useState('')
-  const [formTipoControle, setFormTipoControle] = useState<TipoControleMaterial>('CONSUMO')
-  const [formUnCompraId, setFormUnCompraId] = useState('')
   const [formUnConsumoId, setFormUnConsumoId] = useState('')
+  // Conversao opcional
+  const [temConversao, setTemConversao] = useState(false)
+  const [formUnCompraId, setFormUnCompraId] = useState('')
   const [formFatorConversao, setFormFatorConversao] = useState('1')
   const [formEhKit, setFormEhKit] = useState(false)
   const [formExigeTeste, setFormExigeTeste] = useState(false)
 
   // Queries
   const { data: materiais = [], isLoading: carregandoMateriais } = useQuery({
-    queryKey: ['materiais', busca, categoriaFiltro, tipoFiltro, somenteAtivos],
+    queryKey: ['materiais', busca, categoriaFiltro, somenteAtivos],
     queryFn: () =>
       getMateriais({
         busca: busca.trim() || undefined,
         categoriaId: categoriaFiltro || undefined,
-        tipoControle: (tipoFiltro as TipoControleMaterial) || undefined,
         somenteAtivos,
       }),
   })
@@ -196,9 +195,9 @@ export function MateriaisPage() {
     setFormCodigo('')
     setFormDescricao('')
     setFormCategoriaId(categorias[0]?.id || '')
-    setFormTipoControle('CONSUMO')
-    setFormUnCompraId(unidades[0]?.id || '')
     setFormUnConsumoId(unidades[0]?.id || '')
+    setTemConversao(false)
+    setFormUnCompraId('')
     setFormFatorConversao('1')
     setFormEhKit(false)
     setFormExigeTeste(false)
@@ -212,10 +211,11 @@ export function MateriaisPage() {
     setFormCodigo(mat.codigo)
     setFormDescricao(mat.descricao)
     setFormCategoriaId(mat.categoriaId)
-    setFormTipoControle(mat.tipoControle)
-    setFormUnCompraId(mat.unidadeCompraId)
     setFormUnConsumoId(mat.unidadeConsumoId)
-    setFormFatorConversao(String(mat.fatorConversao))
+    const possuiConversao = Boolean(mat.unidadeCompraId && mat.unidadeCompraId !== mat.unidadeConsumoId)
+    setTemConversao(possuiConversao)
+    setFormUnCompraId(mat.unidadeCompraId || '')
+    setFormFatorConversao(String(mat.fatorConversao || 1))
     setFormEhKit(mat.ehKit)
     setFormExigeTeste(mat.exigeTesteQualidade)
     setMensagemErro(null)
@@ -233,10 +233,20 @@ export function MateriaisPage() {
     setMensagemErro(null)
     setMensagemSucesso(null)
 
-    const fatorNum = Number(formFatorConversao)
-    if (isNaN(fatorNum) || fatorNum <= 0) {
-      setMensagemErro('O fator de conversao deve ser um numero positivo maior que zero.')
-      return
+    let fatorNum = 1.0
+    let unCompraFinal: string | null = null
+
+    if (temConversao) {
+      if (!formUnCompraId) {
+        setMensagemErro('Selecione a unidade de compra para a conversao.')
+        return
+      }
+      fatorNum = Number(formFatorConversao)
+      if (isNaN(fatorNum) || fatorNum <= 0) {
+        setMensagemErro('O fator de conversao deve ser um numero positivo maior que zero.')
+        return
+      }
+      unCompraFinal = formUnCompraId
     }
 
     if (materialEmEdicao) {
@@ -245,9 +255,8 @@ export function MateriaisPage() {
         dados: {
           descricao: formDescricao,
           categoriaId: formCategoriaId,
-          tipoControle: formTipoControle,
-          unidadeCompraId: formUnCompraId,
           unidadeConsumoId: formUnConsumoId,
+          unidadeCompraId: unCompraFinal,
           fatorConversao: fatorNum,
           ehKit: formEhKit,
           exigeTesteQualidade: formExigeTeste,
@@ -258,9 +267,8 @@ export function MateriaisPage() {
         codigo: formCodigo,
         descricao: formDescricao,
         categoriaId: formCategoriaId,
-        tipoControle: formTipoControle,
-        unidadeCompraId: formUnCompraId,
         unidadeConsumoId: formUnConsumoId,
+        unidadeCompraId: unCompraFinal,
         fatorConversao: fatorNum,
         ehKit: formEhKit,
         exigeTesteQualidade: formExigeTeste,
@@ -268,9 +276,8 @@ export function MateriaisPage() {
     }
   }
 
-  const unCompraObj = unidades.find((u) => u.id === formUnCompraId)
   const unConsumoObj = unidades.find((u) => u.id === formUnConsumoId)
-  const mesmasUnidades = Boolean(formUnCompraId && formUnConsumoId && formUnCompraId === formUnConsumoId)
+  const unCompraObj = unidades.find((u) => u.id === formUnCompraId)
 
   return (
     <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem' }}>
@@ -287,10 +294,10 @@ export function MateriaisPage() {
       >
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-            Catalogo de Materiais
+            Catálogo de Materiais
           </h1>
           <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.95rem' }}>
-            Controle de insumos, ferramentas patrimoniais, unidades de medida e taxas de conversao.
+            Controle de insumos, unidades de medida e taxas opcionais de conversão de compra.
           </p>
         </div>
 
@@ -398,7 +405,7 @@ export function MateriaisPage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '1rem',
           backgroundColor: '#f8fafc',
           padding: '1.25rem',
@@ -413,12 +420,12 @@ export function MateriaisPage() {
             htmlFor="filtro-busca"
             style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
           >
-            Buscar Material
+            Buscar Insumo
           </label>
           <input
             id="filtro-busca"
             type="text"
-            placeholder="Nome ou codigo..."
+            placeholder="Nome ou código..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             style={{
@@ -462,33 +469,6 @@ export function MateriaisPage() {
           </select>
         </div>
 
-        <div>
-          <label
-            htmlFor="filtro-tipo"
-            style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
-          >
-            Tipo de Controle
-          </label>
-          <select
-            id="filtro-tipo"
-            value={tipoFiltro}
-            onChange={(e) => setTipoFiltro(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.9rem',
-              backgroundColor: '#ffffff',
-              boxSizing: 'border-box',
-            }}
-          >
-            <option value="">Todos os tipos</option>
-            <option value="CONSUMO">Consumo / Estoque Quantitativo</option>
-            <option value="FERRAMENTA_PATRIMONIO">Ferramenta Patrimonial</option>
-          </select>
-        </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingBottom: '0.5rem' }}>
           <input
             id="filtro-somente-ativos"
@@ -521,26 +501,26 @@ export function MateriaisPage() {
             <thead>
               <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
                 <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                  Codigo
+                  Código
                 </th>
                 <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                  Descricao / Material
+                  Descrição / Insumo
                 </th>
                 <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
                   Categoria
                 </th>
                 <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                  Tipo
+                  Unidade Padrão
                 </th>
                 <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                  Conversao de Unidades
+                  Conversão de Compra
                 </th>
                 <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                  Situacao
+                  Situação
                 </th>
                 {podeGerenciar && (
                   <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>
-                    Acoes
+                    Ações
                   </th>
                 )}
               </tr>
@@ -549,7 +529,7 @@ export function MateriaisPage() {
               {carregandoMateriais ? (
                 <tr>
                   <td colSpan={podeGerenciar ? 7 : 6} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
-                    Carregando catalogo de materiais...
+                    Carregando catálogo de materiais...
                   </td>
                 </tr>
               ) : materiais.length === 0 ? (
@@ -560,8 +540,9 @@ export function MateriaisPage() {
                 </tr>
               ) : (
                 materiais.map((mat) => {
-                  const fatorNum = Number(mat.fatorConversao)
-                  const ehMesmaUnidade = mat.unidadeCompraId === mat.unidadeConsumoId
+                  const fatorNum = Number(mat.fatorConversao || 1)
+                  const possuiConversaoAtiva =
+                    Boolean(mat.unidadeCompraId && mat.unidadeCompraId !== mat.unidadeConsumoId)
 
                   return (
                     <tr
@@ -612,42 +593,16 @@ export function MateriaisPage() {
                       <td style={{ padding: '0.875rem 1rem', fontSize: '0.875rem', color: '#334155' }}>
                         {mat.categoria?.nome || '-'}
                       </td>
-                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.85rem' }}>
-                        {mat.tipoControle === 'FERRAMENTA_PATRIMONIO' ? (
-                          <span
-                            style={{
-                              padding: '0.2rem 0.5rem',
-                              backgroundColor: '#e0e7ff',
-                              color: '#3730a3',
-                              borderRadius: '4px',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            Ferramenta Patrimonial
-                          </span>
-                        ) : (
-                          <span
-                            style={{
-                              padding: '0.2rem 0.5rem',
-                              backgroundColor: '#f1f5f9',
-                              color: '#334155',
-                              borderRadius: '4px',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            Consumo / Estoque
-                          </span>
-                        )}
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                        {mat.unidadeConsumo?.sigla} ({mat.unidadeConsumo?.descricao})
                       </td>
-                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.85rem', color: '#334155' }}>
-                        {ehMesmaUnidade ? (
-                          <span>1 {mat.unidadeCompra?.sigla} = 1 {mat.unidadeConsumo?.sigla}</span>
-                        ) : (
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.85rem' }}>
+                        {possuiConversaoAtiva ? (
                           <span style={{ fontWeight: 600, color: '#0369a1' }}>
                             1 {mat.unidadeCompra?.sigla} = {fatorNum} {mat.unidadeConsumo?.sigla}
                           </span>
+                        ) : (
+                          <span style={{ color: '#94a3b8' }}>Direta (1:1)</span>
                         )}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
@@ -730,7 +685,7 @@ export function MateriaisPage() {
         </div>
       </div>
 
-      {/* Modal de Cadastro / Edicao de Material */}
+      {/* Modal de Cadastro / Edição de Material */}
       {modalMaterialAberto && (
         <div
           style={{
@@ -758,7 +713,7 @@ export function MateriaisPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
-                {materialEmEdicao ? `Editar Material (${materialEmEdicao.codigo})` : 'Novo Material'}
+                {materialEmEdicao ? `Editar Insumo (${materialEmEdicao.codigo})` : 'Novo Insumo'}
               </h2>
               <button
                 type="button"
@@ -782,7 +737,7 @@ export function MateriaisPage() {
                     htmlFor="material-codigo"
                     style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
                   >
-                    Codigo (Sienge/ERP) *
+                    Código (Sienge/ERP) *
                   </label>
                   <input
                     id="material-codigo"
@@ -809,7 +764,7 @@ export function MateriaisPage() {
                     htmlFor="material-descricao"
                     style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
                   >
-                    Descricao Completa *
+                    Descrição Completa *
                   </label>
                   <input
                     id="material-descricao"
@@ -864,15 +819,16 @@ export function MateriaisPage() {
 
                 <div>
                   <label
-                    htmlFor="material-tipo-controle"
+                    htmlFor="material-un-consumo"
                     style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
                   >
-                    Tipo de Controle *
+                    Unidade Padrão de Estoque/Uso *
                   </label>
                   <select
-                    id="material-tipo-controle"
-                    value={formTipoControle}
-                    onChange={(e) => setFormTipoControle(e.target.value as TipoControleMaterial)}
+                    id="material-un-consumo"
+                    required
+                    value={formUnConsumoId}
+                    onChange={(e) => setFormUnConsumoId(e.target.value)}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
@@ -883,13 +839,17 @@ export function MateriaisPage() {
                       boxSizing: 'border-box',
                     }}
                   >
-                    <option value="CONSUMO">Consumo / Estoque Quantitativo</option>
-                    <option value="FERRAMENTA_PATRIMONIO">Ferramenta Patrimonial</option>
+                    <option value="">Selecione a unidade...</option>
+                    {unidades.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.sigla} - {u.descricao}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              {/* Bloco de Conversao de Unidades */}
+              {/* Conversão Opcional de Unidade de Compra */}
               <div
                 style={{
                   backgroundColor: '#f8fafc',
@@ -900,109 +860,90 @@ export function MateriaisPage() {
                   gap: '0.75rem',
                 }}
               >
-                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b' }}>
-                  Unidades e Fator de Conversao
-                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={temConversao}
+                    onChange={(e) => {
+                      setTemConversao(e.target.checked)
+                      if (!e.target.checked) {
+                        setFormUnCompraId('')
+                        setFormFatorConversao('1')
+                      }
+                    }}
+                    style={{ width: '1rem', height: '1rem' }}
+                  />
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b' }}>
+                    Material possui unidade de compra diferente (com taxa de conversão)?
+                  </span>
+                </label>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label
-                      htmlFor="material-un-compra"
-                      style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
-                    >
-                      Unidade de Compra *
-                    </label>
-                    <select
-                      id="material-un-compra"
-                      required
-                      value={formUnCompraId}
-                      onChange={(e) => setFormUnCompraId(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.45rem',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.85rem',
-                        backgroundColor: '#ffffff',
-                      }}
-                    >
-                      <option value="">Selecione...</option>
-                      {unidades.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.sigla} - {u.descricao}
-                        </option>
-                      ))}
-                    </select>
+                {temConversao && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    <div>
+                      <label
+                        htmlFor="material-un-compra"
+                        style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
+                      >
+                        Unidade de Compra *
+                      </label>
+                      <select
+                        id="material-un-compra"
+                        required={temConversao}
+                        value={formUnCompraId}
+                        onChange={(e) => setFormUnCompraId(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.45rem',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          backgroundColor: '#ffffff',
+                        }}
+                      >
+                        <option value="">Selecione a unidade de compra...</option>
+                        {unidades.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.sigla} - {u.descricao}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="material-fator"
+                        style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
+                      >
+                        Fator de Conversão *
+                      </label>
+                      <input
+                        id="material-fator"
+                        type="number"
+                        step="any"
+                        min="0.0001"
+                        required={temConversao}
+                        value={formFatorConversao}
+                        onChange={(e) => setFormFatorConversao(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.45rem',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          backgroundColor: '#ffffff',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+
+                    {unCompraObj && unConsumoObj && (
+                      <div style={{ gridColumn: 'span 2', fontSize: '0.8rem', color: '#0369a1', fontStyle: 'italic' }}>
+                        Exemplo: Cada 1 {unCompraObj.sigla} comprado gerará {formFatorConversao || 1} {unConsumoObj.sigla} no saldo de estoque.
+                      </div>
+                    )}
                   </div>
-
-                  <div>
-                    <label
-                      htmlFor="material-un-consumo"
-                      style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
-                    >
-                      Unidade de Estoque/Uso *
-                    </label>
-                    <select
-                      id="material-un-consumo"
-                      required
-                      value={formUnConsumoId}
-                      onChange={(e) => setFormUnConsumoId(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.45rem',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.85rem',
-                        backgroundColor: '#ffffff',
-                      }}
-                    >
-                      <option value="">Selecione...</option>
-                      {unidades.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.sigla} - {u.descricao}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="material-fator"
-                      style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}
-                    >
-                      Fator de Conversao *
-                    </label>
-                    <input
-                      id="material-fator"
-                      type="number"
-                      step="any"
-                      min="0.0001"
-                      required
-                      disabled={mesmasUnidades}
-                      value={mesmasUnidades ? '1' : formFatorConversao}
-                      onChange={(e) => setFormFatorConversao(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.45rem',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.85rem',
-                        backgroundColor: mesmasUnidades ? '#e2e8f0' : '#ffffff',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ fontSize: '0.8rem', color: '#0369a1', fontStyle: 'italic' }}>
-                  {mesmasUnidades ? (
-                    'Unidades identicas: 1 compra equivale a 1 no estoque (fator fixo em 1).'
-                  ) : unCompraObj && unConsumoObj ? (
-                    `Explicacao: Cada 1 ${unCompraObj.sigla} comprado gerara ${formFatorConversao || 1} ${unConsumoObj.sigla} no saldo de estoque da obra.`
-                  ) : (
-                    'Selecione as unidades de compra e consumo para configurar o fator.'
-                  )}
-                </div>
+                )}
               </div>
 
               {/* Indicadores adicionais */}
@@ -1022,11 +963,11 @@ export function MateriaisPage() {
                     checked={formEhKit}
                     onChange={(e) => setFormEhKit(e.target.checked)}
                   />
-                  <span>Composicao em Kit de Materiais</span>
+                  <span>Composição em Kit de Materiais</span>
                 </label>
               </div>
 
-              {/* Botoes de Acao */}
+              {/* Botões de Ação */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
                 <button
                   type="button"
@@ -1061,8 +1002,8 @@ export function MateriaisPage() {
                   {criarMaterialMutation.isPending || atualizarMaterialMutation.isPending
                     ? 'Salvando...'
                     : materialEmEdicao
-                    ? 'Salvar Alteracoes'
-                    : 'Cadastrar Material'}
+                    ? 'Salvar Alterações'
+                    : 'Cadastrar Insumo'}
                 </button>
               </div>
             </form>
@@ -1070,7 +1011,7 @@ export function MateriaisPage() {
         </div>
       )}
 
-      {/* Modal Completo: Gerenciar Categorias */}
+      {/* Modal Gerenciar Categorias */}
       {modalGerenciarCategorias && (
         <div
           style={{
@@ -1109,7 +1050,6 @@ export function MateriaisPage() {
               </button>
             </div>
 
-            {/* Form inline para criar ou editar */}
             <form
               onSubmit={(e) => {
                 e.preventDefault()
@@ -1179,14 +1119,13 @@ export function MateriaisPage() {
               )}
             </form>
 
-            {/* Listagem de categorias existentes */}
             <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Nome da Categoria</th>
                     <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Materiais</th>
-                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Acoes</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1236,7 +1175,7 @@ export function MateriaisPage() {
                               disabled={totalVinculados > 0}
                               title={
                                 totalVinculados > 0
-                                  ? 'Nao e possivel excluir pois ha materiais vinculados'
+                                  ? 'Não é possível excluir pois há materiais vinculados'
                                   : 'Excluir categoria'
                               }
                               onClick={() => {
@@ -1268,7 +1207,7 @@ export function MateriaisPage() {
         </div>
       )}
 
-      {/* Modal Completo: Gerenciar Unidades de Medida */}
+      {/* Modal Gerenciar Unidades */}
       {modalGerenciarUnidades && (
         <div
           style={{
@@ -1307,7 +1246,6 @@ export function MateriaisPage() {
               </button>
             </div>
 
-            {/* Form inline para criar ou editar */}
             <form
               onSubmit={(e) => {
                 e.preventDefault()
@@ -1347,7 +1285,7 @@ export function MateriaisPage() {
                 required
                 value={descricaoUnidadeInput}
                 onChange={(e) => setDescricaoUnidadeInput(e.target.value)}
-                placeholder="Descricao da unidade..."
+                placeholder="Descrição da unidade..."
                 style={{
                   padding: '0.5rem 0.75rem',
                   borderRadius: '6px',
@@ -1395,15 +1333,14 @@ export function MateriaisPage() {
               )}
             </form>
 
-            {/* Listagem de unidades existentes */}
             <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Sigla</th>
-                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Descricao</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Descrição</th>
                     <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Materiais</th>
-                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Acoes</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1458,7 +1395,7 @@ export function MateriaisPage() {
                               disabled={totalVinculados > 0}
                               title={
                                 totalVinculados > 0
-                                  ? 'Nao e possivel excluir pois ha materiais vinculados'
+                                  ? 'Não é possível excluir pois há materiais vinculados'
                                   : 'Excluir unidade'
                               }
                               onClick={() => {

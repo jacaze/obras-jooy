@@ -69,6 +69,16 @@ export function Navbar() {
           >
             Catalogo de Materiais
           </Link>
+          <Link
+            to="/ferramentas"
+            style={{
+              color: '#cbd5e1',
+              textDecoration: 'none',
+              fontSize: '0.95rem',
+            }}
+          >
+            Ferramentas
+          </Link>
           {usuario.perfil === 'ADMIN' && (
             <Link
               to="/usuarios"
