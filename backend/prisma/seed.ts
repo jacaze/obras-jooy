@@ -45,6 +45,47 @@ export async function seedDatabase() {
 
     console.log(`Usuario administrador inicial criado com sucesso: ${env.ADMIN_LOGIN}`)
   }
+
+  // 3. Seed da Obra Inicial e Pavimentos/Setores (T05)
+  const obraInicial = await prisma.obra.upsert({
+    where: { codigo: 'JOOY-01' },
+    update: {},
+    create: {
+      codigo: 'JOOY-01',
+      nome: 'Residencial Jooy Reserva',
+      cidade: 'Campo Grande',
+      ativa: true,
+    },
+  })
+
+  const areasIniciais = [
+    { nome: 'Subsolo 02', ordem: -2 },
+    { nome: 'Subsolo 01', ordem: -1 },
+    { nome: 'Terreo / Acesso', ordem: 0 },
+    { nome: '1o Pavimento', ordem: 1 },
+    { nome: '2o Pavimento', ordem: 2 },
+    { nome: '3o Pavimento', ordem: 3 },
+    { nome: 'Area Comum / Lazer', ordem: 10 },
+    { nome: 'Cobertura', ordem: 20 },
+  ]
+
+  for (const area of areasIniciais) {
+    await prisma.areaObra.upsert({
+      where: {
+        area_obra_nome_unico: {
+          obraId: obraInicial.id,
+          nome: area.nome,
+        },
+      },
+      update: {},
+      create: {
+        obraId: obraInicial.id,
+        nome: area.nome,
+        ordem: area.ordem,
+        ativa: true,
+      },
+    })
+  }
 }
 
 if (process.env.NODE_ENV !== 'test') {

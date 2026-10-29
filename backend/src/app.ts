@@ -9,6 +9,8 @@ import { errorHandler } from './shared/middlewares/errorHandler.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 import { cargoRoutes } from './modules/cargo/cargo.routes.js'
 import { usuarioRoutes } from './modules/usuario/usuario.routes.js'
+import { obraRoutes } from './modules/obra/obra.routes.js'
+import { areaObraRoutes } from './modules/area-obra/area-obra.routes.js'
 
 export async function buildApp() {
   const app = fastify({
@@ -49,6 +51,8 @@ export async function buildApp() {
   await app.register(healthRoutes, { prefix: '/api' })
   await app.register(cargoRoutes, { prefix: '/api' })
   await app.register(usuarioRoutes, { prefix: '/api' })
+  await app.register(obraRoutes, { prefix: '/api' })
+  await app.register(areaObraRoutes, { prefix: '/api' })
 
   return app
 }

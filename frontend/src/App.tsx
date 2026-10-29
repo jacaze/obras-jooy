@@ -6,6 +6,7 @@ import { Navbar } from './components/Navbar'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { UsuariosPage } from './pages/UsuariosPage'
+import { ObrasPage } from './pages/ObrasPage'
 import { SemPermissaoPage } from './pages/SemPermissaoPage'
 
 const queryClient = new QueryClient({
@@ -31,6 +32,7 @@ export function App() {
             {/* Rotas Autenticadas Gerais */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/obras" element={<ObrasPage />} />
             </Route>
 
             {/* Rotas Restritas Exclusivas para ADMIN */}
