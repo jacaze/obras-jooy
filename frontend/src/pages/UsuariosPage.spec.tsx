@@ -227,4 +227,126 @@ describe('UsuariosPage Component', () => {
       expect(toggleCargoSpy).toHaveBeenCalledWith('cargo-1', false)
     })
   })
+
+  it('deve abrir modal de edicao de usuario e atualizar dados com sucesso', async () => {
+    const updateUsuarioSpy = vi.spyOn(apiClient, 'updateUsuario').mockResolvedValue({
+      id: 'user-1',
+      nome: 'Carlos Silva Atualizado',
+      login: 'carlos.silva',
+      perfil: 'ADMIN',
+      cargoId: 'cargo-2',
+      ativo: true,
+      cargo: mockCargos[1],
+      criadoEm: '2026-10-28T00:00:00Z',
+    })
+
+    renderUsuariosPage()
+
+    await waitFor(() => {
+      expect(screen.getByText('Carlos Almoxarife')).toBeInTheDocument()
+    })
+
+    const btnEditar = screen.getByRole('button', { name: 'Editar' })
+    fireEvent.click(btnEditar)
+
+    expect(screen.getByText('Editar Dados do Usuario')).toBeInTheDocument()
+
+    const inputNome = screen.getByDisplayValue('Carlos Almoxarife')
+    fireEvent.change(inputNome, { target: { value: 'Carlos Silva Atualizado' } })
+
+    const inputLogin = screen.getByDisplayValue('carlos')
+    fireEvent.change(inputLogin, { target: { value: 'carlos.silva' } })
+
+    const formEdit = screen.getByRole('button', { name: 'Salvar Alteracoes' }).closest('form')!
+    fireEvent.submit(formEdit)
+
+    await waitFor(() => {
+      expect(updateUsuarioSpy).toHaveBeenCalledWith('user-1', {
+        nome: 'Carlos Silva Atualizado',
+        login: 'carlos.silva',
+        perfil: 'ALMOXARIFE',
+        cargoId: 'cargo-1',
+      })
+    })
+  })
+
+  it('deve abrir modal de confirmacao e excluir usuario com sucesso', async () => {
+    const deleteUsuarioSpy = vi.spyOn(apiClient, 'deleteUsuario').mockResolvedValue(undefined)
+
+    renderUsuariosPage()
+
+    await waitFor(() => {
+      expect(screen.getByText('Carlos Almoxarife')).toBeInTheDocument()
+    })
+
+    const btnExcluir = screen.getByRole('button', { name: 'Excluir' })
+    fireEvent.click(btnExcluir)
+
+    expect(screen.getByText('Confirmar Exclusao de Usuario')).toBeInTheDocument()
+    expect(screen.getByText(/Regra de integridade:/i)).toBeInTheDocument()
+
+    const btnConfirmar = screen.getByRole('button', { name: 'Confirmar Exclusao' })
+    fireEvent.click(btnConfirmar)
+
+    await waitFor(() => {
+      expect(deleteUsuarioSpy).toHaveBeenCalledWith('user-1')
+    })
+  })
+
+  it('deve exibir mensagem de erro clara quando a exclusao for bloqueada por ferramentas ou solicitacoes vinculadas (409 Conflict)', async () => {
+    vi.spyOn(apiClient, 'deleteUsuario').mockRejectedValueOnce({
+      response: {
+        status: 409,
+        data: {
+          erro: 'Nao e possivel excluir o usuario pois ele possui historico de ferramentas vinculadas. Desative o usuario caso ele nao deva mais acessar o sistema.',
+        },
+      },
+    })
+
+    renderUsuariosPage()
+
+    await waitFor(() => {
+      expect(screen.getByText('Carlos Almoxarife')).toBeInTheDocument()
+    })
+
+    const btnExcluir = screen.getByRole('button', { name: 'Excluir' })
+    fireEvent.click(btnExcluir)
+
+    const btnConfirmar = screen.getByRole('button', { name: 'Confirmar Exclusao' })
+    fireEvent.click(btnConfirmar)
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Nao e possivel excluir o usuario pois ele possui historico de ferramentas vinculadas/i)
+      ).toBeInTheDocument()
+    })
+  })
+
+  it('deve desabilitar os botoes de desativar e excluir para o proprio usuario logado', async () => {
+    vi.spyOn(apiClient, 'getUsuarios').mockResolvedValue([
+      {
+        id: mockAdmin.id,
+        nome: mockAdmin.nome,
+        login: mockAdmin.login,
+        perfil: mockAdmin.perfil,
+        ativo: true,
+        cargoId: 'cargo-1',
+        cargo: mockCargos[0],
+        criadoEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+
+    renderUsuariosPage()
+
+    await waitFor(() => {
+      expect(screen.getByText('Admin Master')).toBeInTheDocument()
+      expect(screen.getByText('(Voce)')).toBeInTheDocument()
+    })
+
+    const btnDesativar = screen.getByRole('button', { name: 'Desativar' })
+    expect(btnDesativar).toBeDisabled()
+
+    const btnExcluir = screen.getByRole('button', { name: 'Excluir' })
+    expect(btnExcluir).toBeDisabled()
+  })
 })
