@@ -59,6 +59,26 @@ export function Navbar() {
           >
             Obras e Pavimentos
           </Link>
+          <Link
+            to="/materiais"
+            style={{
+              color: '#cbd5e1',
+              textDecoration: 'none',
+              fontSize: '0.95rem',
+            }}
+          >
+            Catalogo de Materiais
+          </Link>
+          <Link
+            to="/ferramentas"
+            style={{
+              color: '#cbd5e1',
+              textDecoration: 'none',
+              fontSize: '0.95rem',
+            }}
+          >
+            Ferramentas
+          </Link>
           {usuario.perfil === 'ADMIN' && (
             <Link
               to="/usuarios"
