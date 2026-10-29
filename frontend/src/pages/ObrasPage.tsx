@@ -3,12 +3,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createAreaObra,
   createObra,
+  deleteAreaObra,
   getAreasObra,
   getObras,
   toggleAreaSituacao,
   toggleObraSituacao,
+  updateAreaObra,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
+import type { AreaObra } from '../types/obra'
 
 function extrairErro(err: any, fallback: string): string {
   const data = err.response?.data
@@ -37,6 +40,7 @@ export function ObrasPage() {
   // Modais
   const [modalNovaObraAberto, setModalNovaObraAberto] = useState(false)
   const [modalNovaAreaAberto, setModalNovaAreaAberto] = useState(false)
+  const [modalEditarAreaAberto, setModalEditarAreaAberto] = useState(false)
 
   // Formulario Nova Obra
   const [novoCodigoObra, setNovoCodigoObra] = useState('')
@@ -48,6 +52,15 @@ export function ObrasPage() {
   const [novoNomeArea, setNovoNomeArea] = useState('')
   const [novaOrdemArea, setNovaOrdemArea] = useState<number>(0)
   const [erroArea, setErroArea] = useState<string | null>(null)
+
+  // Formulario Edicao Area
+  const [areaParaEditar, setAreaParaEditar] = useState<AreaObra | null>(null)
+  const [editarNomeArea, setEditarNomeArea] = useState('')
+  const [editarOrdemArea, setEditarOrdemArea] = useState<number>(0)
+  const [erroEdicaoArea, setErroEdicaoArea] = useState<string | null>(null)
+
+  // Mensagem de erro geral para exclusao
+  const [erroExclusaoArea, setErroExclusaoArea] = useState<string | null>(null)
 
   // Queries
   const { data: obras = [], isLoading: carregandoObras } = useQuery({
@@ -106,11 +119,37 @@ export function ObrasPage() {
     },
   })
 
+  const editarAreaMutation = useMutation({
+    mutationFn: ({ id, dados }: { id: string; dados: { nome?: string; ordem?: number } }) =>
+      updateAreaObra(id, dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['areas', obraIdAtiva] })
+      setModalEditarAreaAberto(false)
+      setAreaParaEditar(null)
+      setErroEdicaoArea(null)
+    },
+    onError: (err: any) => {
+      setErroEdicaoArea(extrairErro(err, 'Erro ao atualizar area'))
+    },
+  })
+
   const toggleAreaMutation = useMutation({
     mutationFn: ({ id, ativa }: { id: string; ativa: boolean }) =>
       toggleAreaSituacao(id, ativa),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['areas', obraIdAtiva] })
+    },
+  })
+
+  const excluirAreaMutation = useMutation({
+    mutationFn: (id: string) => deleteAreaObra(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['areas', obraIdAtiva] })
+      queryClient.invalidateQueries({ queryKey: ['obras'] })
+      setErroExclusaoArea(null)
+    },
+    onError: (err: any) => {
+      setErroExclusaoArea(extrairErro(err, 'Nao e possivel excluir esta area pois existem registros vinculados'))
     },
   })
 
@@ -132,6 +171,37 @@ export function ObrasPage() {
       nome: novoNomeArea.trim(),
       ordem: Number(novaOrdemArea),
     })
+  }
+
+  function abrirModalEditar(area: AreaObra) {
+    setAreaParaEditar(area)
+    setEditarNomeArea(area.nome)
+    setEditarOrdemArea(area.ordem)
+    setErroEdicaoArea(null)
+    setModalEditarAreaAberto(true)
+  }
+
+  function handleEditarArea(e: FormEvent) {
+    e.preventDefault()
+    if (!areaParaEditar) return
+    setErroEdicaoArea(null)
+    editarAreaMutation.mutate({
+      id: areaParaEditar.id,
+      dados: {
+        nome: editarNomeArea.trim(),
+        ordem: Number(editarOrdemArea),
+      },
+    })
+  }
+
+  function handleConfirmarExclusao(area: AreaObra) {
+    setErroExclusaoArea(null)
+    const confirmou = window.confirm(
+      `Deseja realmente excluir a area "${area.nome}"? Esta acao so sera permitida se nao houver materiais ou requisicoes vinculadas a ela.`
+    )
+    if (confirmou) {
+      excluirAreaMutation.mutate(area.id)
+    }
   }
 
   const areasFiltradas = areas.filter((a) =>
@@ -207,6 +277,22 @@ export function ObrasPage() {
           )}
         </div>
       </div>
+
+      {erroExclusaoArea && (
+        <div
+          style={{
+            backgroundColor: '#fef2f2',
+            color: '#b91c1c',
+            padding: '0.75rem 1rem',
+            borderRadius: '6px',
+            marginBottom: '1.5rem',
+            border: '1px solid #fecaca',
+            fontSize: '0.9rem',
+          }}
+        >
+          {erroExclusaoArea}
+        </div>
+      )}
 
       {carregandoObras ? (
         <p style={{ color: '#64748b' }}>Carregando dados das obras...</p>
@@ -329,7 +415,7 @@ export function ObrasPage() {
               </h3>
               <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
                 {podeGerenciarAreas
-                  ? 'Engenharia e Administracao possuem permissao para cadastrar e gerenciar areas'
+                  ? 'Engenharia e Administracao possuem permissao para cadastrar, editar e gerenciar areas'
                   : 'Visualizacao restrita aos dados cadastrados'}
               </p>
             </div>
@@ -417,21 +503,55 @@ export function ObrasPage() {
                       </td>
                       {podeGerenciarAreas && (
                         <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                          <button
-                            disabled={toggleAreaMutation.isPending}
-                            onClick={() => toggleAreaMutation.mutate({ id: a.id, ativa: !a.ativa })}
-                            style={{
-                              backgroundColor: a.ativa ? '#fef2f2' : '#f0fdf4',
-                              color: a.ativa ? '#b91c1c' : '#15803d',
-                              border: `1px solid ${a.ativa ? '#fecaca' : '#bbf7d0'}`,
-                              padding: '0.3rem 0.6rem',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '0.8rem',
-                            }}
-                          >
-                            {a.ativa ? 'Desativar Area' : 'Ativar Area'}
-                          </button>
+                          <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                            <button
+                              onClick={() => abrirModalEditar(a)}
+                              style={{
+                                backgroundColor: '#f1f5f9',
+                                color: '#0369a1',
+                                border: '1px solid #bae6fd',
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem',
+                                fontWeight: 500,
+                              }}
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              disabled={toggleAreaMutation.isPending}
+                              onClick={() => toggleAreaMutation.mutate({ id: a.id, ativa: !a.ativa })}
+                              style={{
+                                backgroundColor: a.ativa ? '#fff7ed' : '#f0fdf4',
+                                color: a.ativa ? '#c2410c' : '#15803d',
+                                border: `1px solid ${a.ativa ? '#ffedd5' : '#bbf7d0'}`,
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem',
+                              }}
+                            >
+                              {a.ativa ? 'Desativar' : 'Ativar'}
+                            </button>
+
+                            <button
+                              disabled={excluirAreaMutation.isPending}
+                              onClick={() => handleConfirmarExclusao(a)}
+                              style={{
+                                backgroundColor: '#fef2f2',
+                                color: '#b91c1c',
+                                border: '1px solid #fecaca',
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem',
+                              }}
+                            >
+                              Excluir
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -719,6 +839,137 @@ export function ObrasPage() {
                   }}
                 >
                   {criarAreaMutation.isPending ? 'Salvando...' : 'Salvar Area'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Editar Area da Obra */}
+      {modalEditarAreaAberto && areaParaEditar && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            zIndex: 50,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '8px',
+              padding: '2rem',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+              Editar Area / Pavimento
+            </h2>
+            <p style={{ margin: '0 0 1rem', color: '#64748b', fontSize: '0.85rem' }}>
+              Obra: <strong>{obraAtual?.nome}</strong>
+            </p>
+
+            {erroEdicaoArea && (
+              <div
+                style={{
+                  backgroundColor: '#fef2f2',
+                  color: '#b91c1c',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  border: '1px solid #fecaca',
+                }}
+              >
+                {erroEdicaoArea}
+              </div>
+            )}
+
+            <form onSubmit={handleEditarArea} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  Nome da Area / Pavimento
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ex: 1o Pavimento Torre A"
+                  value={editarNomeArea}
+                  onChange={(e) => setEditarNomeArea(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  Ordem de Exibicao
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={editarOrdemArea}
+                  onChange={(e) => setEditarOrdemArea(Number(e.target.value))}
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalEditarAreaAberto(false)
+                    setAreaParaEditar(null)
+                  }}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#334155',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={editarAreaMutation.isPending}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    backgroundColor: '#0284c7',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {editarAreaMutation.isPending ? 'Salvando...' : 'Salvar Alteracoes'}
                 </button>
               </div>
             </form>

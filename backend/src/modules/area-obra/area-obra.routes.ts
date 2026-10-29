@@ -184,4 +184,47 @@ export async function areaObraRoutes(app: FastifyInstance) {
       return reply.status(200).send(areaAtualizada)
     }
   )
+
+  // Excluir area da obra (exclusivo ADMIN e ENGENHARIA)
+  // Regra futura (T11): Se houver requisicoes vinculadas, bloqueia a exclusao fisica com BusinessRuleError
+  app.delete(
+    '/areas/:id',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA])],
+      schema: {
+        tags: ['Areas da Obra'],
+        summary: 'Excluir area da obra caso nao possua vinculos operacionais (exclusivo ADMIN ou ENGENHARIA)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      const area = await prisma.areaObra.findUnique({
+        where: { id },
+      })
+
+      if (!area) {
+        throw new NotFoundError('Area nao localizada')
+      }
+
+      // Trava de integridade: preparada para T11 (Requisicoes) e limites
+      // Exemplo futuro: const totalRequisicoes = await prisma.requisicao.count({ where: { areaId: id } })
+      // if (totalRequisicoes > 0) throw new BusinessRuleError('Nao e possivel excluir uma area com requisicoes vinculadas. Em vez disso, desative a area.')
+
+      try {
+        await prisma.areaObra.delete({
+          where: { id },
+        })
+      } catch (err: any) {
+        // Se houver restricao de chave estrangeira (FK)
+        if (err.code === 'P2003') {
+          throw new BusinessRuleError('Nao e possivel excluir esta area pois existem registros vinculados a ela. Em vez disso, desative a area.')
+        }
+        throw err
+      }
+
+      return reply.status(204).send()
+    }
+  )
 }

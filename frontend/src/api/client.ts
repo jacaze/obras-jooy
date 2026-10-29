@@ -144,3 +144,7 @@ export async function toggleAreaSituacao(id: string, ativa: boolean): Promise<Ar
   const response = await api.patch<AreaObra>(`/areas/${id}/situacao`, { ativa })
   return response.data
 }
+
+export async function deleteAreaObra(id: string): Promise<void> {
+  await api.delete(`/areas/${id}`)
+}

@@ -349,4 +349,80 @@ describe('Modulo de Areas da Obra (Rotas e Regras de Negocio)', () => {
       expect(body.ativa).toBe(false)
     })
   })
+
+  describe('DELETE /api/areas/:id', () => {
+    it('deve permitir exclusao de area sem vinculos operacionais por ADMIN ou ENGENHARIA', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: 'area-1',
+        nome: 'Area Descartavel',
+      } as any)
+
+      vi.spyOn(prisma.areaObra, 'delete').mockResolvedValueOnce({
+        id: 'area-1',
+      } as any)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: '/api/areas/area-1',
+        headers: {
+          authorization: `Bearer ${engenhariaToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(204)
+    })
+
+    it('deve rejeitar exclusao por ALMOXARIFE (403)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: almoxarifeId,
+        perfil: PerfilUsuario.ALMOXARIFE,
+        ativo: true,
+      } as any)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: '/api/areas/area-1',
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(403)
+    })
+
+    it('deve retornar 422 caso haja restricao de chave estrangeira ao tentar excluir', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: adminId,
+        perfil: PerfilUsuario.ADMIN,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: 'area-1',
+        nome: 'Area Vinculada',
+      } as any)
+
+      const fkError: any = new Error('Foreign key violation')
+      fkError.code = 'P2003'
+      vi.spyOn(prisma.areaObra, 'delete').mockRejectedValueOnce(fkError)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: '/api/areas/area-1',
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(422)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Nao e possivel excluir esta area')
+    })
+  })
 })

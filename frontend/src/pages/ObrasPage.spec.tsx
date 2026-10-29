@@ -141,7 +141,9 @@ describe('ObrasPage Component', () => {
     })
 
     expect(screen.queryByRole('button', { name: /\+ Nova Area/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Desativar Area/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Desativar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Editar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Excluir/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /\+ Nova Obra/i })).not.toBeInTheDocument()
   })
 
@@ -208,11 +210,67 @@ describe('ObrasPage Component', () => {
       expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
     })
 
-    const btnDesativar = screen.getAllByRole('button', { name: /Desativar Area/i })[0]
+    const btnDesativar = screen.getByRole('button', { name: 'Desativar Obra' }) ? screen.getAllByRole('button', { name: /^Desativar$/i })[0] : screen.getAllByRole('button', { name: /Desativar/i })[0]
     fireEvent.click(btnDesativar)
 
     await waitFor(() => {
       expect(toggleAreaSpy).toHaveBeenCalledWith('area-1', false)
+    })
+  })
+
+  it('deve permitir que ENGENHARIA edite o nome e ordem de uma area existente', async () => {
+    const updateAreaSpy = vi.spyOn(apiClient, 'updateAreaObra').mockResolvedValue({
+      id: 'area-1',
+      obraId: 'obra-1',
+      nome: 'Subsolo 01 Atualizado',
+      ordem: -1,
+      ativa: true,
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnEditar = screen.getAllByRole('button', { name: /Editar/i })[0]
+    fireEvent.click(btnEditar)
+
+    expect(screen.getByText('Editar Area / Pavimento')).toBeInTheDocument()
+
+    const inputNome = screen.getByPlaceholderText('ex: 1o Pavimento Torre A')
+    fireEvent.change(inputNome, { target: { value: 'Subsolo 01 Atualizado' } })
+
+    const form = inputNome.closest('form')!
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(updateAreaSpy).toHaveBeenCalledWith(
+        'area-1',
+        expect.objectContaining({
+          nome: 'Subsolo 01 Atualizado',
+          ordem: -1,
+        })
+      )
+    })
+  })
+
+  it('deve permitir que ADMIN exclua uma area sem vinculos operacionais', async () => {
+    const deleteSpy = vi.spyOn(apiClient, 'deleteAreaObra').mockResolvedValue(undefined)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderObrasPage(mockAdmin)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnExcluir = screen.getAllByRole('button', { name: /Excluir/i })[0]
+    fireEvent.click(btnExcluir)
+
+    await waitFor(() => {
+      expect(deleteSpy).toHaveBeenCalledWith('area-1')
     })
   })
 })
