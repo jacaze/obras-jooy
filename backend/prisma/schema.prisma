@@ -87,3 +87,54 @@ model AreaObra {
   @@unique([obraId, nome], name: "area_obra_nome_unico")
   @@map("area_obra")
 }
+
+// ----------------------------------------------------
+// CATALOGO DE MATERIAIS, CATEGORIAS E UNIDADES (T07)
+// ----------------------------------------------------
+enum TipoControleMaterial {
+  CONSUMO
+  FERRAMENTA_PATRIMONIO
+}
+
+model UnidadeMedida {
+  id               String     @id @default(uuid()) @db.Uuid
+  sigla            String     @unique @db.VarChar(10)
+  descricao        String     @db.VarChar(60)
+  criadaEm         DateTime   @default(now()) @map("criada_em")
+
+  materiaisCompra  Material[] @relation("MaterialUnidadeCompra")
+  materiaisConsumo Material[] @relation("MaterialUnidadeConsumo")
+
+  @@map("unidade_medida")
+}
+
+model CategoriaMaterial {
+  id          String     @id @default(uuid()) @db.Uuid
+  nome        String     @unique @db.VarChar(80)
+  criadaEm    DateTime   @default(now()) @map("criada_em")
+
+  materiais   Material[]
+
+  @@map("categoria_material")
+}
+
+model Material {
+  id                  String               @id @default(uuid()) @db.Uuid
+  codigo              String               @unique @db.VarChar(50)
+  descricao           String               @db.VarChar(180)
+  categoriaId         String               @map("categoria_id") @db.Uuid
+  tipoControle        TipoControleMaterial @default(CONSUMO) @map("tipo_controle")
+  unidadeCompraId     String               @map("unidade_compra_id") @db.Uuid
+  unidadeConsumoId    String               @map("unidade_consumo_id") @db.Uuid
+  fatorConversao      Decimal              @default(1.0000) @map("fator_conversao") @db.Decimal(12, 4)
+  ehKit               Boolean              @default(false) @map("eh_kit")
+  exigeTesteQualidade Boolean              @default(false) @map("exige_teste_qualidade")
+  ativo               Boolean              @default(true)
+  criadoEm            DateTime             @default(now()) @map("criado_em")
+
+  categoria           CategoriaMaterial    @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+  unidadeCompra       UnidadeMedida        @relation("MaterialUnidadeCompra", fields: [unidadeCompraId], references: [id], onDelete: Restrict)
+  unidadeConsumo      UnidadeMedida        @relation("MaterialUnidadeConsumo", fields: [unidadeConsumoId], references: [id], onDelete: Restrict)
+
+  @@map("material")
+}

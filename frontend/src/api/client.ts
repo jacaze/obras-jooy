@@ -1,6 +1,14 @@
 import axios from 'axios'
 import type { Cargo, PerfilUsuario, UsuarioAuth, UsuarioListagem } from '../types/auth'
 import type { AreaObra, Obra } from '../types/obra'
+import type {
+  CategoriaMaterial,
+  CriarMaterialInput,
+  AtualizarMaterialInput,
+  FiltrosMaterial,
+  Material,
+  UnidadeMedida,
+} from '../types/material'
 
 export const api = axios.create({
   baseURL: '/api',
@@ -147,4 +155,62 @@ export async function toggleAreaSituacao(id: string, ativa: boolean): Promise<Ar
 
 export async function deleteAreaObra(id: string): Promise<void> {
   await api.delete(`/areas/${id}`)
+}
+
+// ----------------------------------------------------
+// CATALOGO DE MATERIAIS, UNIDADES E CATEGORIAS (T07)
+// ----------------------------------------------------
+
+export async function getUnidadesMedida(): Promise<UnidadeMedida[]> {
+  const response = await api.get<UnidadeMedida[]>('/unidades-medida')
+  return response.data
+}
+
+export async function createUnidadeMedida(dados: { sigla: string; descricao: string }): Promise<UnidadeMedida> {
+  const response = await api.post<UnidadeMedida>('/unidades-medida', dados)
+  return response.data
+}
+
+export async function getCategoriasMaterial(): Promise<CategoriaMaterial[]> {
+  const response = await api.get<CategoriaMaterial[]>('/categorias-material')
+  return response.data
+}
+
+export async function createCategoriaMaterial(dados: { nome: string }): Promise<CategoriaMaterial> {
+  const response = await api.post<CategoriaMaterial>('/categorias-material', dados)
+  return response.data
+}
+
+export async function getMateriais(filtros?: FiltrosMaterial): Promise<Material[]> {
+  const params = new URLSearchParams()
+  if (filtros?.busca) params.append('busca', filtros.busca)
+  if (filtros?.categoriaId) params.append('categoriaId', filtros.categoriaId)
+  if (filtros?.tipoControle) params.append('tipoControle', filtros.tipoControle)
+  if (filtros?.somenteAtivos !== undefined) {
+    params.append('somenteAtivos', String(filtros.somenteAtivos))
+  }
+
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<Material[]>(`/materiais${queryStr}`)
+  return response.data
+}
+
+export async function getMaterialDetalhes(id: string): Promise<Material> {
+  const response = await api.get<Material>(`/materiais/${id}`)
+  return response.data
+}
+
+export async function createMaterial(dados: CriarMaterialInput): Promise<Material> {
+  const response = await api.post<Material>('/materiais', dados)
+  return response.data
+}
+
+export async function updateMaterial(id: string, dados: AtualizarMaterialInput): Promise<Material> {
+  const response = await api.patch<Material>(`/materiais/${id}`, dados)
+  return response.data
+}
+
+export async function toggleMaterialSituacao(id: string, ativo: boolean): Promise<Material> {
+  const response = await api.patch<Material>(`/materiais/${id}/situacao`, { ativo })
+  return response.data
 }
