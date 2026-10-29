@@ -328,5 +328,209 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
       const body = JSON.parse(response.body)
       expect(body.erro).toBe('Nao e permitido desativar o proprio usuario logado')
     })
+
+    describe('PATCH /api/usuarios/:id (Edicao de Usuario)', () => {
+      it('deve atualizar dados cadastrais de um usuario com sucesso (200)', async () => {
+        vi.spyOn(prisma.usuario, 'findUnique').mockImplementation(async ({ where }: any) => {
+          if (where.id === adminUserId) {
+            return { id: adminUserId, ativo: true } as any
+          }
+          if (where.id === 'user-edit') {
+            return {
+              id: 'user-edit',
+              nome: 'Nome Antigo',
+              login: 'login.antigo',
+              perfil: PerfilUsuario.ENCARREGADO,
+              cargoId: cargoId,
+            } as any
+          }
+          return null
+        })
+
+        vi.spyOn(prisma.usuario, 'findFirst').mockResolvedValueOnce(null)
+        vi.spyOn(prisma.cargo, 'findUnique').mockResolvedValueOnce({
+          id: cargoId,
+          nome: 'Almoxarife',
+          ativo: true,
+        } as any)
+
+        vi.spyOn(prisma.usuario, 'update').mockResolvedValueOnce({
+          id: 'user-edit',
+          nome: 'Nome Atualizado',
+          login: 'login.novo',
+          perfil: PerfilUsuario.ALMOXARIFE,
+          ativo: true,
+          criadoEm: new Date(),
+          cargo: { id: cargoId, nome: 'Almoxarife' },
+        } as any)
+
+        const response = await app.inject({
+          method: 'PATCH',
+          url: '/api/usuarios/user-edit',
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+          payload: {
+            nome: 'Nome Atualizado',
+            login: 'login.novo',
+            perfil: 'ALMOXARIFE',
+            cargoId: cargoId,
+          },
+        })
+
+        expect(response.statusCode).toBe(200)
+        const body = JSON.parse(response.body)
+        expect(body.nome).toBe('Nome Atualizado')
+        expect(body.login).toBe('login.novo')
+        expect(body.perfil).toBe('ALMOXARIFE')
+      })
+
+      it('deve rejeitar edicao com login ja pertencente a outro usuario (409 Conflict)', async () => {
+        vi.spyOn(prisma.usuario, 'findUnique').mockImplementation(async ({ where }: any) => {
+          if (where.id === adminUserId) {
+            return { id: adminUserId, ativo: true } as any
+          }
+          if (where.id === 'user-edit') {
+            return {
+              id: 'user-edit',
+              nome: 'Carlos',
+              login: 'carlos.original',
+              cargoId: cargoId,
+            } as any
+          }
+          return null
+        })
+
+        vi.spyOn(prisma.usuario, 'findFirst').mockResolvedValueOnce({
+          id: 'outro-user',
+          login: 'login.existente',
+        } as any)
+
+        const response = await app.inject({
+          method: 'PATCH',
+          url: '/api/usuarios/user-edit',
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+          payload: {
+            login: 'login.existente',
+          },
+        })
+
+        expect(response.statusCode).toBe(409)
+        const body = JSON.parse(response.body)
+        expect(body.erro).toBe('Login ja cadastrado para outro usuario')
+      })
+
+      it('deve impedir que o ADMIN altere o proprio perfil para outro nao-admin (422)', async () => {
+        vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+          id: adminUserId,
+          ativo: true,
+          perfil: PerfilUsuario.ADMIN,
+          login: 'admin',
+        } as any)
+
+        const response = await app.inject({
+          method: 'PATCH',
+          url: `/api/usuarios/${adminUserId}`,
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+          payload: {
+            perfil: 'ENCARREGADO',
+          },
+        })
+
+        expect(response.statusCode).toBe(422)
+        const body = JSON.parse(response.body)
+        expect(body.erro).toBe('Nao e permitido alterar o perfil do proprio administrador logado')
+      })
+    })
+
+    describe('DELETE /api/usuarios/:id (Exclusao de Usuario)', () => {
+      it('deve impedir que o ADMIN exclua a si proprio (422 BusinessRuleError)', async () => {
+        vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValueOnce({
+          id: adminUserId,
+          ativo: true,
+        } as any)
+
+        const response = await app.inject({
+          method: 'DELETE',
+          url: `/api/usuarios/${adminUserId}`,
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+        })
+
+        expect(response.statusCode).toBe(422)
+        const body = JSON.parse(response.body)
+        expect(body.erro).toBe('Nao e permitido excluir o proprio usuario logado')
+      })
+
+      it('deve bloquear exclusao de usuario com historico de ferramentas vinculadas (409 Conflict)', async () => {
+        vi.spyOn(prisma.usuario, 'findUnique').mockImplementation(async ({ where }: any) => {
+          if (where.id === adminUserId) {
+            return { id: adminUserId, ativo: true } as any
+          }
+          if (where.id === 'user-com-ferramenta') {
+            return {
+              id: 'user-com-ferramenta',
+              nome: 'Joao Encarregado',
+              _count: {
+                ferramentasEmprestadas: 2,
+              },
+            } as any
+          }
+          return null
+        })
+
+        const response = await app.inject({
+          method: 'DELETE',
+          url: '/api/usuarios/user-com-ferramenta',
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+        })
+
+        expect(response.statusCode).toBe(409)
+        const body = JSON.parse(response.body)
+        expect(body.erro).toContain('Nao e possivel excluir o usuario pois ele possui historico de ferramentas vinculadas')
+      })
+
+      it('deve excluir com sucesso usuario sem ferramentas ou historico vinculado (204)', async () => {
+        vi.spyOn(prisma.usuario, 'findUnique').mockImplementation(async ({ where }: any) => {
+          if (where.id === adminUserId) {
+            return { id: adminUserId, ativo: true } as any
+          }
+          if (where.id === 'user-limpo') {
+            return {
+              id: 'user-limpo',
+              nome: 'Novo Estagiario',
+              _count: {
+                ferramentasEmprestadas: 0,
+              },
+            } as any
+          }
+          return null
+        })
+
+        const deleteSpy = vi.spyOn(prisma.usuario, 'delete').mockResolvedValueOnce({
+          id: 'user-limpo',
+        } as any)
+
+        const response = await app.inject({
+          method: 'DELETE',
+          url: '/api/usuarios/user-limpo',
+          headers: {
+            authorization: `Bearer ${adminToken}`,
+          },
+        })
+
+        expect(response.statusCode).toBe(204)
+        expect(deleteSpy).toHaveBeenCalledWith({
+          where: { id: 'user-limpo' },
+        })
+      })
+    })
   })
 })

@@ -3,14 +3,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createCargo,
   createUsuario,
+  deleteUsuario,
   getCargos,
   getUsuarios,
   resetarSenhaUsuario,
   toggleCargoSituacao,
   toggleUsuarioSituacao,
+  updateUsuario,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import type { PerfilUsuario } from '../types/auth'
+import type { PerfilUsuario, UsuarioListagem } from '../types/auth'
 
 function extrairErro(err: any, fallback: string): string {
   const data = err.response?.data
@@ -39,6 +41,8 @@ export function UsuariosPage() {
 
   // Modais
   const [modalNovoUsuarioAberto, setModalNovoUsuarioAberto] = useState(false)
+  const [modalEditarUsuarioAberto, setModalEditarUsuarioAberto] = useState(false)
+  const [modalExcluirUsuarioAberto, setModalExcluirUsuarioAberto] = useState(false)
   const [modalResetSenhaAberto, setModalResetSenhaAberto] = useState(false)
   const [modalNovoCargoAberto, setModalNovoCargoAberto] = useState(false)
 
@@ -49,6 +53,18 @@ export function UsuariosPage() {
   const [novoPerfil, setNovoPerfil] = useState<PerfilUsuario>('ALMOXARIFE')
   const [novoCargoId, setNovoCargoId] = useState('')
   const [erroForm, setErroForm] = useState<string | null>(null)
+
+  // Estados do formulario de edicao de usuario
+  const [usuarioEditando, setUsuarioEditando] = useState<UsuarioListagem | null>(null)
+  const [editNome, setEditNome] = useState('')
+  const [editLogin, setEditLogin] = useState('')
+  const [editPerfil, setEditPerfil] = useState<PerfilUsuario>('ALMOXARIFE')
+  const [editCargoId, setEditCargoId] = useState('')
+  const [erroEditForm, setErroEditForm] = useState<string | null>(null)
+
+  // Estados de exclusao de usuario
+  const [usuarioExcluindo, setUsuarioExcluindo] = useState<UsuarioListagem | null>(null)
+  const [erroExcluir, setErroExcluir] = useState<string | null>(null)
 
   // Estados do formulario de criacao de cargo
   const [nomeNovoCargo, setNomeNovoCargo] = useState('')
@@ -131,6 +147,7 @@ export function UsuariosPage() {
       queryClient.invalidateQueries({ queryKey: ['cargos'] })
       queryClient.invalidateQueries({ queryKey: ['cargos-todos'] })
       setNovoCargoId(cargoCriado.id)
+      setEditCargoId(cargoCriado.id)
       setModalNovoCargoAberto(false)
       setNomeNovoCargo('')
     },
@@ -138,6 +155,80 @@ export function UsuariosPage() {
       setErroCargo(extrairErro(err, 'Erro ao criar cargo'))
     },
   })
+
+  const editarUsuarioMutation = useMutation({
+    mutationFn: ({
+      id,
+      dados,
+    }: {
+      id: string
+      dados: { nome: string; login: string; perfil: PerfilUsuario; cargoId: string }
+    }) => updateUsuario(id, dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+      setModalEditarUsuarioAberto(false)
+      setUsuarioEditando(null)
+      setErroEditForm(null)
+    },
+    onError: (err: any) => {
+      setErroEditForm(extrairErro(err, 'Erro ao atualizar usuario'))
+    },
+  })
+
+  const excluirUsuarioMutation = useMutation({
+    mutationFn: (id: string) => deleteUsuario(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+      setModalExcluirUsuarioAberto(false)
+      setUsuarioExcluindo(null)
+      setErroExcluir(null)
+    },
+    onError: (err: any) => {
+      setErroExcluir(extrairErro(err, 'Erro ao excluir usuario'))
+    },
+  })
+
+  function abrirModalEdicao(u: UsuarioListagem) {
+    setUsuarioEditando(u)
+    setEditNome(u.nome)
+    setEditLogin(u.login)
+    setEditPerfil(u.perfil)
+    setEditCargoId(u.cargo.id)
+    setErroEditForm(null)
+    setModalEditarUsuarioAberto(true)
+  }
+
+  function handleAtualizarUsuario(e: FormEvent) {
+    e.preventDefault()
+    setErroEditForm(null)
+
+    if (!usuarioEditando) return
+    if (!editCargoId) {
+      setErroEditForm('Selecione um cargo para o usuario')
+      return
+    }
+
+    editarUsuarioMutation.mutate({
+      id: usuarioEditando.id,
+      dados: {
+        nome: editNome.trim(),
+        login: editLogin.trim(),
+        perfil: editPerfil,
+        cargoId: editCargoId,
+      },
+    })
+  }
+
+  function abrirModalExclusao(u: UsuarioListagem) {
+    setUsuarioExcluindo(u)
+    setErroExcluir(null)
+    setModalExcluirUsuarioAberto(true)
+  }
+
+  function handleConfirmarExclusao() {
+    if (!usuarioExcluindo) return
+    excluirUsuarioMutation.mutate(usuarioExcluindo.id)
+  }
 
   function limparFormUsuario() {
     setNovoNome('')
@@ -394,6 +485,22 @@ export function UsuariosPage() {
                         <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
                           <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
                             <button
+                              onClick={() => abrirModalEdicao(u)}
+                              style={{
+                                backgroundColor: '#f0f9ff',
+                                color: '#0369a1',
+                                border: '1px solid #bae6fd',
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem',
+                                fontWeight: 500,
+                              }}
+                            >
+                              Editar
+                            </button>
+
+                            <button
                               onClick={() => {
                                 setUsuarioAlvoReset({ id: u.id, nome: u.nome })
                                 setSenhaResetVal('')
@@ -427,6 +534,23 @@ export function UsuariosPage() {
                               }}
                             >
                               {u.ativo ? 'Desativar' : 'Ativar'}
+                            </button>
+
+                            <button
+                              disabled={ehOUsuarioLogado || excluirUsuarioMutation.isPending}
+                              onClick={() => abrirModalExclusao(u)}
+                              style={{
+                                backgroundColor: '#fff1f2',
+                                color: '#e11d48',
+                                border: '1px solid #fecdd3',
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '4px',
+                                cursor: ehOUsuarioLogado ? 'not-allowed' : 'pointer',
+                                fontSize: '0.8rem',
+                                opacity: ehOUsuarioLogado ? 0.4 : 1,
+                              }}
+                            >
+                              Excluir
                             </button>
                           </div>
                         </td>
@@ -988,6 +1112,311 @@ export function UsuariosPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Editar Usuario */}
+      {modalEditarUsuarioAberto && usuarioEditando && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            zIndex: 50,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '8px',
+              padding: '2rem',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>Editar Dados do Usuario</h2>
+
+            {erroEditForm && (
+              <div
+                style={{
+                  backgroundColor: '#fef2f2',
+                  color: '#b91c1c',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  border: '1px solid #fecaca',
+                }}
+              >
+                {erroEditForm}
+              </div>
+            )}
+
+            <form onSubmit={handleAtualizarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  Nome Completo
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editNome}
+                  onChange={(e) => setEditNome(e.target.value)}
+                  placeholder="ex: Carlos Alberto de Souza"
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  Login
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editLogin}
+                  onChange={(e) => setEditLogin(e.target.value)}
+                  placeholder="ex: carlos.souza"
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  Perfil de Acesso
+                </label>
+                <select
+                  value={editPerfil}
+                  onChange={(e) => setEditPerfil(e.target.value as PerfilUsuario)}
+                  disabled={usuarioLogado?.id === usuarioEditando.id}
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    boxSizing: 'border-box',
+                    backgroundColor: usuarioLogado?.id === usuarioEditando.id ? '#f1f5f9' : '#ffffff',
+                    color: '#0f172a',
+                  }}
+                >
+                  <option value="ALMOXARIFE" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ALMOXARIFE (Recebe, separa e baixa material)</option>
+                  <option value="ENCARREGADO" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ENCARREGADO (Pede material pelo celular)</option>
+                  <option value="ENGENHARIA" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ENGENHARIA (Define limites de consumo)</option>
+                  <option value="ADMINISTRACAO" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMINISTRACAO (Relatorios gerenciais)</option>
+                  <option value="ADMIN" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMIN (Controle total de usuarios e cadastros)</option>
+                </select>
+                {usuarioLogado?.id === usuarioEditando.id && (
+                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+                    O perfil do proprio administrador logado nao pode ser alterado.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>Cargo Exercido</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNomeNovoCargo('')
+                      setErroCargo(null)
+                      setModalNovoCargoAberto(true)
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#0284c7',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      padding: 0,
+                    }}
+                  >
+                    + Novo Cargo
+                  </button>
+                </div>
+                <select
+                  value={editCargoId}
+                  onChange={(e) => setEditCargoId(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    boxSizing: 'border-box',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                  }}
+                >
+                  <option value="" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>Selecione o cargo...</option>
+                  {cargosAtivos.map((c) => (
+                    <option key={c.id} value={c.id} style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setModalEditarUsuarioAberto(false)}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#334155',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={editarUsuarioMutation.isPending}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    backgroundColor: '#0284c7',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {editarUsuarioMutation.isPending ? 'Salvando...' : 'Salvar Alteracoes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Confirmacao de Exclusao de Usuario */}
+      {modalExcluirUsuarioAberto && usuarioExcluindo && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            zIndex: 60,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '8px',
+              padding: '1.75rem',
+              maxWidth: '460px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 0.75rem', color: '#b91c1c', fontSize: '1.15rem' }}>
+              Confirmar Exclusao de Usuario
+            </h3>
+            <p style={{ color: '#334155', fontSize: '0.9rem', margin: '0 0 0.75rem', lineHeight: '1.4' }}>
+              Deseja realmente excluir permanentemente o usuario{' '}
+              <strong>{usuarioExcluindo.nome}</strong> (login: <em>{usuarioExcluindo.login}</em>)?
+            </p>
+
+            <div
+              style={{
+                backgroundColor: '#fffbeb',
+                color: '#92400e',
+                border: '1px solid #fef3c7',
+                padding: '0.75rem',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                marginBottom: '1rem',
+                lineHeight: '1.4',
+              }}
+            >
+              <strong>Regra de integridade:</strong> Usuarios que ja tenham realizado qualquer emprestimo de ferramenta ou solicitacao de material nao podem ser excluidos para preservar o historico da obra. Nesses casos, a exclusao e bloqueada e o usuario deve apenas ser desativado.
+            </div>
+
+            {erroExcluir && (
+              <div
+                style={{
+                  backgroundColor: '#fef2f2',
+                  color: '#b91c1c',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  border: '1px solid #fecaca',
+                }}
+              >
+                {erroExcluir}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalExcluirUsuarioAberto(false)
+                  setUsuarioExcluindo(null)
+                  setErroExcluir(null)
+                }}
+                style={{
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '4px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: '#334155',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={excluirUsuarioMutation.isPending}
+                onClick={handleConfirmarExclusao}
+                style={{
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {excluirUsuarioMutation.isPending ? 'Excluindo...' : 'Confirmar Exclusao'}
+              </button>
+            </div>
           </div>
         </div>
       )}

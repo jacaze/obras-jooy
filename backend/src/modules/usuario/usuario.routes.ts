@@ -5,6 +5,7 @@ import { prisma } from '../../shared/database/prisma.js'
 import { authenticate, requireRole } from '../../shared/middlewares/auth.js'
 import {
   atualizarSituacaoUsuarioSchema,
+  atualizarUsuarioSchema,
   criarUsuarioSchema,
   loginSchema,
   resetarSenhaSchema,
@@ -329,6 +330,144 @@ export async function usuarioRoutes(app: FastifyInstance) {
       return reply.status(200).send({
         mensagem: 'Senha resetada com sucesso',
       })
+    }
+  )
+
+  // Atualizar dados cadastrais de usuario (exclusivo ADMIN)
+  app.patch(
+    '/usuarios/:id',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN])],
+      schema: {
+        tags: ['Usuarios'],
+        summary: 'Atualizar dados cadastrais de um usuario (exclusivo ADMIN)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const dados = atualizarUsuarioSchema.parse(request.body)
+
+      const usuarioExistente = await prisma.usuario.findUnique({
+        where: { id },
+      })
+
+      if (!usuarioExistente) {
+        throw new NotFoundError('Usuario nao localizado')
+      }
+
+      // Se informou login, valida unicidade
+      if (dados.login && dados.login !== usuarioExistente.login) {
+        const loginEmUso = await prisma.usuario.findFirst({
+          where: {
+            id: { not: id },
+            login: {
+              equals: dados.login,
+              mode: 'insensitive',
+            },
+          },
+        })
+
+        if (loginEmUso) {
+          throw new ConflictError('Login ja cadastrado para outro usuario')
+        }
+      }
+
+      // Se informou cargoId, valida se existe e esta ativo
+      if (dados.cargoId && dados.cargoId !== usuarioExistente.cargoId) {
+        const cargo = await prisma.cargo.findUnique({
+          where: { id: dados.cargoId },
+        })
+
+        if (!cargo || !cargo.ativo) {
+          throw new BusinessRuleError('Cargo informado nao existe ou esta inativo')
+        }
+      }
+
+      // Protecao: impede o admin de retirar a si proprio o perfil ADMIN
+      if (
+        request.user.sub === id &&
+        dados.perfil &&
+        dados.perfil !== PerfilUsuario.ADMIN &&
+        usuarioExistente.perfil === PerfilUsuario.ADMIN
+      ) {
+        throw new BusinessRuleError('Nao e permitido alterar o perfil do proprio administrador logado')
+      }
+
+      const usuarioAtualizado = await prisma.usuario.update({
+        where: { id },
+        data: {
+          nome: dados.nome,
+          login: dados.login,
+          perfil: dados.perfil,
+          cargoId: dados.cargoId,
+        },
+        select: {
+          id: true,
+          nome: true,
+          login: true,
+          perfil: true,
+          ativo: true,
+          criadoEm: true,
+          cargo: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      })
+
+      return reply.status(200).send(usuarioAtualizado)
+    }
+  )
+
+  // Excluir usuario (exclusivo ADMIN)
+  app.delete(
+    '/usuarios/:id',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN])],
+      schema: {
+        tags: ['Usuarios'],
+        summary: 'Excluir usuario do sistema (exclusivo ADMIN)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      // Protecao: impede o admin de excluir a si proprio
+      if (request.user.sub === id) {
+        throw new BusinessRuleError('Nao e permitido excluir o proprio usuario logado')
+      }
+
+      const usuario = await prisma.usuario.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              ferramentasEmprestadas: true,
+            },
+          },
+        },
+      })
+
+      if (!usuario) {
+        throw new NotFoundError('Usuario nao localizado')
+      }
+
+      // Bloqueio de exclusao se houver historico de ferramentas vinculadas
+      if (usuario._count.ferramentasEmprestadas > 0) {
+        throw new ConflictError(
+          'Nao e possivel excluir o usuario pois ele possui historico de ferramentas vinculadas. Desative o usuario caso ele nao deva mais acessar o sistema.'
+        )
+      }
+
+      await prisma.usuario.delete({
+        where: { id },
+      })
+
+      return reply.status(204).send()
     }
   )
 }
