@@ -113,6 +113,52 @@ export async function materialRoutes(app: FastifyInstance) {
     }
   )
 
+  // Excluir unidade de medida (ADMIN, ENGENHARIA, ALMOXARIFE - se nao houver materiais vinculados)
+  app.delete(
+    '/unidades-medida/:id',
+    {
+      preHandler: [
+        authenticate,
+        requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA, PerfilUsuario.ALMOXARIFE]),
+      ],
+      schema: {
+        tags: ['Materiais'],
+        summary: 'Excluir unidade de medida se nao houver materiais vinculados',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      const existente = await prisma.unidadeMedida.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              materiaisCompra: true,
+              materiaisConsumo: true,
+            },
+          },
+        },
+      })
+      if (!existente) {
+        throw new NotFoundError('Unidade de medida nao encontrada')
+      }
+
+      const totalMateriais =
+        existente._count.materiaisCompra + existente._count.materiaisConsumo
+
+      if (totalMateriais > 0) {
+        throw new ConflictError(
+          `Nao e possivel excluir a unidade "${existente.sigla}" pois existem ${totalMateriais} material(is) vinculado(s) a ela`
+        )
+      }
+
+      await prisma.unidadeMedida.delete({ where: { id } })
+      return reply.status(204).send()
+    }
+  )
+
   // ----------------------------------------------------
   // CATEGORIAS DE MATERIAL
   // ----------------------------------------------------
@@ -212,6 +258,46 @@ export async function materialRoutes(app: FastifyInstance) {
       })
 
       return reply.status(200).send(atualizada)
+    }
+  )
+
+  // Excluir categoria de material (ADMIN, ENGENHARIA, ALMOXARIFE - se nao houver materiais vinculados)
+  app.delete(
+    '/categorias-material/:id',
+    {
+      preHandler: [
+        authenticate,
+        requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA, PerfilUsuario.ALMOXARIFE]),
+      ],
+      schema: {
+        tags: ['Materiais'],
+        summary: 'Excluir categoria de material se nao houver materiais vinculados',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      const existente = await prisma.categoriaMaterial.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: { materiais: true },
+          },
+        },
+      })
+      if (!existente) {
+        throw new NotFoundError('Categoria de material nao encontrada')
+      }
+
+      if (existente._count.materiais > 0) {
+        throw new ConflictError(
+          `Nao e possivel excluir a categoria "${existente.nome}" pois existem ${existente._count.materiais} material(is) vinculado(s) a ela`
+        )
+      }
+
+      await prisma.categoriaMaterial.delete({ where: { id } })
+      return reply.status(204).send()
     }
   )
 

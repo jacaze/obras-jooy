@@ -171,6 +171,15 @@ export async function createUnidadeMedida(dados: { sigla: string; descricao: str
   return response.data
 }
 
+export async function updateUnidadeMedida(id: string, dados: { descricao: string }): Promise<UnidadeMedida> {
+  const response = await api.patch<UnidadeMedida>(`/unidades-medida/${id}`, dados)
+  return response.data
+}
+
+export async function deleteUnidadeMedida(id: string): Promise<void> {
+  await api.delete(`/unidades-medida/${id}`)
+}
+
 export async function getCategoriasMaterial(): Promise<CategoriaMaterial[]> {
   const response = await api.get<CategoriaMaterial[]>('/categorias-material')
   return response.data
@@ -179,6 +188,15 @@ export async function getCategoriasMaterial(): Promise<CategoriaMaterial[]> {
 export async function createCategoriaMaterial(dados: { nome: string }): Promise<CategoriaMaterial> {
   const response = await api.post<CategoriaMaterial>('/categorias-material', dados)
   return response.data
+}
+
+export async function updateCategoriaMaterial(id: string, dados: { nome: string }): Promise<CategoriaMaterial> {
+  const response = await api.patch<CategoriaMaterial>(`/categorias-material/${id}`, dados)
+  return response.data
+}
+
+export async function deleteCategoriaMaterial(id: string): Promise<void> {
+  await api.delete(`/categorias-material/${id}`)
 }
 
 export async function getMateriais(filtros?: FiltrosMaterial): Promise<Material[]> {

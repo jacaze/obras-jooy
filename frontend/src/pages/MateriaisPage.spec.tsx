@@ -201,8 +201,8 @@ describe('MateriaisPage', () => {
     })
 
     expect(screen.queryByText('+ Cadastrar Material')).not.toBeInTheDocument()
-    expect(screen.queryByText('+ Nova Categoria')).not.toBeInTheDocument()
-    expect(screen.queryByText('+ Nova Unidade')).not.toBeInTheDocument()
+    expect(screen.queryByText('Gerenciar Categorias')).not.toBeInTheDocument()
+    expect(screen.queryByText('Gerenciar Unidades')).not.toBeInTheDocument()
     expect(screen.queryByText('Editar')).not.toBeInTheDocument()
   })
 })

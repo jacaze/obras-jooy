@@ -8,10 +8,14 @@ import {
   updateMaterial,
   toggleMaterialSituacao,
   createCategoriaMaterial,
+  updateCategoriaMaterial,
+  deleteCategoriaMaterial,
   createUnidadeMedida,
+  updateUnidadeMedida,
+  deleteUnidadeMedida,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import type { Material, TipoControleMaterial } from '../types/material'
+import type { Material, TipoControleMaterial, CategoriaMaterial, UnidadeMedida } from '../types/material'
 
 export function MateriaisPage() {
   const { usuario } = useAuth()
@@ -29,16 +33,20 @@ export function MateriaisPage() {
   const [tipoFiltro, setTipoFiltro] = useState('')
   const [somenteAtivos, setSomenteAtivos] = useState(true)
 
-  // Estados dos Modais
+  // Estados dos Modais de Material
   const [modalMaterialAberto, setModalMaterialAberto] = useState(false)
   const [materialEmEdicao, setMaterialEmEdicao] = useState<Material | null>(null)
 
-  const [modalCategoriaAberto, setModalCategoriaAberto] = useState(false)
-  const [novaCategoriaNome, setNovaCategoriaNome] = useState('')
+  // Estados do Gerenciador de Categorias
+  const [modalGerenciarCategorias, setModalGerenciarCategorias] = useState(false)
+  const [categoriaEmEdicao, setCategoriaEmEdicao] = useState<CategoriaMaterial | null>(null)
+  const [nomeCategoriaInput, setNomeCategoriaInput] = useState('')
 
-  const [modalUnidadeAberto, setModalUnidadeAberto] = useState(false)
-  const [novaUnidadeSigla, setNovaUnidadeSigla] = useState('')
-  const [novaUnidadeDescricao, setNovaUnidadeDescricao] = useState('')
+  // Estados do Gerenciador de Unidades
+  const [modalGerenciarUnidades, setModalGerenciarUnidades] = useState(false)
+  const [unidadeEmEdicao, setUnidadeEmEdicao] = useState<UnidadeMedida | null>(null)
+  const [siglaUnidadeInput, setSiglaUnidadeInput] = useState('')
+  const [descricaoUnidadeInput, setDescricaoUnidadeInput] = useState('')
 
   const [mensagemErro, setMensagemErro] = useState<string | null>(null)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
@@ -76,11 +84,13 @@ export function MateriaisPage() {
     queryFn: getCategoriasMaterial,
   })
 
-  // Mutations
+  // Mutations de Material
   const criarMaterialMutation = useMutation({
     mutationFn: createMaterial,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materiais'] })
+      queryClient.invalidateQueries({ queryKey: ['unidades-medida'] })
+      queryClient.invalidateQueries({ queryKey: ['categorias-material'] })
       fecharModalMaterial()
       setMensagemSucesso('Material cadastrado com sucesso no catalogo.')
     },
@@ -113,31 +123,71 @@ export function MateriaisPage() {
     },
   })
 
-  const criarCategoriaMutation = useMutation({
-    mutationFn: createCategoriaMaterial,
-    onSuccess: (nova) => {
+  // Mutations de Categorias
+  const salvarCategoriaMutation = useMutation({
+    mutationFn: async () => {
+      if (categoriaEmEdicao) {
+        return updateCategoriaMaterial(categoriaEmEdicao.id, { nome: nomeCategoriaInput.trim() })
+      }
+      return createCategoriaMaterial({ nome: nomeCategoriaInput.trim() })
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias-material'] })
-      setNovaCategoriaNome('')
-      setModalCategoriaAberto(false)
-      setFormCategoriaId(nova.id)
-      setMensagemSucesso(`Categoria "${nova.nome}" criada com sucesso.`)
+      queryClient.invalidateQueries({ queryKey: ['materiais'] })
+      setCategoriaEmEdicao(null)
+      setNomeCategoriaInput('')
+      setMensagemSucesso('Categoria salva com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao criar categoria.')
+      setMensagemErro(err.response?.data?.message || 'Erro ao salvar categoria.')
     },
   })
 
-  const criarUnidadeMutation = useMutation({
-    mutationFn: createUnidadeMedida,
-    onSuccess: (nova) => {
-      queryClient.invalidateQueries({ queryKey: ['unidades-medida'] })
-      setNovaUnidadeSigla('')
-      setNovaUnidadeDescricao('')
-      setModalUnidadeAberto(false)
-      setMensagemSucesso(`Unidade "${nova.sigla}" criada com sucesso.`)
+  const excluirCategoriaMutation = useMutation({
+    mutationFn: deleteCategoriaMaterial,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categorias-material'] })
+      setMensagemSucesso('Categoria excluida com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao criar unidade de medida.')
+      setMensagemErro(err.response?.data?.message || 'Erro ao excluir categoria.')
+    },
+  })
+
+  // Mutations de Unidades
+  const salvarUnidadeMutation = useMutation({
+    mutationFn: async () => {
+      if (unidadeEmEdicao) {
+        return updateUnidadeMedida(unidadeEmEdicao.id, {
+          descricao: descricaoUnidadeInput.trim(),
+        })
+      }
+      return createUnidadeMedida({
+        sigla: siglaUnidadeInput.trim().toUpperCase(),
+        descricao: descricaoUnidadeInput.trim(),
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unidades-medida'] })
+      queryClient.invalidateQueries({ queryKey: ['materiais'] })
+      setUnidadeEmEdicao(null)
+      setSiglaUnidadeInput('')
+      setDescricaoUnidadeInput('')
+      setMensagemSucesso('Unidade de medida salva com sucesso.')
+    },
+    onError: (err: any) => {
+      setMensagemErro(err.response?.data?.message || 'Erro ao salvar unidade.')
+    },
+  })
+
+  const excluirUnidadeMutation = useMutation({
+    mutationFn: deleteUnidadeMedida,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unidades-medida'] })
+      setMensagemSucesso('Unidade de medida excluida com sucesso.')
+    },
+    onError: (err: any) => {
+      setMensagemErro(err.response?.data?.message || 'Erro ao excluir unidade.')
     },
   })
 
@@ -218,7 +268,6 @@ export function MateriaisPage() {
     }
   }
 
-  // Calculo de descricao dinamica de conversao
   const unCompraObj = unidades.find((u) => u.id === formUnCompraId)
   const unConsumoObj = unidades.find((u) => u.id === formUnConsumoId)
   const mesmasUnidades = Boolean(formUnCompraId && formUnConsumoId && formUnCompraId === formUnConsumoId)
@@ -249,7 +298,12 @@ export function MateriaisPage() {
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button
               type="button"
-              onClick={() => setModalCategoriaAberto(true)}
+              onClick={() => {
+                setCategoriaEmEdicao(null)
+                setNomeCategoriaInput('')
+                setMensagemErro(null)
+                setModalGerenciarCategorias(true)
+              }}
               style={{
                 padding: '0.6rem 1rem',
                 backgroundColor: '#ffffff',
@@ -261,11 +315,17 @@ export function MateriaisPage() {
                 cursor: 'pointer',
               }}
             >
-              + Nova Categoria
+              Gerenciar Categorias
             </button>
             <button
               type="button"
-              onClick={() => setModalUnidadeAberto(true)}
+              onClick={() => {
+                setUnidadeEmEdicao(null)
+                setSiglaUnidadeInput('')
+                setDescricaoUnidadeInput('')
+                setMensagemErro(null)
+                setModalGerenciarUnidades(true)
+              }}
               style={{
                 padding: '0.6rem 1rem',
                 backgroundColor: '#ffffff',
@@ -277,7 +337,7 @@ export function MateriaisPage() {
                 cursor: 'pointer',
               }}
             >
-              + Nova Unidade
+              Gerenciar Unidades
             </button>
             <button
               type="button"
@@ -934,7 +994,6 @@ export function MateriaisPage() {
                   </div>
                 </div>
 
-                {/* Mensagem explicativa da conversao */}
                 <div style={{ fontSize: '0.8rem', color: '#0369a1', fontStyle: 'italic' }}>
                   {mesmasUnidades ? (
                     'Unidades identicas: 1 compra equivale a 1 no estoque (fator fixo em 1).'
@@ -1011,8 +1070,8 @@ export function MateriaisPage() {
         </div>
       )}
 
-      {/* Modal de Nova Categoria */}
-      {modalCategoriaAberto && (
+      {/* Modal Completo: Gerenciar Categorias */}
+      {modalGerenciarCategorias && (
         <div
           style={{
             position: 'fixed',
@@ -1029,87 +1088,188 @@ export function MateriaisPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              maxWidth: '450px',
+              maxWidth: '600px',
               width: '100%',
               padding: '1.5rem',
+              maxHeight: '90vh',
+              overflowY: 'auto',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 1rem 0', color: '#0f172a' }}>
-              Nova Categoria de Material
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                Gerenciar Categorias de Materiais
+              </h2>
+              <button
+                type="button"
+                onClick={() => setModalGerenciarCategorias(false)}
+                style={{ background: 'none', border: 'none', fontSize: '1.25rem', color: '#64748b', cursor: 'pointer' }}
+              >
+                X
+              </button>
+            </div>
+
+            {/* Form inline para criar ou editar */}
             <form
               onSubmit={(e) => {
                 e.preventDefault()
-                if (novaCategoriaNome.trim()) {
-                  criarCategoriaMutation.mutate({ nome: novaCategoriaNome.trim() })
+                if (nomeCategoriaInput.trim()) {
+                  salvarCategoriaMutation.mutate()
                 }
               }}
+              style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '1.25rem',
+                backgroundColor: '#f8fafc',
+                padding: '0.75rem',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+              }}
             >
-              <label
-                htmlFor="nova-categoria-nome"
-                style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
-              >
-                Nome da Categoria *
-              </label>
               <input
-                id="nova-categoria-nome"
                 type="text"
                 required
-                value={novaCategoriaNome}
-                onChange={(e) => setNovaCategoriaNome(e.target.value)}
-                placeholder="Ex: Alvenaria e Cimento"
+                value={nomeCategoriaInput}
+                onChange={(e) => setNomeCategoriaInput(e.target.value)}
+                placeholder={categoriaEmEdicao ? 'Alterar nome da categoria...' : 'Nome da nova categoria...'}
                 style={{
-                  width: '100%',
+                  flex: 1,
                   padding: '0.5rem 0.75rem',
                   borderRadius: '6px',
                   border: '1px solid #cbd5e1',
                   fontSize: '0.9rem',
-                  marginBottom: '1.25rem',
-                  boxSizing: 'border-box',
                 }}
               />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                type="submit"
+                disabled={salvarCategoriaMutation.isPending}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#0284c7',
+                  border: 'none',
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {categoriaEmEdicao ? 'Salvar' : 'Adicionar'}
+              </button>
+              {categoriaEmEdicao && (
                 <button
                   type="button"
-                  onClick={() => setModalCategoriaAberto(false)}
+                  onClick={() => {
+                    setCategoriaEmEdicao(null)
+                    setNomeCategoriaInput('')
+                  }}
                   style={{
-                    padding: '0.5rem 1rem',
+                    padding: '0.5rem 0.75rem',
                     backgroundColor: '#ffffff',
                     border: '1px solid #cbd5e1',
                     borderRadius: '6px',
-                    color: '#334155',
+                    color: '#64748b',
                     fontSize: '0.85rem',
-                    fontWeight: 600,
                     cursor: 'pointer',
                   }}
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  disabled={criarCategoriaMutation.isPending}
-                  style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: '#0284c7',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Salvar Categoria
-                </button>
-              </div>
+              )}
             </form>
+
+            {/* Listagem de categorias existentes */}
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Nome da Categoria</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Materiais</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categorias.map((cat) => {
+                    const totalVinculados = cat._count?.materiais || 0
+                    return (
+                      <tr key={cat.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500, color: '#1e293b' }}>
+                          {cat.nome}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', color: '#64748b' }}>
+                          <span
+                            style={{
+                              padding: '0.15rem 0.5rem',
+                              backgroundColor: totalVinculados > 0 ? '#e0f2fe' : '#f1f5f9',
+                              color: totalVinculados > 0 ? '#0369a1' : '#64748b',
+                              borderRadius: '999px',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {totalVinculados} vinculado(s)
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCategoriaEmEdicao(cat)
+                                setNomeCategoriaInput(cat.nome)
+                              }}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                color: '#1e293b',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              disabled={totalVinculados > 0}
+                              title={
+                                totalVinculados > 0
+                                  ? 'Nao e possivel excluir pois ha materiais vinculados'
+                                  : 'Excluir categoria'
+                              }
+                              onClick={() => {
+                                if (confirm(`Deseja realmente excluir a categoria "${cat.nome}"?`)) {
+                                  excluirCategoriaMutation.mutate(cat.id)
+                                }
+                              }}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                backgroundColor: '#ffffff',
+                                border: totalVinculados > 0 ? '1px solid #e2e8f0' : '1px solid #fca5a5',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                color: totalVinculados > 0 ? '#94a3b8' : '#b91c1c',
+                                cursor: totalVinculados > 0 ? 'not-allowed' : 'pointer',
+                              }}
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Modal de Nova Unidade de Medida */}
-      {modalUnidadeAberto && (
+      {/* Modal Completo: Gerenciar Unidades de Medida */}
+      {modalGerenciarUnidades && (
         <div
           style={{
             position: 'fixed',
@@ -1126,112 +1286,206 @@ export function MateriaisPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              maxWidth: '450px',
+              maxWidth: '650px',
               width: '100%',
               padding: '1.5rem',
+              maxHeight: '90vh',
+              overflowY: 'auto',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 1rem 0', color: '#0f172a' }}>
-              Nova Unidade de Medida
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                Gerenciar Unidades de Medida
+              </h2>
+              <button
+                type="button"
+                onClick={() => setModalGerenciarUnidades(false)}
+                style={{ background: 'none', border: 'none', fontSize: '1.25rem', color: '#64748b', cursor: 'pointer' }}
+              >
+                X
+              </button>
+            </div>
+
+            {/* Form inline para criar ou editar */}
             <form
               onSubmit={(e) => {
                 e.preventDefault()
-                if (novaUnidadeSigla.trim() && novaUnidadeDescricao.trim()) {
-                  criarUnidadeMutation.mutate({
-                    sigla: novaUnidadeSigla.trim(),
-                    descricao: novaUnidadeDescricao.trim(),
-                  })
+                if (descricaoUnidadeInput.trim() && (unidadeEmEdicao || siglaUnidadeInput.trim())) {
+                  salvarUnidadeMutation.mutate()
                 }
               }}
-              style={{ display: 'grid', gap: '1rem' }}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: unidadeEmEdicao ? '1fr auto auto' : '1fr 2fr auto',
+                gap: '0.5rem',
+                marginBottom: '1.25rem',
+                backgroundColor: '#f8fafc',
+                padding: '0.75rem',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                alignItems: 'center',
+              }}
             >
-              <div>
-                <label
-                  htmlFor="nova-unidade-sigla"
-                  style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
-                >
-                  Sigla (abreviacao) *
-                </label>
+              {!unidadeEmEdicao && (
                 <input
-                  id="nova-unidade-sigla"
                   type="text"
                   required
-                  value={novaUnidadeSigla}
-                  onChange={(e) => setNovaUnidadeSigla(e.target.value.toUpperCase())}
-                  placeholder="Ex: M3"
+                  value={siglaUnidadeInput}
+                  onChange={(e) => setSiglaUnidadeInput(e.target.value.toUpperCase())}
+                  placeholder="Sigla (ex: M3)"
                   style={{
-                    width: '100%',
                     padding: '0.5rem 0.75rem',
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
                     fontSize: '0.9rem',
-                    boxSizing: 'border-box',
                   }}
                 />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="nova-unidade-descricao"
-                  style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
-                >
-                  Descricao da Unidade *
-                </label>
-                <input
-                  id="nova-unidade-descricao"
-                  type="text"
-                  required
-                  value={novaUnidadeDescricao}
-                  onChange={(e) => setNovaUnidadeDescricao(e.target.value)}
-                  placeholder="Ex: Metro Cubico"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              )}
+              <input
+                type="text"
+                required
+                value={descricaoUnidadeInput}
+                onChange={(e) => setDescricaoUnidadeInput(e.target.value)}
+                placeholder="Descricao da unidade..."
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.9rem',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={salvarUnidadeMutation.isPending}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#0284c7',
+                  border: 'none',
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {unidadeEmEdicao ? 'Salvar' : 'Adicionar'}
+              </button>
+              {unidadeEmEdicao && (
                 <button
                   type="button"
-                  onClick={() => setModalUnidadeAberto(false)}
+                  onClick={() => {
+                    setUnidadeEmEdicao(null)
+                    setSiglaUnidadeInput('')
+                    setDescricaoUnidadeInput('')
+                  }}
                   style={{
-                    padding: '0.5rem 1rem',
+                    padding: '0.5rem 0.75rem',
                     backgroundColor: '#ffffff',
                     border: '1px solid #cbd5e1',
                     borderRadius: '6px',
-                    color: '#334155',
+                    color: '#64748b',
                     fontSize: '0.85rem',
-                    fontWeight: 600,
                     cursor: 'pointer',
                   }}
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  disabled={criarUnidadeMutation.isPending}
-                  style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: '#0284c7',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Salvar Unidade
-                </button>
-              </div>
+              )}
             </form>
+
+            {/* Listagem de unidades existentes */}
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Sigla</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569' }}>Descricao</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Materiais</th>
+                    <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unidades.map((u) => {
+                    const totalVinculados =
+                      (u._count?.materiaisCompra || 0) + (u._count?.materiaisConsumo || 0)
+
+                    return (
+                      <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                          {u.sigla}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: '#334155' }}>
+                          {u.descricao}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                          <span
+                            style={{
+                              padding: '0.15rem 0.5rem',
+                              backgroundColor: totalVinculados > 0 ? '#e0f2fe' : '#f1f5f9',
+                              color: totalVinculados > 0 ? '#0369a1' : '#64748b',
+                              borderRadius: '999px',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {totalVinculados} vinculado(s)
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUnidadeEmEdicao(u)
+                                setDescricaoUnidadeInput(u.descricao)
+                              }}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                color: '#1e293b',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              disabled={totalVinculados > 0}
+                              title={
+                                totalVinculados > 0
+                                  ? 'Nao e possivel excluir pois ha materiais vinculados'
+                                  : 'Excluir unidade'
+                              }
+                              onClick={() => {
+                                if (confirm(`Deseja realmente excluir a unidade "${u.sigla}"?`)) {
+                                  excluirUnidadeMutation.mutate(u.id)
+                                }
+                              }}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                backgroundColor: '#ffffff',
+                                border: totalVinculados > 0 ? '1px solid #e2e8f0' : '1px solid #fca5a5',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                color: totalVinculados > 0 ? '#94a3b8' : '#b91c1c',
+                                cursor: totalVinculados > 0 ? 'not-allowed' : 'pointer',
+                              }}
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

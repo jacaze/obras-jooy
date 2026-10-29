@@ -148,6 +148,24 @@ describe('Modulo de Catalogo de Materiais, Categorias e Unidades', () => {
 
       expect(response.statusCode).toBe(409)
     })
+
+    it('deve rejeitar exclusao de unidade que possui materiais vinculados', async () => {
+      vi.spyOn(prisma.unidadeMedida, 'findUnique').mockResolvedValueOnce({
+        id: unidadeUnId,
+        sigla: 'UN',
+        descricao: 'Unidade',
+        _count: { materiaisCompra: 2, materiaisConsumo: 0 },
+      } as any)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/api/unidades-medida/${unidadeUnId}`,
+        headers: { authorization: `Bearer ${almoxarifeToken}` },
+      })
+
+      expect(response.statusCode).toBe(409)
+      expect(response.json().erro).toContain('vinculado')
+    })
   })
 
   // ----------------------------------------------------
@@ -210,6 +228,23 @@ describe('Modulo de Catalogo de Materiais, Categorias e Unidades', () => {
       })
 
       expect(response.statusCode).toBe(409)
+    })
+
+    it('deve rejeitar exclusao de categoria que possui materiais vinculados', async () => {
+      vi.spyOn(prisma.categoriaMaterial, 'findUnique').mockResolvedValueOnce({
+        id: categoriaAlvenariaId,
+        nome: 'Alvenaria e Cimento',
+        _count: { materiais: 3 },
+      } as any)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/api/categorias-material/${categoriaAlvenariaId}`,
+        headers: { authorization: `Bearer ${almoxarifeToken}` },
+      })
+
+      expect(response.statusCode).toBe(409)
+      expect(response.json().erro).toContain('vinculado')
     })
   })
 
