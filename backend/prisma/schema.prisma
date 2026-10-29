@@ -57,3 +57,33 @@ model HealthCheck {
 
   @@map("health_check")
 }
+
+// ----------------------------------------------------
+// ESTRUTURA DA OBRA E AREAS (T05)
+// ----------------------------------------------------
+model Obra {
+  id          String     @id @default(uuid()) @db.Uuid
+  codigo      String     @unique @db.VarChar(30)
+  nome        String     @db.VarChar(120)
+  cidade      String     @db.VarChar(80)
+  ativa       Boolean    @default(true)
+  criadaEm    DateTime   @default(now()) @map("criada_em")
+
+  areas       AreaObra[]
+
+  @@map("obra")
+}
+
+model AreaObra {
+  id          String     @id @default(uuid()) @db.Uuid
+  obraId      String     @map("obra_id") @db.Uuid
+  nome        String     @db.VarChar(80)
+  ordem       Int        @default(0)
+  ativa       Boolean    @default(true)
+  criadaEm    DateTime   @default(now()) @map("criada_em")
+
+  obra        Obra       @relation(fields: [obraId], references: [id], onDelete: Restrict)
+
+  @@unique([obraId, nome], name: "area_obra_nome_unico")
+  @@map("area_obra")
+}

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { Cargo, PerfilUsuario, UsuarioAuth, UsuarioListagem } from '../types/auth'
+import type { AreaObra, Obra } from '../types/obra'
 
 export const api = axios.create({
   baseURL: '/api',
@@ -97,5 +98,49 @@ export async function toggleUsuarioSituacao(id: string, ativo: boolean): Promise
 
 export async function resetarSenhaUsuario(id: string, novaSenha: string): Promise<{ mensagem: string }> {
   const response = await api.patch<{ mensagem: string }>(`/usuarios/${id}/senha`, { novaSenha })
+  return response.data
+}
+
+// ----------------------------------------------------
+// OBRAS E AREAS DA OBRA (T05)
+// ----------------------------------------------------
+
+export async function getObras(somenteAtivas = true): Promise<Obra[]> {
+  const response = await api.get<Obra[]>(`/obras?somenteAtivas=${somenteAtivas}`)
+  return response.data
+}
+
+export async function getObraDetalhes(id: string): Promise<Obra> {
+  const response = await api.get<Obra>(`/obras/${id}`)
+  return response.data
+}
+
+export async function createObra(dados: { codigo: string; nome: string; cidade: string }): Promise<Obra> {
+  const response = await api.post<Obra>('/obras', dados)
+  return response.data
+}
+
+export async function toggleObraSituacao(id: string, ativa: boolean): Promise<Obra> {
+  const response = await api.patch<Obra>(`/obras/${id}/situacao`, { ativa })
+  return response.data
+}
+
+export async function getAreasObra(obraId: string, somenteAtivas = true): Promise<AreaObra[]> {
+  const response = await api.get<AreaObra[]>(`/obras/${obraId}/areas?somenteAtivas=${somenteAtivas}`)
+  return response.data
+}
+
+export async function createAreaObra(obraId: string, dados: { nome: string; ordem?: number }): Promise<AreaObra> {
+  const response = await api.post<AreaObra>(`/obras/${obraId}/areas`, dados)
+  return response.data
+}
+
+export async function updateAreaObra(id: string, dados: { nome?: string; ordem?: number }): Promise<AreaObra> {
+  const response = await api.patch<AreaObra>(`/areas/${id}`, dados)
+  return response.data
+}
+
+export async function toggleAreaSituacao(id: string, ativa: boolean): Promise<AreaObra> {
+  const response = await api.patch<AreaObra>(`/areas/${id}/situacao`, { ativa })
   return response.data
 }
