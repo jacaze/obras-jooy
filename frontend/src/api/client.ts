@@ -103,6 +103,22 @@ export async function createUsuario(dados: {
   return response.data
 }
 
+export interface AtualizarUsuarioInput {
+  nome?: string
+  login?: string
+  perfil?: PerfilUsuario
+  cargoId?: string
+}
+
+export async function updateUsuario(id: string, dados: AtualizarUsuarioInput): Promise<UsuarioListagem> {
+  const response = await api.patch<UsuarioListagem>(`/usuarios/${id}`, dados)
+  return response.data
+}
+
+export async function deleteUsuario(id: string): Promise<void> {
+  await api.delete(`/usuarios/${id}`)
+}
+
 export async function toggleUsuarioSituacao(id: string, ativo: boolean): Promise<{ id: string; ativo: boolean }> {
   const response = await api.patch<{ id: string; ativo: boolean }>(`/usuarios/${id}/situacao`, { ativo })
   return response.data
