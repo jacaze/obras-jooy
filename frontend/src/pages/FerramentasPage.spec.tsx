@@ -135,57 +135,17 @@ describe('FerramentasPage', () => {
     })
   })
 
-  it('deve registrar emprestimo de ferramenta disponivel', async () => {
-    vi.mocked(client.registrarEmprestimoFerramenta).mockResolvedValueOnce({
-      ...mockFerramentas[0],
-      status: 'EMPRESTADO',
-      emprestadoParaId: 'usr-mestre',
-      emprestadoPara: mockUsuarios[0],
-    })
-
+  it('deve permitir abrir modal de edicao de ferramenta', async () => {
     renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('Emprestar')).toBeInTheDocument()
+      expect(screen.getByText('Martelete Rompedor 800W')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText('Emprestar'))
+    const botoesEditar = screen.getAllByRole('button', { name: 'Editar' })
+    fireEvent.click(botoesEditar[0])
 
-    expect(screen.getByRole('heading', { name: 'Registrar Empréstimo' })).toBeInTheDocument()
-
-    fireEvent.change(screen.getByLabelText(/Usuário Solicitante/i), {
-      target: { value: 'usr-mestre' },
-    })
-
-    fireEvent.click(screen.getByRole('button', { name: 'Confirmar Empréstimo' }))
-
-    await waitFor(() => {
-      expect(client.registrarEmprestimoFerramenta).toHaveBeenCalledWith('fer-1', 'usr-mestre')
-    })
-  })
-
-  it('deve registrar devolucao de ferramenta emprestada', async () => {
-    vi.mocked(client.registrarDevolucaoFerramenta).mockResolvedValueOnce({
-      ...mockFerramentas[1],
-      status: 'DISPONIVEL',
-      emprestadoParaId: null,
-      emprestadoPara: null,
-    })
-
-    renderComponent()
-
-    await waitFor(() => {
-      expect(screen.getByText('Devolver')).toBeInTheDocument()
-    })
-
-    fireEvent.click(screen.getByText('Devolver'))
-
-    expect(screen.getByRole('heading', { name: 'Registrar Devolução da Ferramenta' })).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Confirmar Devolução' }))
-
-    await waitFor(() => {
-      expect(client.registrarDevolucaoFerramenta).toHaveBeenCalledWith('fer-2', false)
-    })
+    expect(screen.getByRole('heading', { name: /Editar Ferramenta/i })).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Martelete Rompedor 800W')).toBeInTheDocument()
   })
 })

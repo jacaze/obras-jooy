@@ -4,9 +4,6 @@ import {
   getFerramentas,
   createFerramenta,
   updateFerramenta,
-  registrarEmprestimoFerramenta,
-  registrarDevolucaoFerramenta,
-  getUsuarios,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
 import type { Ferramenta, StatusFerramenta } from '../types/material'
@@ -30,19 +27,11 @@ export function FerramentasPage() {
   const [mensagemErro, setMensagemErro] = useState<string | null>(null)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
 
-  // Modais
+  // Modal de Criacao e Edicao
   const [modalFerramentaAberto, setModalFerramentaAberto] = useState(false)
   const [ferramentaEmEdicao, setFerramentaEmEdicao] = useState<Ferramenta | null>(null)
   const [formCodigo, setFormCodigo] = useState('')
   const [formNome, setFormNome] = useState('')
-
-  const [modalEmprestimoAberto, setModalEmprestimoAberto] = useState(false)
-  const [ferramentaParaEmprestimo, setFerramentaParaEmprestimo] = useState<Ferramenta | null>(null)
-  const [usuarioSolicitanteId, setUsuarioSolicitanteId] = useState('')
-
-  const [modalDevolucaoAberto, setModalDevolucaoAberto] = useState(false)
-  const [ferramentaParaDevolucao, setFerramentaParaDevolucao] = useState<Ferramenta | null>(null)
-  const [comDefeitoDevolucao, setComDefeitoDevolucao] = useState(false)
 
   // Queries
   const { data: ferramentas = [], isLoading: carregandoFerramentas } = useQuery({
@@ -53,11 +42,6 @@ export function FerramentasPage() {
         status: (statusFiltro as StatusFerramenta) || undefined,
         somenteAtivas,
       }),
-  })
-
-  const { data: usuarios = [] } = useQuery({
-    queryKey: ['usuarios-listagem'],
-    queryFn: () => getUsuarios(),
   })
 
   // Mutations
@@ -77,44 +61,10 @@ export function FerramentasPage() {
       setFerramentaEmEdicao(null)
       setFormCodigo('')
       setFormNome('')
-      setMensagemSucesso('Ferramenta salva com sucesso.')
+      setMensagemSucesso('Ferramenta salva com sucesso no catalogo.')
     },
     onError: (err: any) => {
       setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao salvar ferramenta.')
-    },
-  })
-
-  const emprestimoMutation = useMutation({
-    mutationFn: async () => {
-      if (!ferramentaParaEmprestimo || !usuarioSolicitanteId) return
-      return registrarEmprestimoFerramenta(ferramentaParaEmprestimo.id, usuarioSolicitanteId)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
-      setModalEmprestimoAberto(false)
-      setFerramentaParaEmprestimo(null)
-      setUsuarioSolicitanteId('')
-      setMensagemSucesso('Emprestimo da ferramenta registrado com sucesso.')
-    },
-    onError: (err: any) => {
-      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao registrar emprestimo.')
-    },
-  })
-
-  const devolucaoMutation = useMutation({
-    mutationFn: async () => {
-      if (!ferramentaParaDevolucao) return
-      return registrarDevolucaoFerramenta(ferramentaParaDevolucao.id, comDefeitoDevolucao)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
-      setModalDevolucaoAberto(false)
-      setFerramentaParaDevolucao(null)
-      setComDefeitoDevolucao(false)
-      setMensagemSucesso('Devolucao da ferramenta registrada com sucesso.')
-    },
-    onError: (err: any) => {
-      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao registrar devolucao.')
     },
   })
 
@@ -400,77 +350,27 @@ export function FerramentasPage() {
                       </td>
                       {podeGerenciar && (
                         <td style={{ padding: '0.875rem 1rem', textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            {fer.status === 'DISPONIVEL' && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFerramentaParaEmprestimo(fer)
-                                  setUsuarioSolicitanteId(usuarios[0]?.id || '')
-                                  setMensagemErro(null)
-                                  setModalEmprestimoAberto(true)
-                                }}
-                                style={{
-                                  padding: '0.35rem 0.7rem',
-                                  backgroundColor: '#0284c7',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  color: '#ffffff',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Emprestar
-                              </button>
-                            )}
-
-                            {fer.status === 'EMPRESTADO' && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFerramentaParaDevolucao(fer)
-                                  setComDefeitoDevolucao(false)
-                                  setMensagemErro(null)
-                                  setModalDevolucaoAberto(true)
-                                }}
-                                style={{
-                                  padding: '0.35rem 0.7rem',
-                                  backgroundColor: '#16a34a',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  color: '#ffffff',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Devolver
-                              </button>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFerramentaEmEdicao(fer)
-                                setFormCodigo(fer.codigo)
-                                setFormNome(fer.nome)
-                                setModalFerramentaAberto(true)
-                              }}
-                              style={{
-                                padding: '0.35rem 0.7rem',
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                color: '#1e293b',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              Editar
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFerramentaEmEdicao(fer)
+                              setFormCodigo(fer.codigo)
+                              setFormNome(fer.nome)
+                              setModalFerramentaAberto(true)
+                            }}
+                            style={{
+                              padding: '0.35rem 0.7rem',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '4px',
+                              color: '#1e293b',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Editar
+                          </button>
                         </td>
                       )}
                     </tr>
@@ -610,203 +510,6 @@ export function FerramentasPage() {
                   }}
                 >
                   {salvarFerramentaMutation.isPending ? 'Salvando...' : 'Salvar Ferramenta'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Emprestar Ferramenta */}
-      {modalEmprestimoAberto && ferramentaParaEmprestimo && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '100%',
-              padding: '1.5rem',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: '#0f172a' }}>
-              Registrar Empréstimo
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0 0 1.25rem 0' }}>
-              Ferramenta: <strong>{ferramentaParaEmprestimo.codigo}</strong> - {ferramentaParaEmprestimo.nome}
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                emprestimoMutation.mutate()
-              }}
-              style={{ display: 'grid', gap: '1rem' }}
-            >
-              <div>
-                <label
-                  htmlFor="usuario-solicitante"
-                  style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}
-                >
-                  Usuário Solicitante (quem está retirando) *
-                </label>
-                <select
-                  id="usuario-solicitante"
-                  required
-                  value={usuarioSolicitanteId}
-                  onChange={(e) => setUsuarioSolicitanteId(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
-                    backgroundColor: '#ffffff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">Selecione o usuário...</option>
-                  {usuarios.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.nome} ({u.cargo?.nome || u.perfil})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setModalEmprestimoAberto(false)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#334155',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={emprestimoMutation.isPending}
-                  style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: '#0284c7',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {emprestimoMutation.isPending ? 'Registrando...' : 'Confirmar Empréstimo'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Devolver Ferramenta */}
-      {modalDevolucaoAberto && ferramentaParaDevolucao && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '100%',
-              padding: '1.5rem',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: '#0f172a' }}>
-              Registrar Devolução da Ferramenta
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0 0 1rem 0' }}>
-              Confirmar o retorno de <strong>{ferramentaParaDevolucao.codigo}</strong> ao almoxarifado.
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                devolucaoMutation.mutate()
-              }}
-              style={{ display: 'grid', gap: '1rem' }}
-            >
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
-                <input
-                  type="checkbox"
-                  checked={comDefeitoDevolucao}
-                  onChange={(e) => setComDefeitoDevolucao(e.target.checked)}
-                  style={{ width: '1rem', height: '1rem' }}
-                />
-                <span style={{ color: comDefeitoDevolucao ? '#b91c1c' : '#334155', fontWeight: 600 }}>
-                  A ferramenta retornou com defeito/avaria? (marcará como "Com Defeito")
-                </span>
-              </label>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setModalDevolucaoAberto(false)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#334155',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={devolucaoMutation.isPending}
-                  style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: '#16a34a',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {devolucaoMutation.isPending ? 'Devolvendo...' : 'Confirmar Devolução'}
                 </button>
               </div>
             </form>
