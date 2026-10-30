@@ -91,7 +91,9 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **T04** | `feature/T04-autenticacao-usuarios` | Autenticacao JWT, Tabela de Cargos, Gestao de Usuarios e RBAC | 42 testes Vitest (26 backend + 16 frontend) | Concluido | Sim (PR #4 mergeado) |
 | **T05** | `feature/T05-obras-areas` | Cadastro de Obra, Cidade e Gestao de Areas (RBAC Engenharia e Admin) | 29 testes Vitest (22 backend + 7 frontend) | Concluido | Sim (PR #5 mergeado) |
 | **T06** | *(descartada)* | Empresas e Pessoas | N/A | Descartada | Sim (Responsavel textual na baixa/emprestimo) |
-| **T07** | `feature/T07-catalogo-materiais` | Catalogo de Materiais, Unidades e Categorias com Fator de Conversao | Vitest | Em desenvolvimento | Nao |
+| **T07** | `feature/T07-catalogo-materiais` | Catalogo de Materiais, Unidades e Categorias com Fator de Conversao | 24 testes Vitest (16 backend + 8 frontend) | Concluido | Sim (PR #6 mergeado) |
+| **AJUSTE-USER** | `feature/ajustes-gestao-usuarios` | Edicao e exclusao segura de usuarios com bloqueio por historico | 7 testes Vitest (3 backend + 4 frontend) | Concluido | Sim (PR #7 mergeado) |
+| **T11** | `feature/T11-requisicoes-obra` | Modulo de Requisicoes de Obra e Isolamento de Acesso para Encarregado | 12 testes Vitest (9 backend + 3 frontend) | Concluido | Aguardando aprovacao (PR #8) |
 | **T08** | *(a criar)* | Estoque Base, Saldos e Livro-Razão Imutável | Vitest (Concorrência) | Pendente | Não |
 | **T09** | *(a criar)* | Recebimento com conversão e controle sem documento | Vitest | Pendente | Não |
 | **T10** | *(a criar)* | Parâmetros de Estoque Mínimo e Máximo | Vitest | Pendente | Não |

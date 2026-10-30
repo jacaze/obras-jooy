@@ -9,6 +9,7 @@ import { UsuariosPage } from './pages/UsuariosPage'
 import { ObrasPage } from './pages/ObrasPage'
 import { MateriaisPage } from './pages/MateriaisPage'
 import { FerramentasPage } from './pages/FerramentasPage'
+import { RequisicoesPage } from './pages/RequisicoesPage'
 import { SemPermissaoPage } from './pages/SemPermissaoPage'
 
 const queryClient = new QueryClient({
@@ -31,9 +32,20 @@ export function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/sem-permissao" element={<SemPermissaoPage />} />
 
-            {/* Rotas Autenticadas Gerais */}
+            {/* Rotas Autenticadas Gerais (inclusive ENCARREGADO) */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/requisicoes" element={<RequisicoesPage />} />
+            </Route>
+
+            {/* Rotas de Gestao e Cadastro (bloqueadas para ENCARREGADO) */}
+            <Route
+              element={
+                <ProtectedRoute
+                  perfisPermitidos={['ADMIN', 'ALMOXARIFE', 'ENGENHARIA', 'ADMINISTRACAO']}
+                />
+              }
+            >
               <Route path="/obras" element={<ObrasPage />} />
               <Route path="/materiais" element={<MateriaisPage />} />
               <Route path="/ferramentas" element={<FerramentasPage />} />

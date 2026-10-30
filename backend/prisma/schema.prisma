@@ -44,6 +44,7 @@ model Usuario {
 
   cargo     Cargo         @relation(fields: [cargoId], references: [id])
   ferramentasEmprestadas Ferramenta[]
+  requisicoesFeitas      Requisicao[]
 
   @@map("usuario")
 }
@@ -84,6 +85,7 @@ model AreaObra {
   criadaEm    DateTime   @default(now()) @map("criada_em")
 
   obra        Obra       @relation(fields: [obraId], references: [id], onDelete: Restrict)
+  requisicoes Requisicao[]
 
   @@unique([obraId, nome], name: "area_obra_nome_unico")
   @@map("area_obra")
@@ -130,6 +132,7 @@ model Material {
   categoria           CategoriaMaterial  @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
   unidadeCompra       UnidadeMedida?     @relation("MaterialUnidadeCompra", fields: [unidadeCompraId], references: [id], onDelete: Restrict)
   unidadeConsumo      UnidadeMedida      @relation("MaterialUnidadeConsumo", fields: [unidadeConsumoId], references: [id], onDelete: Restrict)
+  itensRequisicao     RequisicaoItem[]
 
   @@map("material")
 }
@@ -153,6 +156,52 @@ model Ferramenta {
   criadaEm          DateTime         @default(now()) @map("criada_em")
 
   emprestadoPara    Usuario?         @relation(fields: [emprestadoParaId], references: [id], onDelete: SetNull)
+  itensRequisicao   RequisicaoItem[]
 
   @@map("ferramenta")
+}
+
+// ----------------------------------------------------
+// REQUISICOES DE OBRA (T11)
+// ----------------------------------------------------
+enum StatusRequisicao {
+  SOLICITADA
+  EM_SEPARACAO
+  PRONTA
+  ATENDIDA
+  CANCELADA
+}
+
+model Requisicao {
+  id                String           @id @default(uuid()) @db.Uuid
+  numeroSequencial  Int              @default(autoincrement()) @map("numero_sequencial")
+  areaId            String           @map("area_id") @db.Uuid
+  requisitanteId    String           @map("requisitante_id") @db.Uuid
+  status            StatusRequisicao @default(SOLICITADA)
+  codigoRetirada    String?          @unique @map("codigo_retirada") @db.VarChar(12)
+  chaveIdempotencia String?          @unique @map("chave_idempotencia") @db.VarChar(100)
+  observacao        String?          @db.VarChar(255)
+  solicitadaEm      DateTime         @default(now()) @map("solicitada_em")
+  prontaEm          DateTime?        @map("pronta_em")
+  retiradaEm        DateTime?        @map("retirada_em")
+
+  area              AreaObra         @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  requisitante      Usuario          @relation(fields: [requisitanteId], references: [id], onDelete: Restrict)
+  itens             RequisicaoItem[]
+
+  @@map("requisicao")
+}
+
+model RequisicaoItem {
+  id            String      @id @default(uuid()) @db.Uuid
+  requisicaoId  String      @map("requisicao_id") @db.Uuid
+  materialId    String?     @map("material_id") @db.Uuid
+  ferramentaId  String?     @map("ferramenta_id") @db.Uuid
+  quantidade    Decimal     @default(1.0) @db.Decimal(12, 4)
+
+  requisicao    Requisicao  @relation(fields: [requisicaoId], references: [id], onDelete: Cascade)
+  material      Material?   @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  ferramenta    Ferramenta? @relation(fields: [ferramentaId], references: [id], onDelete: Restrict)
+
+  @@map("requisicao_item")
 }
