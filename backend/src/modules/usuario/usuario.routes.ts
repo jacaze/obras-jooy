@@ -447,6 +447,7 @@ export async function usuarioRoutes(app: FastifyInstance) {
           _count: {
             select: {
               ferramentasEmprestadas: true,
+              requisicoesFeitas: true,
             },
           },
         },
@@ -456,10 +457,10 @@ export async function usuarioRoutes(app: FastifyInstance) {
         throw new NotFoundError('Usuario nao localizado')
       }
 
-      // Bloqueio de exclusao se houver historico de ferramentas vinculadas
-      if (usuario._count.ferramentasEmprestadas > 0) {
+      // Bloqueio de exclusao se houver historico de ferramentas ou requisicoes vinculadas
+      if (usuario._count.ferramentasEmprestadas > 0 || usuario._count.requisicoesFeitas > 0) {
         throw new ConflictError(
-          'Nao e possivel excluir o usuario pois ele possui historico de ferramentas vinculadas. Desative o usuario caso ele nao deva mais acessar o sistema.'
+          'Nao e possivel excluir o usuario pois ele possui historico vinculado (ferramentas ou requisicoes de materiais). Desative o usuario caso ele nao deva mais acessar o sistema.'
         )
       }
 

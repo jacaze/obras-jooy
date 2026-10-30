@@ -5,6 +5,11 @@ export interface AreaObra {
   ordem: number
   ativa: boolean
   criadaEm: string
+  obra?: {
+    id: string
+    codigo: string
+    nome: string
+  }
 }
 
 export interface Obra {

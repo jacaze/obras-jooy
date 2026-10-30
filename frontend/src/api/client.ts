@@ -13,6 +13,11 @@ import type {
   AtualizarFerramentaInput,
   FiltrosFerramenta,
 } from '../types/material'
+import type {
+  CriarRequisicaoInput,
+  FiltrosRequisicao,
+  Requisicao,
+} from '../types/requisicao'
 
 export const api = axios.create({
   baseURL: '/api',
@@ -286,5 +291,36 @@ export async function registrarEmprestimoFerramenta(id: string, usuarioId: strin
 
 export async function registrarDevolucaoFerramenta(id: string, comDefeito: boolean): Promise<Ferramenta> {
   const response = await api.post<Ferramenta>(`/ferramentas/${id}/devolucao`, { comDefeito })
+  return response.data
+}
+
+// ----------------------------------------------------
+// REQUISICOES DE OBRA (T11)
+// ----------------------------------------------------
+
+export async function getRequisicoes(filtros?: FiltrosRequisicao): Promise<Requisicao[]> {
+  const params = new URLSearchParams()
+  if (filtros?.status) params.append('status', filtros.status)
+  if (filtros?.areaId) params.append('areaId', filtros.areaId)
+  if (filtros?.obraId) params.append('obraId', filtros.obraId)
+  if (filtros?.requisitanteId) params.append('requisitanteId', filtros.requisitanteId)
+
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<Requisicao[]>(`/requisicoes${queryStr}`)
+  return response.data
+}
+
+export async function getRequisicaoDetalhes(id: string): Promise<Requisicao> {
+  const response = await api.get<Requisicao>(`/requisicoes/${id}`)
+  return response.data
+}
+
+export async function createRequisicao(dados: CriarRequisicaoInput): Promise<Requisicao> {
+  const response = await api.post<Requisicao>('/requisicoes', dados)
+  return response.data
+}
+
+export async function cancelarRequisicao(id: string): Promise<{ id: string; status: string }> {
+  const response = await api.patch<{ id: string; status: string }>(`/requisicoes/${id}/cancelar`)
   return response.data
 }

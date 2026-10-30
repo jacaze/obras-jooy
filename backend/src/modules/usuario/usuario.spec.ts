@@ -467,7 +467,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
         expect(body.erro).toBe('Nao e permitido excluir o proprio usuario logado')
       })
 
-      it('deve bloquear exclusao de usuario com historico de ferramentas vinculadas (409 Conflict)', async () => {
+      it('deve bloquear exclusao de usuario com historico de ferramentas ou requisicoes (409 Conflict)', async () => {
         vi.spyOn(prisma.usuario, 'findUnique').mockImplementation(async ({ where }: any) => {
           if (where.id === adminUserId) {
             return { id: adminUserId, ativo: true } as any
@@ -478,6 +478,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
               nome: 'Joao Encarregado',
               _count: {
                 ferramentasEmprestadas: 2,
+                requisicoesFeitas: 0,
               },
             } as any
           }
@@ -494,7 +495,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
 
         expect(response.statusCode).toBe(409)
         const body = JSON.parse(response.body)
-        expect(body.erro).toContain('Nao e possivel excluir o usuario pois ele possui historico de ferramentas vinculadas')
+        expect(body.erro).toContain('Nao e possivel excluir o usuario pois ele possui historico vinculado')
       })
 
       it('deve excluir com sucesso usuario sem ferramentas ou historico vinculado (204)', async () => {
@@ -508,6 +509,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
               nome: 'Novo Estagiario',
               _count: {
                 ferramentasEmprestadas: 0,
+                requisicoesFeitas: 0,
               },
             } as any
           }

@@ -13,6 +13,7 @@ import { obraRoutes } from './modules/obra/obra.routes.js'
 import { areaObraRoutes } from './modules/area-obra/area-obra.routes.js'
 import { materialRoutes } from './modules/material/material.routes.js'
 import { ferramentaRoutes } from './modules/ferramenta/ferramenta.routes.js'
+import { requisicaoRoutes } from './modules/requisicao/requisicao.routes.js'
 
 export async function buildApp() {
   const app = fastify({
@@ -57,6 +58,7 @@ export async function buildApp() {
   await app.register(areaObraRoutes, { prefix: '/api' })
   await app.register(materialRoutes, { prefix: '/api' })
   await app.register(ferramentaRoutes, { prefix: '/api' })
+  await app.register(requisicaoRoutes, { prefix: '/api' })
 
   return app
 }
