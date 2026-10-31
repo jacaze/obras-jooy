@@ -18,6 +18,14 @@ import type {
   FiltrosRequisicao,
   Requisicao,
 } from '../types/requisicao'
+import type {
+  EstoqueSaldoItem,
+  FiltrosMovimentacaoEstoque,
+  FiltrosSaldoEstoque,
+  LocalEstoque,
+  MovimentacaoEstoqueItem,
+  RegistrarMovimentacaoInput,
+} from '../types/estoque'
 
 export const api = axios.create({
   baseURL: '/api',
@@ -322,5 +330,76 @@ export async function createRequisicao(dados: CriarRequisicaoInput): Promise<Req
 
 export async function cancelarRequisicao(id: string): Promise<{ id: string; status: string }> {
   const response = await api.patch<{ id: string; status: string }>(`/requisicoes/${id}/cancelar`)
+  return response.data
+}
+
+// ----------------------------------------------------
+// ESTOQUE FISICO, SALDOS E LIVRO-RAZAO (T08)
+// ----------------------------------------------------
+
+export async function getLocaisEstoque(obraId?: string, somenteAtivos?: boolean): Promise<LocalEstoque[]> {
+  const params = new URLSearchParams()
+  if (obraId) params.append('obraId', obraId)
+  if (somenteAtivos !== undefined) params.append('somenteAtivos', String(somenteAtivos))
+
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<LocalEstoque[]>(`/locais-estoque${queryStr}`)
+  return response.data
+}
+
+export async function createLocalEstoque(dados: { obraId: string; nome: string }): Promise<LocalEstoque> {
+  const response = await api.post<LocalEstoque>('/locais-estoque', dados)
+  return response.data
+}
+
+export async function updateLocalEstoque(id: string, nome: string): Promise<LocalEstoque> {
+  const response = await api.patch<LocalEstoque>(`/locais-estoque/${id}`, { nome })
+  return response.data
+}
+
+export async function deleteLocalEstoque(id: string): Promise<void> {
+  await api.delete(`/locais-estoque/${id}`)
+}
+
+export async function toggleLocalEstoqueSituacao(id: string, ativo: boolean): Promise<LocalEstoque> {
+  const response = await api.patch<LocalEstoque>(`/locais-estoque/${id}/situacao`, { ativo })
+  return response.data
+}
+
+export async function getSaldosEstoque(filtros?: FiltrosSaldoEstoque): Promise<EstoqueSaldoItem[]> {
+  const params = new URLSearchParams()
+  if (filtros?.obraId) params.append('obraId', filtros.obraId)
+  if (filtros?.localId) params.append('localId', filtros.localId)
+  if (filtros?.categoriaId) params.append('categoriaId', filtros.categoriaId)
+  if (filtros?.busca) params.append('busca', filtros.busca)
+
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<EstoqueSaldoItem[]>(`/estoque/saldos${queryStr}`)
+  return response.data
+}
+
+export async function getMovimentacoesEstoque(
+  filtros?: FiltrosMovimentacaoEstoque
+): Promise<MovimentacaoEstoqueItem[]> {
+  const params = new URLSearchParams()
+  if (filtros?.obraId) params.append('obraId', filtros.obraId)
+  if (filtros?.localId) params.append('localId', filtros.localId)
+  if (filtros?.materialId) params.append('materialId', filtros.materialId)
+  if (filtros?.tipo) params.append('tipo', filtros.tipo)
+  if (filtros?.limite) params.append('limite', String(filtros.limite))
+
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<MovimentacaoEstoqueItem[]>(`/estoque/movimentacoes${queryStr}`)
+  return response.data
+}
+
+export async function registrarMovimentacaoEstoque(dados: RegistrarMovimentacaoInput): Promise<{
+  movimentacao: MovimentacaoEstoqueItem
+  saldo: EstoqueSaldoItem
+}> {
+  const response = await api.post<{
+    movimentacao: MovimentacaoEstoqueItem
+    saldo: EstoqueSaldoItem
+  }>('/estoque/movimentacoes', dados)
   return response.data
 }
