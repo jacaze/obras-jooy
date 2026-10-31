@@ -62,6 +62,16 @@ export function Navbar() {
           {usuario.perfil !== 'ENCARREGADO' && (
             <>
               <Link
+                to="/estoque"
+                style={{
+                  color: '#cbd5e1',
+                  textDecoration: 'none',
+                  fontSize: '0.95rem',
+                }}
+              >
+                Estoque e Kardex
+              </Link>
+              <Link
                 to="/obras"
                 style={{
                   color: '#cbd5e1',

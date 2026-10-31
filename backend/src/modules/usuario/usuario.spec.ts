@@ -479,6 +479,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
               _count: {
                 ferramentasEmprestadas: 2,
                 requisicoesFeitas: 0,
+                movimentacoesRegistradas: 0,
               },
             } as any
           }
@@ -510,6 +511,7 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
               _count: {
                 ferramentasEmprestadas: 0,
                 requisicoesFeitas: 0,
+                movimentacoesRegistradas: 0,
               },
             } as any
           }

@@ -10,6 +10,7 @@ import { ObrasPage } from './pages/ObrasPage'
 import { MateriaisPage } from './pages/MateriaisPage'
 import { FerramentasPage } from './pages/FerramentasPage'
 import { RequisicoesPage } from './pages/RequisicoesPage'
+import { EstoquePage } from './pages/EstoquePage'
 import { SemPermissaoPage } from './pages/SemPermissaoPage'
 
 const queryClient = new QueryClient({
@@ -46,6 +47,7 @@ export function App() {
                 />
               }
             >
+              <Route path="/estoque" element={<EstoquePage />} />
               <Route path="/obras" element={<ObrasPage />} />
               <Route path="/materiais" element={<MateriaisPage />} />
               <Route path="/ferramentas" element={<FerramentasPage />} />

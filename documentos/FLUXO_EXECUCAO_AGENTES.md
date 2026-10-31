@@ -93,11 +93,10 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **T06** | *(descartada)* | Empresas e Pessoas | N/A | Descartada | Sim (Responsavel textual na baixa/emprestimo) |
 | **T07** | `feature/T07-catalogo-materiais` | Catalogo de Materiais, Unidades e Categorias com Fator de Conversao | 24 testes Vitest (16 backend + 8 frontend) | Concluido | Sim (PR #6 mergeado) |
 | **AJUSTE-USER** | `feature/ajustes-gestao-usuarios` | Edicao e exclusao segura de usuarios com bloqueio por historico | 7 testes Vitest (3 backend + 4 frontend) | Concluido | Sim (PR #7 mergeado) |
-| **T11** | `feature/T11-requisicoes-obra` | Modulo de Requisicoes de Obra e Isolamento de Acesso para Encarregado | 12 testes Vitest (9 backend + 3 frontend) | Concluido | Aguardando aprovacao (PR #8) |
-| **T08** | *(a criar)* | Estoque Base, Saldos e Livro-Razão Imutável | Vitest (Concorrência) | Pendente | Não |
+| **T11** | `feature/T11-requisicoes-obra` | Modulo de Requisicoes de Obra e Isolamento de Acesso para Encarregado | 12 testes Vitest (9 backend + 3 frontend) | Concluido | Sim (PR #8 mergeado) |
+| **T08** | `feature/T08-estoque-livro-razao` | Estoque Fisico, Saldos, Locais de Estoque e Livro-Razao Imutavel (Kardex) | 16 testes Vitest (12 backend + 4 frontend) | Concluido | Aguardando aprovacao (PR #9) |
 | **T09** | *(a criar)* | Recebimento com conversão e controle sem documento | Vitest | Pendente | Não |
 | **T10** | *(a criar)* | Parâmetros de Estoque Mínimo e Máximo | Vitest | Pendente | Não |
-| **T11** | *(a criar)* | Requisição com Idempotência e validações | Vitest | Pendente | Não |
 | **T12** | *(a criar)* | Separação, Reserva Atômica e Baixa com Código | Vitest (Atômico) | Pendente | Não |
 | **T13** | *(a criar)* | Limites de Material por Obra e Área | Vitest | Pendente | Não |
 | **T14** | *(a criar)* | Ativos e Ferramentas (próprias, locadas, terceiros) | Vitest | Pendente | Não |
