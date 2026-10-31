@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createLocalEstoque,
+  deleteLocalEstoque,
   getAreasObra,
   getLocaisEstoque,
   getMateriais,
@@ -10,9 +11,10 @@ import {
   getSaldosEstoque,
   registrarMovimentacaoEstoque,
   toggleLocalEstoqueSituacao,
+  updateLocalEstoque,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import type { RegistrarMovimentacaoInput, TipoMovimentacao } from '../types/estoque'
+import type { LocalEstoque, RegistrarMovimentacaoInput, TipoMovimentacao } from '../types/estoque'
 
 function extrairErro(err: any, fallback: string): string {
   const data = err.response?.data
@@ -57,6 +59,7 @@ export function EstoquePage() {
 
   // Modal: Lancar Movimentacao
   const [modalMovAberto, setModalMovAberto] = useState(false)
+  const [movObraId, setMovObraId] = useState('')
   const [movLocalId, setMovLocalId] = useState('')
   const [movMaterialId, setMovMaterialId] = useState('')
   const [movTipo, setMovTipo] = useState<TipoMovimentacao>('ENTRADA_RECEB')
@@ -67,8 +70,9 @@ export function EstoquePage() {
   const [chaveIdempotencia, setChaveIdempotencia] = useState(gerarChaveIdempotencia())
   const [erroMov, setErroMov] = useState<string | null>(null)
 
-  // Modal: Novo Local de Estoque
+  // Modal: Novo / Editar Local (Locacao) de Estoque
   const [modalLocalAberto, setModalLocalAberto] = useState(false)
+  const [localEditando, setLocalEditando] = useState<LocalEstoque | null>(null)
   const [localObraId, setLocalObraId] = useState('')
   const [localNome, setLocalNome] = useState('')
   const [erroLocal, setErroLocal] = useState<string | null>(null)
@@ -92,9 +96,10 @@ export function EstoquePage() {
     queryFn: () => getLocaisEstoque(undefined, true),
   })
 
+  // CORRECAO: undefined no segundo parametro para trazer TODOS os locais (ativos e inativos)
   const { data: todosOsLocais = [], isLoading: carregandoLocais } = useQuery({
     queryKey: ['locais-estoque-todos', filtroObraId],
-    queryFn: () => getLocaisEstoque(filtroObraId || undefined, false),
+    queryFn: () => getLocaisEstoque(filtroObraId || undefined, undefined),
   })
 
   const { data: materiais = [] } = useQuery({
@@ -122,14 +127,15 @@ export function EstoquePage() {
       }),
   })
 
-  // Identifica a obra do local selecionado no modal de movimentacao para carregar suas areas
-  const localSelecionadoNoModal = locaisAtivos.find((l) => l.id === movLocalId)
-  const obraIdDoLocalModal = localSelecionadoNoModal?.obraId || ''
+  // Locacoes ativas pertencentes a obra selecionada no modal de movimentacao
+  const locacoesDaObraNoModal = movObraId
+    ? locaisAtivos.filter((l) => l.obraId === movObraId)
+    : locaisAtivos
 
   const { data: areasDaObraModal = [] } = useQuery({
-    queryKey: ['areas-obra', obraIdDoLocalModal],
-    queryFn: () => getAreasObra(obraIdDoLocalModal, true),
-    enabled: !!obraIdDoLocalModal,
+    queryKey: ['areas-obra', movObraId],
+    queryFn: () => getAreasObra(movObraId, true),
+    enabled: !!movObraId,
   })
 
   const materialSelecionadoNoModal = materiais.find((m) => m.id === movMaterialId)
@@ -149,6 +155,7 @@ export function EstoquePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['estoque-saldos'] })
       queryClient.invalidateQueries({ queryKey: ['estoque-movimentacoes'] })
+      queryClient.invalidateQueries({ queryKey: ['locais-estoque-ativos'] })
       queryClient.invalidateQueries({ queryKey: ['locais-estoque-todos'] })
       setModalMovAberto(false)
       limparFormMov()
@@ -164,12 +171,31 @@ export function EstoquePage() {
       queryClient.invalidateQueries({ queryKey: ['locais-estoque-ativos'] })
       queryClient.invalidateQueries({ queryKey: ['locais-estoque-todos'] })
       setModalLocalAberto(false)
+      setLocalEditando(null)
       setLocalNome('')
       setLocalObraId('')
       setErroLocal(null)
     },
     onError: (err: any) => {
-      setErroLocal(extrairErro(err, 'Erro ao cadastrar local de estoque'))
+      setErroLocal(extrairErro(err, 'Erro ao cadastrar locacao de estoque'))
+    },
+  })
+
+  const editarLocalMutation = useMutation({
+    mutationFn: ({ id, nome }: { id: string; nome: string }) => updateLocalEstoque(id, nome),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locais-estoque-ativos'] })
+      queryClient.invalidateQueries({ queryKey: ['locais-estoque-todos'] })
+      queryClient.invalidateQueries({ queryKey: ['estoque-saldos'] })
+      queryClient.invalidateQueries({ queryKey: ['estoque-movimentacoes'] })
+      setModalLocalAberto(false)
+      setLocalEditando(null)
+      setLocalNome('')
+      setLocalObraId('')
+      setErroLocal(null)
+    },
+    onError: (err: any) => {
+      setErroLocal(extrairErro(err, 'Erro ao atualizar locacao de estoque'))
     },
   })
 
@@ -182,11 +208,24 @@ export function EstoquePage() {
       setErroAcaoLocal(null)
     },
     onError: (err: any) => {
-      setErroAcaoLocal(extrairErro(err, 'Nao foi possivel alterar a situacao do local'))
+      setErroAcaoLocal(extrairErro(err, 'Nao foi possivel alterar a situacao da locacao'))
+    },
+  })
+
+  const excluirLocalMutation = useMutation({
+    mutationFn: (id: string) => deleteLocalEstoque(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locais-estoque-ativos'] })
+      queryClient.invalidateQueries({ queryKey: ['locais-estoque-todos'] })
+      setErroAcaoLocal(null)
+    },
+    onError: (err: any) => {
+      setErroAcaoLocal(extrairErro(err, 'Nao foi possivel excluir a locacao'))
     },
   })
 
   function limparFormMov() {
+    setMovObraId(filtroObraId || '')
     setMovLocalId('')
     setMovMaterialId('')
     setMovTipo('ENTRADA_RECEB')
@@ -203,8 +242,8 @@ export function EstoquePage() {
     setErroMov(null)
 
     const qtdNum = parseFloat(movQuantidade)
-    if (!movLocalId) {
-      setErroMov('Selecione o local de estoque')
+    if (!movObraId && !movLocalId) {
+      setErroMov('Selecione a obra da movimentacao')
       return
     }
     if (!movMaterialId) {
@@ -217,7 +256,8 @@ export function EstoquePage() {
     }
 
     registrarMovMutation.mutate({
-      localId: movLocalId,
+      obraId: movObraId || null,
+      localId: movLocalId || null,
       materialId: movMaterialId,
       tipo: movTipo,
       quantidade: qtdNum,
@@ -232,8 +272,8 @@ export function EstoquePage() {
     e.preventDefault()
     setErroLocal(null)
 
-    if (!localObraId) {
-      setErroLocal('Selecione a obra vinculada ao local')
+    if (!localEditando && !localObraId) {
+      setErroLocal('Selecione a obra vinculada a locacao')
       return
     }
     if (localNome.trim().length < 3) {
@@ -241,10 +281,33 @@ export function EstoquePage() {
       return
     }
 
-    criarLocalMutation.mutate({
-      obraId: localObraId,
-      nome: localNome.trim(),
-    })
+    if (localEditando) {
+      editarLocalMutation.mutate({
+        id: localEditando.id,
+        nome: localNome.trim(),
+      })
+    } else {
+      criarLocalMutation.mutate({
+        obraId: localObraId,
+        nome: localNome.trim(),
+      })
+    }
+  }
+
+  function abrirModalNovoLocal() {
+    setLocalEditando(null)
+    setLocalObraId(filtroObraId || '')
+    setLocalNome('')
+    setErroLocal(null)
+    setModalLocalAberto(true)
+  }
+
+  function abrirModalEditarLocal(loc: LocalEstoque) {
+    setLocalEditando(loc)
+    setLocalObraId(loc.obraId)
+    setLocalNome(loc.nome)
+    setErroLocal(null)
+    setModalLocalAberto(true)
   }
 
   const locaisFiltradosNoSelect = filtroObraId
@@ -269,19 +332,14 @@ export function EstoquePage() {
             Estoque Fisico e Livro-Razao (Kardex)
           </h1>
           <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
-            Controle de saldos disponiveis, recebimentos com conversao e trilha imutavel de movimentacoes
+            Controle de saldos disponiveis, recebimentos com conversao, locacoes opcionais e trilha imutavel
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           {podeGerenciarLocais && (
             <button
-              onClick={() => {
-                setLocalObraId(filtroObraId || '')
-                setLocalNome('')
-                setErroLocal(null)
-                setModalLocalAberto(true)
-              }}
+              onClick={abrirModalNovoLocal}
               style={{
                 backgroundColor: '#f8fafc',
                 color: '#0f172a',
@@ -293,7 +351,7 @@ export function EstoquePage() {
                 fontSize: '0.85rem',
               }}
             >
-              + Novo Local de Estoque
+              + Nova Locacao (Opcional)
             </button>
           )}
 
@@ -370,11 +428,11 @@ export function EstoquePage() {
             marginBottom: '-2px',
           }}
         >
-          Locais de Estoque ({todosOsLocais.length})
+          Locacoes de Estoque ({todosOsLocais.length})
         </button>
       </div>
 
-      {/* Filtros Compartilhados (Obra e Local) */}
+      {/* Filtros Compartilhados (Obra e Locacao) */}
       <div
         style={{
           display: 'flex',
@@ -422,7 +480,7 @@ export function EstoquePage() {
               fontSize: '0.85rem',
             }}
           >
-            <option value="">Todos os Locais de Estoque</option>
+            <option value="">Todas as Locacoes de Estoque</option>
             {locaisFiltradosNoSelect.map((l) => (
               <option key={l.id} value={l.id}>
                 {l.obra?.codigo} - {l.nome}
@@ -494,7 +552,7 @@ export function EstoquePage() {
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
                     <th style={{ padding: '0.75rem 1rem' }}>Codigo</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Material</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Obra / Local de Estoque</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Obra / Locacao</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Saldo Fisico</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Reservado</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Disponivel</th>
@@ -573,7 +631,7 @@ export function EstoquePage() {
                     <th style={{ padding: '0.75rem 1rem' }}>Operacao</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Material</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Qtd</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Local / Destino</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Obra / Locacao</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Responsavel</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Observacao</th>
                   </tr>
@@ -649,9 +707,23 @@ export function EstoquePage() {
         </>
       )}
 
-      {/* ABA 3: LOCAIS DE ESTOQUE */}
+      {/* ABA 3: LOCACOES DE ESTOQUE */}
       {abaAtiva === 'locais' && (
         <>
+          <div
+            style={{
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              padding: '0.75rem 1rem',
+              borderRadius: '6px',
+              marginBottom: '1rem',
+              fontSize: '0.85rem',
+              color: '#0369a1',
+            }}
+          >
+            As locacoes sao subdivisoes fisicas opcionais do almoxarifado da obra (ex: Prateleira A1, Container 02, Patio Externo). Caso nao informe uma locacao ao lancar uma movimentacao, o sistema utilizara automaticamente o <strong>Almoxarifado Geral</strong> da obra.
+          </div>
+
           {erroAcaoLocal && (
             <div
               style={{
@@ -669,7 +741,7 @@ export function EstoquePage() {
           )}
 
           {carregandoLocais ? (
-            <p style={{ color: '#64748b' }}>Carregando locais de estoque...</p>
+            <p style={{ color: '#64748b' }}>Carregando locacoes de estoque...</p>
           ) : (
             <div
               style={{
@@ -684,63 +756,100 @@ export function EstoquePage() {
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
                     <th style={{ padding: '0.75rem 1rem' }}>Obra</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome do Almoxarifado / Local</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Nome da Locacao / Almoxarifado</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Itens / Movimentacoes</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {todosOsLocais.map((loc) => (
-                    <tr key={loc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#0369a1' }}>
-                        {loc.obra?.codigo} - {loc.obra?.nome}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#0f172a' }}>
-                        {loc.nome}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.85rem' }}>
-                        {loc._count?.saldos ?? 0} materiais &bull; {loc._count?.movimentacoes ?? 0} lancamentos
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <span
-                          style={{
-                            backgroundColor: loc.ativo ? '#dcfce7' : '#fee2e2',
-                            color: loc.ativo ? '#166534' : '#991b1b',
-                            padding: '0.2rem 0.55rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {loc.ativo ? 'Ativo' : 'Inativo'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                        {podeGerenciarLocais && (
-                          <button
-                            disabled={toggleLocalMutation.isPending}
-                            onClick={() => toggleLocalMutation.mutate({ id: loc.id, ativo: !loc.ativo })}
+                  {todosOsLocais.map((loc) => {
+                    const semHistorico =
+                      (loc._count?.saldos ?? 0) === 0 && (loc._count?.movimentacoes ?? 0) === 0
+                    return (
+                      <tr key={loc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#0369a1' }}>
+                          {loc.obra?.codigo} - {loc.obra?.nome}
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#0f172a' }}>
+                          {loc.nome}
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.85rem' }}>
+                          {loc._count?.saldos ?? 0} materiais &bull; {loc._count?.movimentacoes ?? 0} lancamentos
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem' }}>
+                          <span
                             style={{
-                              backgroundColor: loc.ativo ? '#fef2f2' : '#f0fdf4',
-                              color: loc.ativo ? '#b91c1c' : '#15803d',
-                              border: `1px solid ${loc.ativo ? '#fecaca' : '#bbf7d0'}`,
-                              padding: '0.3rem 0.65rem',
+                              backgroundColor: loc.ativo ? '#dcfce7' : '#fee2e2',
+                              color: loc.ativo ? '#166534' : '#991b1b',
+                              padding: '0.2rem 0.55rem',
                               borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '0.8rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
                             }}
                           >
-                            {loc.ativo ? 'Desativar' : 'Ativar'}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                            {loc.ativo ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                          {podeGerenciarLocais && (
+                            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                              <button
+                                onClick={() => abrirModalEditarLocal(loc)}
+                                style={{
+                                  backgroundColor: '#f8fafc',
+                                  color: '#334155',
+                                  border: '1px solid #cbd5e1',
+                                  padding: '0.3rem 0.65rem',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                }}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                disabled={toggleLocalMutation.isPending}
+                                onClick={() => toggleLocalMutation.mutate({ id: loc.id, ativo: !loc.ativo })}
+                                style={{
+                                  backgroundColor: loc.ativo ? '#fef2f2' : '#f0fdf4',
+                                  color: loc.ativo ? '#b91c1c' : '#15803d',
+                                  border: `1px solid ${loc.ativo ? '#fecaca' : '#bbf7d0'}`,
+                                  padding: '0.3rem 0.65rem',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                }}
+                              >
+                                {loc.ativo ? 'Desativar' : 'Ativar'}
+                              </button>
+                              {semHistorico && (
+                                <button
+                                  disabled={excluirLocalMutation.isPending}
+                                  onClick={() => excluirLocalMutation.mutate(loc.id)}
+                                  style={{
+                                    backgroundColor: '#ffffff',
+                                    color: '#991b1b',
+                                    border: '1px solid #fca5a5',
+                                    padding: '0.3rem 0.65rem',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                  }}
+                                >
+                                  Excluir
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
                   {todosOsLocais.length === 0 && (
                     <tr>
                       <td colSpan={5} style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8' }}>
-                        Nenhum local de estoque cadastrado.
+                        Nenhuma locacao de estoque cadastrada.
                       </td>
                     </tr>
                   )}
@@ -828,33 +937,71 @@ export function EstoquePage() {
                 </select>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
-                  Local de Estoque (Almoxarifado)
-                </label>
-                <select
-                  value={movLocalId}
-                  onChange={(e) => {
-                    setMovLocalId(e.target.value)
-                    setMovAreaId('')
-                  }}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                  }}
-                >
-                  <option value="">Selecione o local de estoque...</option>
-                  {locaisAtivos.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.obra?.codigo} - {l.nome}
-                    </option>
-                  ))}
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                    Obra
+                  </label>
+                  <select
+                    value={movObraId}
+                    onChange={(e) => {
+                      setMovObraId(e.target.value)
+                      setMovLocalId('')
+                      setMovAreaId('')
+                    }}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '0.55rem',
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                    }}
+                  >
+                    <option value="">Selecione a obra...</option>
+                    {obras.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.codigo} - {o.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                    Locacao do Estoque (opcional)
+                  </label>
+                  <select
+                    value={movLocalId}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setMovLocalId(val)
+                      if (val) {
+                        const loc = locaisAtivos.find((l) => l.id === val)
+                        if (loc && loc.obraId !== movObraId) {
+                          setMovObraId(loc.obraId)
+                          setMovAreaId('')
+                        }
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.55rem',
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                    }}
+                  >
+                    <option value="">Padrao (Almoxarifado Geral)</option>
+                    {locacoesDaObraNoModal.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.obra?.codigo ? `${l.obra.codigo} - ${l.nome}` : l.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -958,13 +1105,13 @@ export function EstoquePage() {
                   <select
                     value={movAreaId}
                     onChange={(e) => setMovAreaId(e.target.value)}
-                    disabled={!movLocalId}
+                    disabled={!movObraId}
                     style={{
                       width: '100%',
                       padding: '0.55rem',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
-                      backgroundColor: !movLocalId ? '#f1f5f9' : '#ffffff',
+                      backgroundColor: !movObraId ? '#f1f5f9' : '#ffffff',
                       color: '#0f172a',
                     }}
                   >
@@ -1037,7 +1184,7 @@ export function EstoquePage() {
         </div>
       )}
 
-      {/* MODAL: NOVO LOCAL DE ESTOQUE */}
+      {/* MODAL: NOVA / EDITAR LOCACAO DE ESTOQUE */}
       {modalLocalAberto && (
         <div
           style={{
@@ -1062,7 +1209,7 @@ export function EstoquePage() {
             }}
           >
             <h2 style={{ margin: '0 0 1rem', fontSize: '1.2rem', color: '#0f172a' }}>
-              Cadastrar Novo Local de Estoque
+              {localEditando ? 'Editar Locacao de Estoque' : 'Cadastrar Nova Locacao de Estoque'}
             </h2>
 
             {erroLocal && (
@@ -1090,12 +1237,13 @@ export function EstoquePage() {
                   value={localObraId}
                   onChange={(e) => setLocalObraId(e.target.value)}
                   required
+                  disabled={!!localEditando}
                   style={{
                     width: '100%',
                     padding: '0.55rem',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: localEditando ? '#f1f5f9' : '#ffffff',
                     color: '#0f172a',
                   }}
                 >
@@ -1110,12 +1258,12 @@ export function EstoquePage() {
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
-                  Nome do Local / Almoxarifado
+                  Nome da Locacao / Prateleira / Container
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="ex: Almoxarifado Central - Subsolo 1"
+                  placeholder="ex: Locacao 01 - Prateleira A"
                   value={localNome}
                   onChange={(e) => setLocalNome(e.target.value)}
                   style={{
@@ -1133,7 +1281,10 @@ export function EstoquePage() {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button
                   type="button"
-                  onClick={() => setModalLocalAberto(false)}
+                  onClick={() => {
+                    setModalLocalAberto(false)
+                    setLocalEditando(null)
+                  }}
                   style={{
                     padding: '0.5rem 0.95rem',
                     borderRadius: '4px',
@@ -1148,7 +1299,7 @@ export function EstoquePage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={criarLocalMutation.isPending}
+                  disabled={criarLocalMutation.isPending || editarLocalMutation.isPending}
                   style={{
                     padding: '0.5rem 1.1rem',
                     borderRadius: '4px',
@@ -1159,7 +1310,9 @@ export function EstoquePage() {
                     cursor: 'pointer',
                   }}
                 >
-                  {criarLocalMutation.isPending ? 'Salvando...' : 'Salvar Local'}
+                  {criarLocalMutation.isPending || editarLocalMutation.isPending
+                    ? 'Salvando...'
+                    : 'Salvar Locacao'}
                 </button>
               </div>
             </form>

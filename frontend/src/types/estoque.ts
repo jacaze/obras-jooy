@@ -88,7 +88,8 @@ export interface MovimentacaoEstoqueItem {
 }
 
 export interface RegistrarMovimentacaoInput {
-  localId: string
+  obraId?: string | null
+  localId?: string | null
   materialId: string
   tipo: TipoMovimentacao
   quantidade: number

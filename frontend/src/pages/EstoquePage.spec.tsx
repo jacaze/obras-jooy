@@ -191,8 +191,8 @@ describe('EstoquePage Component', () => {
 
     expect(screen.getByText('Lancar Movimentacao de Estoque')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByDisplayValue('Selecione o local de estoque...'), {
-      target: { value: 'local-1' },
+    fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
+      target: { value: 'obra-1' },
     })
 
     fireEvent.change(screen.getByDisplayValue('Selecione o material...'), {
@@ -215,7 +215,8 @@ describe('EstoquePage Component', () => {
     await waitFor(() => {
       expect(registrarSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          localId: 'local-1',
+          obraId: 'obra-1',
+          localId: null,
           materialId: 'mat-1',
           tipo: 'ENTRADA_RECEB',
           quantidade: 5,
@@ -225,7 +226,7 @@ describe('EstoquePage Component', () => {
     })
   })
 
-  it('deve permitir cadastrar novo local de estoque', async () => {
+  it('deve permitir cadastrar nova locacao de estoque e listar locacoes na aba Locacoes de Estoque', async () => {
     const createLocalSpy = vi.spyOn(apiClient, 'createLocalEstoque').mockResolvedValue({
       id: 'local-2',
       obraId: 'obra-1',
@@ -240,19 +241,19 @@ describe('EstoquePage Component', () => {
       expect(screen.getByText('Silicone Tubo 280g')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByRole('button', { name: /\+ Novo Local de Estoque/i }))
+    fireEvent.click(screen.getByRole('button', { name: /\+ Nova Locacao \(Opcional\)/i }))
 
-    expect(screen.getByText('Cadastrar Novo Local de Estoque')).toBeInTheDocument()
+    expect(screen.getByText('Cadastrar Nova Locacao de Estoque')).toBeInTheDocument()
 
     fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
       target: { value: 'obra-1' },
     })
 
-    fireEvent.change(screen.getByPlaceholderText('ex: Almoxarifado Central - Subsolo 1'), {
+    fireEvent.change(screen.getByPlaceholderText('ex: Locacao 01 - Prateleira A'), {
       target: { value: 'Deposito Bloco B' },
     })
 
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Local/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Salvar Locacao/i }))
 
     await waitFor(() => {
       expect(createLocalSpy).toHaveBeenCalledWith({

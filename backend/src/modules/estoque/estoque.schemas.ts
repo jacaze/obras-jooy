@@ -16,6 +16,14 @@ export const idLocalParamSchema = z.object({
   id: z.string().uuid('Identificador do local de estoque invalido'),
 })
 
+export const atualizarLocalEstoqueSchema = z.object({
+  nome: z
+    .string({ required_error: 'O nome do local de estoque e obrigatorio' })
+    .trim()
+    .min(3, 'O nome do local deve ter no minimo 3 caracteres')
+    .max(80, 'O nome do local deve ter no maximo 80 caracteres'),
+})
+
 export const atualizarSituacaoLocalSchema = z.object({
   ativo: z.boolean({ required_error: 'O campo ativo e obrigatorio' }),
 })
@@ -28,39 +36,43 @@ export const filtrosLocalEstoqueSchema = z.object({
     .transform((val) => (val === undefined ? undefined : val === 'true')),
 })
 
-export const registrarMovimentacaoSchema = z.object({
-  localId: z
-    .string({ required_error: 'O local de estoque e obrigatorio' })
-    .uuid('Identificador do local de estoque invalido'),
-  materialId: z
-    .string({ required_error: 'O material e obrigatorio' })
-    .uuid('Identificador do material invalido'),
-  tipo: z.nativeEnum(TipoMovimentacao, {
-    errorMap: () => ({ message: 'Tipo de movimentacao de estoque invalido' }),
-  }),
-  quantidade: z
-    .number({
-      required_error: 'A quantidade e obrigatoria',
-      invalid_type_error: 'A quantidade deve ser um numero valido',
-    })
-    .positive('A quantidade deve ser maior que zero'),
-  usarUnidadeCompra: z.boolean().optional().default(false),
-  areaId: z.string().uuid('Identificador da area invalido').optional().nullable(),
-  requisicaoId: z.string().uuid('Identificador da requisicao invalido').optional().nullable(),
-  observacao: z
-    .string()
-    .trim()
-    .max(255, 'A observacao nao pode exceder 255 caracteres')
-    .optional()
-    .nullable(),
-  chaveIdempotencia: z
-    .string()
-    .trim()
-    .min(1)
-    .max(100, 'Chave de idempotencia nao pode exceder 100 caracteres')
-    .optional()
-    .nullable(),
-})
+export const registrarMovimentacaoSchema = z
+  .object({
+    obraId: z.string().uuid('Identificador da obra invalido').optional().nullable(),
+    localId: z.string().uuid('Identificador do local de estoque invalido').optional().nullable(),
+    materialId: z
+      .string({ required_error: 'O material e obrigatorio' })
+      .uuid('Identificador do material invalido'),
+    tipo: z.nativeEnum(TipoMovimentacao, {
+      errorMap: () => ({ message: 'Tipo de movimentacao de estoque invalido' }),
+    }),
+    quantidade: z
+      .number({
+        required_error: 'A quantidade e obrigatoria',
+        invalid_type_error: 'A quantidade deve ser um numero valido',
+      })
+      .positive('A quantidade deve ser maior que zero'),
+    usarUnidadeCompra: z.boolean().optional().default(false),
+    areaId: z.string().uuid('Identificador da area invalido').optional().nullable(),
+    requisicaoId: z.string().uuid('Identificador da requisicao invalido').optional().nullable(),
+    observacao: z
+      .string()
+      .trim()
+      .max(255, 'A observacao nao pode exceder 255 caracteres')
+      .optional()
+      .nullable(),
+    chaveIdempotencia: z
+      .string()
+      .trim()
+      .min(1)
+      .max(100, 'Chave de idempotencia nao pode exceder 100 caracteres')
+      .optional()
+      .nullable(),
+  })
+  .refine((data) => Boolean(data.obraId || data.localId), {
+    message: 'E obrigatorio informar a obra ou o local/locacao de estoque',
+    path: ['obraId'],
+  })
 
 export const filtrosSaldoEstoqueSchema = z.object({
   obraId: z.string().uuid('Identificador da obra invalido').optional(),

@@ -337,7 +337,7 @@ export async function cancelarRequisicao(id: string): Promise<{ id: string; stat
 // ESTOQUE FISICO, SALDOS E LIVRO-RAZAO (T08)
 // ----------------------------------------------------
 
-export async function getLocaisEstoque(obraId?: string, somenteAtivos = true): Promise<LocalEstoque[]> {
+export async function getLocaisEstoque(obraId?: string, somenteAtivos?: boolean): Promise<LocalEstoque[]> {
   const params = new URLSearchParams()
   if (obraId) params.append('obraId', obraId)
   if (somenteAtivos !== undefined) params.append('somenteAtivos', String(somenteAtivos))
@@ -350,6 +350,15 @@ export async function getLocaisEstoque(obraId?: string, somenteAtivos = true): P
 export async function createLocalEstoque(dados: { obraId: string; nome: string }): Promise<LocalEstoque> {
   const response = await api.post<LocalEstoque>('/locais-estoque', dados)
   return response.data
+}
+
+export async function updateLocalEstoque(id: string, nome: string): Promise<LocalEstoque> {
+  const response = await api.patch<LocalEstoque>(`/locais-estoque/${id}`, { nome })
+  return response.data
+}
+
+export async function deleteLocalEstoque(id: string): Promise<void> {
+  await api.delete(`/locais-estoque/${id}`)
 }
 
 export async function toggleLocalEstoqueSituacao(id: string, ativo: boolean): Promise<LocalEstoque> {

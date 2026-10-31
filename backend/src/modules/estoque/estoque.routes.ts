@@ -3,6 +3,7 @@ import { PerfilUsuario, TipoMovimentacao } from '@prisma/client'
 import { prisma } from '../../shared/database/prisma.js'
 import { authenticate, requireRole } from '../../shared/middlewares/auth.js'
 import {
+  atualizarLocalEstoqueSchema,
   atualizarSituacaoLocalSchema,
   criarLocalEstoqueSchema,
   filtrosLocalEstoqueSchema,
@@ -207,6 +208,106 @@ export async function estoqueRoutes(app: FastifyInstance) {
       })
 
       return reply.status(200).send(localAtualizado)
+    }
+  )
+
+  app.patch(
+    '/locais-estoque/:id',
+    {
+      preHandler: [authenticate, requireRole(PERFIS_GESTAO_LOCAL)],
+      schema: {
+        tags: ['Estoque'],
+        summary: 'Editar nome do local/locacao de estoque',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = idLocalParamSchema.parse(request.params)
+      const { nome } = atualizarLocalEstoqueSchema.parse(request.body)
+
+      const local = await prisma.localEstoque.findUnique({
+        where: { id },
+      })
+
+      if (!local) {
+        throw new NotFoundError('Local de estoque nao localizado')
+      }
+
+      const duplicado = await prisma.localEstoque.findFirst({
+        where: {
+          obraId: local.obraId,
+          id: { not: id },
+          nome: {
+            equals: nome,
+            mode: 'insensitive',
+          },
+        },
+      })
+
+      if (duplicado) {
+        throw new ConflictError('Ja existe um local de estoque com este nome nesta obra')
+      }
+
+      const localAtualizado = await prisma.localEstoque.update({
+        where: { id },
+        data: { nome },
+        include: {
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+              cidade: true,
+              ativa: true,
+            },
+          },
+        },
+      })
+
+      return reply.status(200).send(localAtualizado)
+    }
+  )
+
+  app.delete(
+    '/locais-estoque/:id',
+    {
+      preHandler: [authenticate, requireRole(PERFIS_GESTAO_LOCAL)],
+      schema: {
+        tags: ['Estoque'],
+        summary: 'Excluir local/locacao de estoque sem historico',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = idLocalParamSchema.parse(request.params)
+
+      const local = await prisma.localEstoque.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              saldos: true,
+              movimentacoes: true,
+            },
+          },
+        },
+      })
+
+      if (!local) {
+        throw new NotFoundError('Local de estoque nao localizado')
+      }
+
+      if (local._count.saldos > 0 || local._count.movimentacoes > 0) {
+        throw new ConflictError(
+          'Nao e possivel excluir uma locacao que ja possui saldos ou movimentacoes registradas. Utilize a opcao de desativar.'
+        )
+      }
+
+      await prisma.localEstoque.delete({
+        where: { id },
+      })
+
+      return reply.status(204).send()
     }
   )
 
@@ -438,15 +539,66 @@ export async function estoqueRoutes(app: FastifyInstance) {
         }
       }
 
-      // 2. Valida Local de Estoque e Obra
-      const local = await prisma.localEstoque.findUnique({
-        where: { id: dados.localId },
-        include: { obra: true },
-      })
+      // 2. Valida ou Resolve Local/Locacao de Estoque (se localId nao for enviado, usa/cria o Almoxarifado Geral da obra)
+      let local: any = null
 
-      if (!local || !local.ativo || !local.obra.ativa) {
-        throw new BusinessRuleError('Local de estoque informado nao existe ou esta inativo')
+      if (dados.localId) {
+        local = await prisma.localEstoque.findUnique({
+          where: { id: dados.localId },
+          include: { obra: true },
+        })
+
+        if (!local || !local.ativo || !local.obra.ativa) {
+          throw new BusinessRuleError('Local de estoque informado nao existe ou esta inativo')
+        }
+
+        if (dados.obraId && local.obraId !== dados.obraId) {
+          throw new BusinessRuleError('A locacao informada nao pertence a obra selecionada')
+        }
+      } else if (dados.obraId) {
+        const obra = await prisma.obra.findUnique({
+          where: { id: dados.obraId },
+        })
+
+        if (!obra || !obra.ativa) {
+          throw new BusinessRuleError('A obra informada nao existe ou esta inativa')
+        }
+
+        // Busca locacao padrao "Almoxarifado Geral" ou qualquer local ativo caso queira usar o geral
+        local = await prisma.localEstoque.findFirst({
+          where: {
+            obraId: dados.obraId,
+            nome: {
+              equals: 'Almoxarifado Geral',
+              mode: 'insensitive',
+            },
+          },
+          include: { obra: true },
+        })
+
+        if (!local) {
+          local = await prisma.localEstoque.create({
+            data: {
+              obraId: dados.obraId,
+              nome: 'Almoxarifado Geral',
+              ativo: true,
+            },
+            include: { obra: true },
+          })
+        } else if (!local.ativo) {
+          local = await prisma.localEstoque.update({
+            where: { id: local.id },
+            data: { ativo: true },
+            include: { obra: true },
+          })
+        }
       }
+
+      if (!local) {
+        throw new BusinessRuleError('Nao foi possivel determinar a obra ou locacao de estoque')
+      }
+
+      const localIdEfetivo = local.id
 
       // 3. Valida Material
       const material = await prisma.material.findUnique({
@@ -493,7 +645,7 @@ export async function estoqueRoutes(app: FastifyInstance) {
         const saldoExistente = await tx.estoqueSaldo.findUnique({
           where: {
             localId_materialId: {
-              localId: dados.localId,
+              localId: localIdEfetivo,
               materialId: dados.materialId,
             },
           },
@@ -515,7 +667,7 @@ export async function estoqueRoutes(app: FastifyInstance) {
         if (saldoExistente) {
           const updateCount = await tx.estoqueSaldo.updateMany({
             where: {
-              localId: dados.localId,
+              localId: localIdEfetivo,
               materialId: dados.materialId,
               versao: saldoExistente.versao,
             },
@@ -534,7 +686,7 @@ export async function estoqueRoutes(app: FastifyInstance) {
           saldoAtualizado = await tx.estoqueSaldo.findUniqueOrThrow({
             where: {
               localId_materialId: {
-                localId: dados.localId,
+                localId: localIdEfetivo,
                 materialId: dados.materialId,
               },
             },
@@ -542,7 +694,7 @@ export async function estoqueRoutes(app: FastifyInstance) {
         } else {
           saldoAtualizado = await tx.estoqueSaldo.create({
             data: {
-              localId: dados.localId,
+              localId: localIdEfetivo,
               materialId: dados.materialId,
               quantidade: delta,
               reservado: 0,
@@ -553,7 +705,7 @@ export async function estoqueRoutes(app: FastifyInstance) {
 
         const novaMovimentacao = await tx.movimentacaoEstoque.create({
           data: {
-            localId: dados.localId,
+            localId: localIdEfetivo,
             materialId: dados.materialId,
             tipo: dados.tipo,
             quantidade: quantidadeConvertida,

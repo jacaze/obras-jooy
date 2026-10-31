@@ -183,6 +183,69 @@ describe('Modulo de Estoque Fisico, Saldos e Livro-Razao Imutavel (T08)', () => 
 
       expect(response.statusCode).toBe(400)
     })
+
+    it('deve permitir editar nome de locacao de estoque existente (200)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValueOnce({
+        id: almoxarifeId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.localEstoque, 'findUnique').mockResolvedValueOnce({
+        id: localId,
+        obraId,
+        nome: 'Locacao Antiga',
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.localEstoque, 'findFirst').mockResolvedValueOnce(null)
+
+      vi.spyOn(prisma.localEstoque, 'update').mockResolvedValueOnce({
+        id: localId,
+        obraId,
+        nome: 'Locacao 01 - Prateleira A',
+        ativo: true,
+        obra: { id: obraId, codigo: 'OBRA-01', nome: 'Obra', cidade: 'Campo Grande', ativa: true },
+      } as any)
+
+      const response = await app.inject({
+        method: 'PATCH',
+        url: `/api/locais-estoque/${localId}`,
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+        payload: {
+          nome: 'Locacao 01 - Prateleira A',
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.nome).toBe('Locacao 01 - Prateleira A')
+    })
+
+    it('deve impedir exclusao de locacao que ja possui historico de saldos ou movimentacoes (409)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValueOnce({
+        id: almoxarifeId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.localEstoque, 'findUnique').mockResolvedValueOnce({
+        id: localId,
+        obraId,
+        nome: 'Locacao 01',
+        _count: { saldos: 1, movimentacoes: 2 },
+      } as any)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/api/locais-estoque/${localId}`,
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
   })
 
   describe('Saldos de Estoque (/api/estoque/saldos)', () => {
@@ -547,6 +610,93 @@ describe('Modulo de Estoque Fisico, Saldos e Livro-Razao Imutavel (T08)', () => 
       expect(response.statusCode).toBe(422)
       const body = JSON.parse(response.body)
       expect(body.erro).toContain('so pode ser utilizada em operacoes de entrada')
+    })
+
+    it('deve permitir registrar movimentacao informando apenas a obra (sem localId) criando/usando automaticamente o Almoxarifado Geral (201)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValueOnce({
+        id: almoxarifeId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.obra, 'findUnique').mockResolvedValueOnce({
+        id: obraId,
+        codigo: 'OBRA-01',
+        nome: 'Residencial Jooy',
+        ativa: true,
+      } as any)
+
+      // Simula que ainda nao havia locacao padrao e cria "Almoxarifado Geral"
+      vi.spyOn(prisma.localEstoque, 'findFirst').mockResolvedValueOnce(null)
+      vi.spyOn(prisma.localEstoque, 'create').mockResolvedValueOnce({
+        id: localId,
+        obraId,
+        nome: 'Almoxarifado Geral',
+        ativo: true,
+        obra: { id: obraId, codigo: 'OBRA-01', nome: 'Residencial Jooy', ativa: true },
+      } as any)
+
+      vi.spyOn(prisma.material, 'findUnique').mockResolvedValueOnce({
+        id: materialId,
+        fatorConversao: 1,
+        ativo: true,
+        unidadeConsumo: { sigla: 'SC', descricao: 'Saco' },
+      } as any)
+
+      vi.spyOn(prisma, '$transaction').mockImplementationOnce(async (callback: any) => {
+        const fakeTx = {
+          estoqueSaldo: {
+            findUnique: vi.fn().mockResolvedValueOnce(null),
+            create: vi.fn().mockResolvedValueOnce({
+              localId,
+              materialId,
+              quantidade: 15,
+              reservado: 0,
+              versao: 1,
+            }),
+          },
+          movimentacaoEstoque: {
+            create: vi.fn().mockResolvedValueOnce({
+              id: 'mov-geral-1',
+              localId,
+              materialId,
+              tipo: TipoMovimentacao.ENTRADA_RECEB,
+              quantidade: 15,
+              local: {
+                id: localId,
+                nome: 'Almoxarifado Geral',
+                obra: { id: obraId, codigo: 'OBRA-01', nome: 'Residencial Jooy' },
+              },
+              material: {
+                id: materialId,
+                codigo: 'MAT-01',
+                descricao: 'Cimento',
+                unidadeConsumo: { sigla: 'SC', descricao: 'Saco' },
+              },
+              usuario: { id: almoxarifeId, nome: 'Maria', login: 'maria' },
+            }),
+          },
+        }
+        return callback(fakeTx)
+      })
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/estoque/movimentacoes',
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+        payload: {
+          obraId,
+          materialId,
+          tipo: 'ENTRADA_RECEB',
+          quantidade: 15,
+        },
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = JSON.parse(response.body)
+      expect(body.movimentacao.local.nome).toBe('Almoxarifado Geral')
+      expect(body.saldo.disponivel).toBe(15)
     })
   })
 })
