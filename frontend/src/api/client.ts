@@ -14,7 +14,10 @@ import type {
   FiltrosFerramenta,
 } from '../types/material'
 import type {
+  AtenderRequisicaoInput,
   CriarRequisicaoInput,
+  ExportarSiengeInput,
+  ExportarSiengeResponse,
   FiltrosRequisicao,
   Requisicao,
 } from '../types/requisicao'
@@ -312,6 +315,9 @@ export async function getRequisicoes(filtros?: FiltrosRequisicao): Promise<Requi
   if (filtros?.areaId) params.append('areaId', filtros.areaId)
   if (filtros?.obraId) params.append('obraId', filtros.obraId)
   if (filtros?.requisitanteId) params.append('requisitanteId', filtros.requisitanteId)
+  if (filtros?.exportadaSienge !== undefined) {
+    params.append('exportadaSienge', String(filtros.exportadaSienge))
+  }
 
   const queryStr = params.toString() ? `?${params.toString()}` : ''
   const response = await api.get<Requisicao[]>(`/requisicoes${queryStr}`)
@@ -325,6 +331,16 @@ export async function getRequisicaoDetalhes(id: string): Promise<Requisicao> {
 
 export async function createRequisicao(dados: CriarRequisicaoInput): Promise<Requisicao> {
   const response = await api.post<Requisicao>('/requisicoes', dados)
+  return response.data
+}
+
+export async function atenderRequisicao(id: string, dados: AtenderRequisicaoInput): Promise<Requisicao> {
+  const response = await api.patch<Requisicao>(`/requisicoes/${id}/atender`, dados)
+  return response.data
+}
+
+export async function exportarRequisicoesSienge(dados?: ExportarSiengeInput): Promise<ExportarSiengeResponse> {
+  const response = await api.post<ExportarSiengeResponse>('/requisicoes/exportar-sienge', dados || {})
   return response.data
 }
 

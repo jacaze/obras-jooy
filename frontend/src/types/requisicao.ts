@@ -13,7 +13,8 @@ export interface RequisicaoItem {
   requisicaoId: string
   materialId?: string | null
   ferramentaId?: string | null
-  quantidade: number | string
+  quantidade: number
+  quantidadeEntregue?: number | null
   material?: Material | null
   ferramenta?: Ferramenta | null
 }
@@ -27,6 +28,12 @@ export interface Requisicao {
   codigoRetirada?: string | null
   chaveIdempotencia?: string | null
   observacao?: string | null
+  retiradoPor?: string | null
+  atendidoPorId?: string | null
+  atendidoEm?: string | null
+  exportadaSienge?: boolean
+  exportadaEm?: string | null
+  exportadaPorId?: string | null
   solicitadaEm: string
   prontaEm?: string | null
   retiradaEm?: string | null
@@ -39,6 +46,16 @@ export interface Requisicao {
       nome: string
     }
   }
+  atendidoPor?: {
+    id: string
+    nome: string
+    login: string
+  } | null
+  exportadaPor?: {
+    id: string
+    nome: string
+    login: string
+  } | null
   itens: RequisicaoItem[]
 }
 
@@ -55,9 +72,34 @@ export interface CriarRequisicaoInput {
   itens: ItemRequisicaoInput[]
 }
 
+export interface AtenderRequisicaoInput {
+  retiradoPor: string
+  observacao?: string | null
+  itens?: Array<{
+    itemId: string
+    quantidadeEntregue: number
+    localId?: string | null
+  }>
+}
+
+export interface ExportarSiengeInput {
+  requisicaoIds?: string[]
+  obraId?: string
+  incluirJaExportadas?: boolean
+}
+
+export interface ExportarSiengeResponse {
+  csv: string
+  nomeArquivo: string
+  totalRequisicoes: number
+  requisicaoIds: string[]
+  exportadaEm: string
+}
+
 export interface FiltrosRequisicao {
   status?: StatusRequisicao
   areaId?: string
   obraId?: string
   requisitanteId?: string
+  exportadaSienge?: boolean
 }
