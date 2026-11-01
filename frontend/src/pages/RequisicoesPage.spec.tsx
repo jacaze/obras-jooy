@@ -216,9 +216,15 @@ describe('RequisicoesPage Component', () => {
       target: { value: 'area-1' },
     })
 
-    fireEvent.change(screen.getByDisplayValue('Selecione o material...'), {
-      target: { value: 'mat-1' },
+    // Selecionar material pelo SeletorItemPesquisavel
+    const inputBuscaMaterial = screen.getByPlaceholderText('Digite codigo ou descricao do material...')
+    fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('Cimento Votoran Todas as Obras')).toBeInTheDocument()
     })
+
+    fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
 
     fireEvent.change(screen.getByPlaceholderText('ex: Urgente para a concretagem do bloco norte'), {
       target: { value: 'Material para inicio da alvenaria' },

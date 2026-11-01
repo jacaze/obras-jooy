@@ -19,6 +19,7 @@ import type {
   Requisicao,
   StatusRequisicao,
 } from '../types/requisicao'
+import { SeletorItemPesquisavel } from '../components/SeletorItemPesquisavel'
 
 function extrairErro(err: any, fallback: string): string {
   const data = err.response?.data
@@ -1203,55 +1204,42 @@ export function RequisicoesPage() {
                         <option value="FERRAMENTA">Ferramenta</option>
                       </select>
 
-                      {/* Select Item */}
+                      {/* Select Item Pesquisavel */}
                       {linha.tipo === 'MATERIAL' ? (
-                        <select
-                          value={linha.materialId}
-                          onChange={(e) => handleAtualizarItem(idx, 'materialId', e.target.value)}
-                          required
-                          style={{
-                            padding: '0.45rem',
-                            borderRadius: '4px',
-                            border: '1px solid #cbd5e1',
-                            backgroundColor: '#ffffff',
-                            fontSize: '0.8rem',
-                            color: '#0f172a',
-                          }}
-                        >
-                          <option value="">Selecione o material...</option>
-                          {materiais.map((m) => {
+                        <SeletorItemPesquisavel
+                          itens={materiais.map((m) => {
                             const disp = obraIdSelecionada
                               ? saldoDisponivelPorMaterial.get(m.id)
                               : undefined
-                            return (
-                              <option key={m.id} value={m.id}>
-                                {m.codigo} - {m.descricao} ({m.unidadeConsumo.sigla})
-                                {disp !== undefined ? ` [Disp: ${disp}]` : ''}
-                              </option>
-                            )
+                            return {
+                              id: m.id,
+                              codigo: m.codigo,
+                              descricao: m.descricao,
+                              unidade: m.unidadeConsumo?.sigla,
+                              saldoDisponivel: disp,
+                              detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
+                            }
                           })}
-                        </select>
+                          valorSelecionadoId={linha.materialId}
+                          onSelecionar={(id) => handleAtualizarItem(idx, 'materialId', id)}
+                          placeholder="Digite codigo ou descricao do material..."
+                          obrigatorio
+                          labelAria={`Selecionar material item ${idx + 1}`}
+                        />
                       ) : (
-                        <select
-                          value={linha.ferramentaId}
-                          onChange={(e) => handleAtualizarItem(idx, 'ferramentaId', e.target.value)}
-                          required
-                          style={{
-                            padding: '0.45rem',
-                            borderRadius: '4px',
-                            border: '1px solid #cbd5e1',
-                            backgroundColor: '#ffffff',
-                            fontSize: '0.8rem',
-                            color: '#0f172a',
-                          }}
-                        >
-                          <option value="">Selecione a ferramenta...</option>
-                          {ferramentas.map((f) => (
-                            <option key={f.id} value={f.id}>
-                              {f.codigo} - {f.nome}
-                            </option>
-                          ))}
-                        </select>
+                        <SeletorItemPesquisavel
+                          itens={ferramentas.map((f) => ({
+                            id: f.id,
+                            codigo: f.codigo,
+                            descricao: f.nome,
+                            detalheExtra: `Status: ${f.status}`,
+                          }))}
+                          valorSelecionadoId={linha.ferramentaId}
+                          onSelecionar={(id) => handleAtualizarItem(idx, 'ferramentaId', id)}
+                          placeholder="Digite codigo ou nome da ferramenta..."
+                          obrigatorio
+                          labelAria={`Selecionar ferramenta item ${idx + 1}`}
+                        />
                       )}
 
                       {/* Quantidade */}
