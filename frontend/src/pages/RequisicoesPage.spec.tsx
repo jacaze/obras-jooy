@@ -16,6 +16,15 @@ const mockEncarregado = {
   ativo: true,
 }
 
+const mockAlmoxarife = {
+  id: 'almox-id-01',
+  nome: 'Maria Almoxarife',
+  login: 'maria',
+  perfil: 'ALMOXARIFE' as const,
+  cargo: 'Almoxarife',
+  ativo: true,
+}
+
 const mockObras = [
   { id: 'obra-1', codigo: 'OBRA-01', nome: 'Edificio Horizonte', cidade: 'Campo Grande', ativa: true, criadaEm: '2026-10-28T00:00:00Z' },
 ]
@@ -52,7 +61,8 @@ const mockRequisicoes: Requisicao[] = [
     chaveIdempotencia: 'idemp-1',
     observacao: 'Para inicio do reboco',
     solicitadaEm: '2026-10-30T10:00:00Z',
-    area: mockAreas[0] as any,
+    exportadaSienge: false,
+    area: { ...mockAreas[0], obra: mockObras[0] } as any,
     requisitante: {
       id: 'enc-id-01',
       nome: 'Marcos Encarregado',
@@ -65,6 +75,7 @@ const mockRequisicoes: Requisicao[] = [
         requisicaoId: 'req-1',
         materialId: 'mat-1',
         quantidade: 10,
+        quantidadeEntregue: null,
         material: mockMateriais[0] as any,
       },
     ],
@@ -74,31 +85,40 @@ const mockRequisicoes: Requisicao[] = [
     numeroSequencial: 102,
     areaId: 'area-1',
     requisitanteId: 'enc-id-01',
-    status: 'PRONTA',
-    codigoRetirada: 'RET-892',
+    status: 'ATENDIDA',
+    codigoRetirada: null,
     chaveIdempotencia: 'idemp-2',
-    observacao: 'Ferramenta para perfuracao',
+    observacao: 'Concretagem pilar',
+    retiradoPor: 'Carlos Pedreiro',
+    atendidoEm: '2026-10-30T14:00:00Z',
+    exportadaSienge: false,
     solicitadaEm: '2026-10-30T11:00:00Z',
-    area: mockAreas[0] as any,
+    area: { ...mockAreas[0], obra: mockObras[0] } as any,
     requisitante: {
       id: 'enc-id-01',
       nome: 'Marcos Encarregado',
       login: 'marcos',
       cargo: { nome: 'Mestre de Obras' },
     },
+    atendidoPor: {
+      id: 'almox-id-01',
+      nome: 'Maria Almoxarife',
+      login: 'maria',
+    },
     itens: [
       {
         id: 'item-2',
         requisicaoId: 'req-2',
-        ferramentaId: 'fer-1',
-        quantidade: 1,
-        ferramenta: mockFerramentas[0] as any,
+        materialId: 'mat-1',
+        quantidade: 10,
+        quantidadeEntregue: 6,
+        material: mockMateriais[0] as any,
       },
     ],
   },
 ]
 
-function renderRequisicoesPage() {
+function renderRequisicoesPage(usuarioLogado: any = mockEncarregado) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -109,8 +129,8 @@ function renderRequisicoesPage() {
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider
         value={{
-          usuario: mockEncarregado,
-          token: 'token-encarregado',
+          usuario: usuarioLogado,
+          token: 'token-teste',
           carregando: false,
           login: vi.fn(),
           logout: vi.fn(),
@@ -132,22 +152,42 @@ describe('RequisicoesPage Component', () => {
     vi.spyOn(apiClient, 'getAreasObra').mockResolvedValue(mockAreas)
     vi.spyOn(apiClient, 'getMateriais').mockResolvedValue(mockMateriais as any)
     vi.spyOn(apiClient, 'getFerramentas').mockResolvedValue(mockFerramentas as any)
+    vi.spyOn(apiClient, 'getSaldosEstoque').mockResolvedValue([
+      {
+        localId: 'local-1',
+        materialId: 'mat-1',
+        quantidade: 50,
+        reservado: 0,
+        disponivel: 50,
+        material: mockMateriais[0],
+      } as any,
+    ])
   })
 
-  it('deve listar as requisicoes com status e detalhes do pedido', async () => {
-    renderRequisicoesPage()
+  it('deve listar as requisicoes do Encarregado com historico de solicitada vs entregue e ocultar opcoes de almoxarife', async () => {
+    renderRequisicoesPage(mockEncarregado)
 
     expect(screen.getByText('Minhas Requisicoes de Obra')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(screen.getByText('#101')).toBeInTheDocument()
       expect(screen.getByText('#102')).toBeInTheDocument()
-      expect(screen.getByText('Aguardando Almoxarifado')).toBeInTheDocument()
-      expect(screen.getByText('Pronta para Retirada')).toBeInTheDocument()
+      expect(screen.getByText('Pendente (Aguardando Almoxarifado)')).toBeInTheDocument()
+      expect(screen.getByText('Atendida / Entregue')).toBeInTheDocument()
+      expect(screen.getByText('Carlos Pedreiro')).toBeInTheDocument()
+      expect(screen.getByText(/Solicitado: 10 SC \| Entregue: 6 SC/i)).toBeInTheDocument()
     })
 
-    // Deve exibir o codigo de retirada em destaque na requisicao pronta
-    expect(screen.getByText('RET-892')).toBeInTheDocument()
+    // Encarregado nao deve ver botao de exportar SIENGE nem botao de Atender
+    expect(screen.queryByText(/Exportar para SIENGE/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Atender \/ Entregar Material/i)).not.toBeInTheDocument()
+
+    // Testar filtro rapido "Ocultar ja atendidas"
+    const chkOcultar = screen.getByLabelText(/Ocultar ja atendidas/i)
+    fireEvent.click(chkOcultar)
+
+    expect(screen.getByText('#101')).toBeInTheDocument()
+    expect(screen.queryByText('#102')).not.toBeInTheDocument()
   })
 
   it('deve abrir modal de nova requisicao e submeter pedido', async () => {
@@ -163,7 +203,7 @@ describe('RequisicoesPage Component', () => {
       itens: [],
     })
 
-    renderRequisicoesPage()
+    renderRequisicoesPage(mockEncarregado)
 
     await waitFor(() => {
       expect(screen.getByText('#101')).toBeInTheDocument()
@@ -173,7 +213,6 @@ describe('RequisicoesPage Component', () => {
 
     expect(screen.getByText('Nova Requisicao de Obra')).toBeInTheDocument()
 
-    // Selecionar obra
     fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
       target: { value: 'obra-1' },
     })
@@ -186,12 +225,16 @@ describe('RequisicoesPage Component', () => {
       target: { value: 'area-1' },
     })
 
-    // Selecionar material
-    fireEvent.change(screen.getByDisplayValue('Selecione o material...'), {
-      target: { value: 'mat-1' },
+    // Selecionar material pelo SeletorItemPesquisavel (puxando itens em estoque)
+    const inputBuscaMaterial = screen.getByPlaceholderText('Digite codigo ou descricao do material em estoque...')
+    fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('Cimento Votoran Todas as Obras')).toBeInTheDocument()
     })
 
-    // Preencher observacao
+    fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
+
     fireEvent.change(screen.getByPlaceholderText('ex: Urgente para a concretagem do bloco norte'), {
       target: { value: 'Material para inicio da alvenaria' },
     })
@@ -215,6 +258,70 @@ describe('RequisicoesPage Component', () => {
     })
   })
 
+  it('deve permitir que ALMOXARIFE atenda uma requisicao ajustando quantidade entregue e informando quem retirou', async () => {
+    const atenderSpy = vi.spyOn(apiClient, 'atenderRequisicao').mockResolvedValue({
+      ...mockRequisicoes[0],
+      status: 'ATENDIDA',
+      retiradoPor: 'Jose da Silva - Pedreiro',
+    })
+
+    renderRequisicoesPage(mockAlmoxarife)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Atender \/ Entregar Material/i }))
+
+    expect(screen.getByText('Atender Requisicao #101')).toBeInTheDocument()
+
+    // Ajustar quantidade entregue de 10 para 8
+    const inputQtdEntregue = screen.getByLabelText(/Quantidade entregue para Cimento/i)
+    fireEvent.change(inputQtdEntregue, { target: { value: '8' } })
+
+    // Preencher quem retirou na obra
+    const inputRetiradoPor = screen.getByPlaceholderText('ex: Jose da Silva - Pedreiro')
+    fireEvent.change(inputRetiradoPor, { target: { value: 'Jose da Silva - Pedreiro' } })
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar Entrega e Baixar Estoque/i }))
+
+    await waitFor(() => {
+      expect(atenderSpy).toHaveBeenCalledWith('req-1', {
+        retiradoPor: 'Jose da Silva - Pedreiro',
+        itens: [
+          {
+            itemId: 'item-1',
+            quantidadeEntregue: 8,
+          },
+        ],
+      })
+    })
+  })
+
+  it('deve permitir que ALMOXARIFE exporte requisicoes atendidas para CSV do SIENGE', async () => {
+    const exportarSpy = vi.spyOn(apiClient, 'exportarRequisicoesSienge').mockResolvedValue({
+      csv: '\uFEFFNUMERO_REQUISICAO;CODIGO_OBRA\r\nREQ-102;OBRA-01',
+      nomeArquivo: 'sienge-requisicoes-2026-10-31.csv',
+      totalRequisicoes: 1,
+      requisicaoIds: ['req-2'],
+      exportadaEm: '2026-10-31T20:00:00Z',
+    })
+
+    renderRequisicoesPage(mockAlmoxarife)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pendente Exportacao SIENGE')).toBeInTheDocument()
+    })
+
+    const btnExportar = screen.getByRole('button', { name: /Exportar para SIENGE \(CSV\)/i })
+    fireEvent.click(btnExportar)
+
+    await waitFor(() => {
+      expect(exportarSpy).toHaveBeenCalledWith({ incluirJaExportadas: false })
+      expect(screen.getByText(/sienge-requisicoes-2026-10-31\.csv gerado com sucesso/i)).toBeInTheDocument()
+    })
+  })
+
   it('deve permitir cancelar uma requisicao no status SOLICITADA', async () => {
     const cancelarSpy = vi.spyOn(apiClient, 'cancelarRequisicao').mockResolvedValue({
       id: 'req-1',
@@ -223,7 +330,7 @@ describe('RequisicoesPage Component', () => {
 
     window.confirm = vi.fn().mockReturnValue(true)
 
-    renderRequisicoesPage()
+    renderRequisicoesPage(mockEncarregado)
 
     await waitFor(() => {
       expect(screen.getByText('#101')).toBeInTheDocument()

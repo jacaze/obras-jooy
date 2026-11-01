@@ -44,7 +44,9 @@ model Usuario {
 
   cargo     Cargo         @relation(fields: [cargoId], references: [id])
   ferramentasEmprestadas   Ferramenta[]
-  requisicoesFeitas        Requisicao[]
+  requisicoesFeitas        Requisicao[]          @relation("RequisicaoSolicitante")
+  requisicoesAtendidas     Requisicao[]          @relation("RequisicaoAtendidaPor")
+  requisicoesExportadas    Requisicao[]          @relation("RequisicaoExportadaPor")
   movimentacoesRegistradas MovimentacaoEstoque[]
 
   @@map("usuario")
@@ -186,12 +188,20 @@ model Requisicao {
   codigoRetirada    String?               @unique @map("codigo_retirada") @db.VarChar(12)
   chaveIdempotencia String?               @unique @map("chave_idempotencia") @db.VarChar(100)
   observacao        String?               @db.VarChar(255)
+  retiradoPor       String?               @map("retirado_por") @db.VarChar(120)
+  atendidoPorId     String?               @map("atendido_por_id") @db.Uuid
+  atendidoEm        DateTime?             @map("atendido_em")
+  exportadaSienge   Boolean               @default(false) @map("exportada_sienge")
+  exportadaEm       DateTime?             @map("exportada_em")
+  exportadaPorId    String?               @map("exportada_por_id") @db.Uuid
   solicitadaEm      DateTime              @default(now()) @map("solicitada_em")
   prontaEm          DateTime?             @map("pronta_em")
   retiradaEm        DateTime?             @map("retirada_em")
 
   area              AreaObra              @relation(fields: [areaId], references: [id], onDelete: Restrict)
-  requisitante      Usuario               @relation(fields: [requisitanteId], references: [id], onDelete: Restrict)
+  requisitante      Usuario               @relation("RequisicaoSolicitante", fields: [requisitanteId], references: [id], onDelete: Restrict)
+  atendidoPor       Usuario?              @relation("RequisicaoAtendidaPor", fields: [atendidoPorId], references: [id], onDelete: SetNull)
+  exportadaPor      Usuario?              @relation("RequisicaoExportadaPor", fields: [exportadaPorId], references: [id], onDelete: SetNull)
   itens             RequisicaoItem[]
   movimentacoes     MovimentacaoEstoque[]
 
@@ -199,15 +209,16 @@ model Requisicao {
 }
 
 model RequisicaoItem {
-  id            String      @id @default(uuid()) @db.Uuid
-  requisicaoId  String      @map("requisicao_id") @db.Uuid
-  materialId    String?     @map("material_id") @db.Uuid
-  ferramentaId  String?     @map("ferramenta_id") @db.Uuid
-  quantidade    Decimal     @default(1.0) @db.Decimal(12, 4)
+  id                 String      @id @default(uuid()) @db.Uuid
+  requisicaoId       String      @map("requisicao_id") @db.Uuid
+  materialId         String?     @map("material_id") @db.Uuid
+  ferramentaId       String?     @map("ferramenta_id") @db.Uuid
+  quantidade         Decimal     @default(1.0) @db.Decimal(12, 4)
+  quantidadeEntregue Decimal?    @map("quantidade_entregue") @db.Decimal(12, 4)
 
-  requisicao    Requisicao  @relation(fields: [requisicaoId], references: [id], onDelete: Cascade)
-  material      Material?   @relation(fields: [materialId], references: [id], onDelete: Restrict)
-  ferramenta    Ferramenta? @relation(fields: [ferramentaId], references: [id], onDelete: Restrict)
+  requisicao         Requisicao  @relation(fields: [requisicaoId], references: [id], onDelete: Cascade)
+  material           Material?   @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  ferramenta         Ferramenta? @relation(fields: [ferramentaId], references: [id], onDelete: Restrict)
 
   @@map("requisicao_item")
 }
