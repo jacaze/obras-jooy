@@ -7,7 +7,6 @@ import {
   exportarRequisicoesSienge,
   getAreasObra,
   getFerramentas,
-  getMateriais,
   getObras,
   getRequisicoes,
   getSaldosEstoque,
@@ -109,11 +108,6 @@ export function RequisicoesPage() {
     enabled: !!obraIdSelecionada,
   })
 
-  const { data: materiais = [] } = useQuery({
-    queryKey: ['materiais'],
-    queryFn: () => getMateriais({ somenteAtivos: true }),
-  })
-
   const { data: saldosObraModal = [] } = useQuery({
     queryKey: ['estoque-saldos-obra-modal', obraIdSelecionada],
     queryFn: () => getSaldosEstoque({ obraId: obraIdSelecionada }),
@@ -125,15 +119,27 @@ export function RequisicoesPage() {
     queryFn: () => getFerramentas({ status: 'DISPONIVEL', somenteAtivas: true }),
   })
 
-  // Mapa de saldo disponivel por material na obra selecionada no modal
-  const saldoDisponivelPorMaterial = new Map<string, number>()
-  for (const s of saldosObraModal) {
-    const atual = saldoDisponivelPorMaterial.get(s.materialId) || 0
-    saldoDisponivelPorMaterial.set(
-      s.materialId,
-      Number((atual + Number(s.disponivel)).toFixed(4))
-    )
-  }
+  // Itens em estoque na obra selecionada com saldo disponivel positivo (> 0)
+  const materiaisEmEstoqueNaObra = (() => {
+    const mapa = new Map<string, { material: any; disponivel: number }>()
+
+    for (const s of saldosObraModal) {
+      const disp = Number(s.disponivel)
+      if (disp <= 0) continue
+
+      const existente = mapa.get(s.materialId)
+      if (existente) {
+        existente.disponivel = Number((existente.disponivel + disp).toFixed(4))
+      } else {
+        mapa.set(s.materialId, {
+          material: s.material,
+          disponivel: disp,
+        })
+      }
+    }
+
+    return Array.from(mapa.values())
+  })()
 
   // Mutations
   const criarRequisicaoMutation = useMutation({
@@ -1204,25 +1210,27 @@ export function RequisicoesPage() {
                         <option value="FERRAMENTA">Ferramenta</option>
                       </select>
 
-                      {/* Select Item Pesquisavel */}
+                      {/* Select Item Pesquisavel: puxa exclusivamente materiais em estoque na obra */}
                       {linha.tipo === 'MATERIAL' ? (
                         <SeletorItemPesquisavel
-                          itens={materiais.map((m) => {
-                            const disp = obraIdSelecionada
-                              ? saldoDisponivelPorMaterial.get(m.id)
-                              : undefined
-                            return {
-                              id: m.id,
-                              codigo: m.codigo,
-                              descricao: m.descricao,
-                              unidade: m.unidadeConsumo?.sigla,
-                              saldoDisponivel: disp,
-                              detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
-                            }
-                          })}
+                          itens={materiaisEmEstoqueNaObra.map(({ material: m, disponivel }) => ({
+                            id: m.id,
+                            codigo: m.codigo,
+                            descricao: m.descricao,
+                            unidade: m.unidadeConsumo?.sigla,
+                            saldoDisponivel: disponivel,
+                            detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
+                          }))}
                           valorSelecionadoId={linha.materialId}
                           onSelecionar={(id) => handleAtualizarItem(idx, 'materialId', id)}
-                          placeholder="Digite codigo ou descricao do material..."
+                          placeholder={
+                            !obraIdSelecionada
+                              ? 'Selecione a obra primeiro para carregar o estoque...'
+                              : materiaisEmEstoqueNaObra.length === 0
+                                ? 'Nenhum material com saldo em estoque nesta obra'
+                                : 'Digite codigo ou descricao do material em estoque...'
+                          }
+                          desabilitado={!obraIdSelecionada || materiaisEmEstoqueNaObra.length === 0}
                           obrigatorio
                           labelAria={`Selecionar material item ${idx + 1}`}
                         />

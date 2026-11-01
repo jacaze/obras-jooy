@@ -152,7 +152,16 @@ describe('RequisicoesPage Component', () => {
     vi.spyOn(apiClient, 'getAreasObra').mockResolvedValue(mockAreas)
     vi.spyOn(apiClient, 'getMateriais').mockResolvedValue(mockMateriais as any)
     vi.spyOn(apiClient, 'getFerramentas').mockResolvedValue(mockFerramentas as any)
-    vi.spyOn(apiClient, 'getSaldosEstoque').mockResolvedValue([])
+    vi.spyOn(apiClient, 'getSaldosEstoque').mockResolvedValue([
+      {
+        localId: 'local-1',
+        materialId: 'mat-1',
+        quantidade: 50,
+        reservado: 0,
+        disponivel: 50,
+        material: mockMateriais[0],
+      } as any,
+    ])
   })
 
   it('deve listar as requisicoes do Encarregado com historico de solicitada vs entregue e ocultar opcoes de almoxarife', async () => {
@@ -216,8 +225,8 @@ describe('RequisicoesPage Component', () => {
       target: { value: 'area-1' },
     })
 
-    // Selecionar material pelo SeletorItemPesquisavel
-    const inputBuscaMaterial = screen.getByPlaceholderText('Digite codigo ou descricao do material...')
+    // Selecionar material pelo SeletorItemPesquisavel (puxando itens em estoque)
+    const inputBuscaMaterial = screen.getByPlaceholderText('Digite codigo ou descricao do material em estoque...')
     fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
 
     await waitFor(() => {
