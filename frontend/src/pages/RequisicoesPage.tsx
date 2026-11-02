@@ -7,6 +7,7 @@ import {
   exportarRequisicoesSienge,
   getAreasObra,
   getFerramentas,
+  getLimitesOrcamentoObra,
   getObras,
   getRequisicoes,
   getSaldosEstoque,
@@ -113,6 +114,20 @@ export function RequisicoesPage() {
     queryFn: () => getSaldosEstoque({ obraId: obraIdSelecionada }),
     enabled: !!obraIdSelecionada,
   })
+
+  const { data: limitesOrcamentoObra = [] } = useQuery({
+    queryKey: ['limites-orcamento-obra', obraIdSelecionada],
+    queryFn: () => getLimitesOrcamentoObra(obraIdSelecionada),
+    enabled: !!obraIdSelecionada,
+  })
+
+  const mapaLimitesOrcamento = (() => {
+    const mapa = new Map<string, number>()
+    for (const lim of limitesOrcamentoObra) {
+      mapa.set(lim.materialId, Number(lim.quantidadeOrcada))
+    }
+    return mapa
+  })()
 
   const { data: ferramentas = [] } = useQuery({
     queryKey: ['ferramentas-disponiveis'],
@@ -1061,7 +1076,7 @@ export function RequisicoesPage() {
               backgroundColor: '#ffffff',
               borderRadius: '8px',
               padding: '1.75rem',
-              maxWidth: '650px',
+              maxWidth: '720px',
               width: '100%',
               maxHeight: '90vh',
               overflowY: 'auto',
@@ -1184,13 +1199,17 @@ export function RequisicoesPage() {
                       key={idx}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: '110px 1fr 100px 32px',
+                        gridTemplateColumns:
+                          itensForm.length > 1
+                            ? '105px minmax(0, 1fr) 88px 28px'
+                            : '105px minmax(0, 1fr) 88px',
                         gap: '0.5rem',
                         alignItems: 'center',
                         backgroundColor: '#f8fafc',
                         padding: '0.5rem',
                         borderRadius: '4px',
                         border: '1px solid #e2e8f0',
+                        boxSizing: 'border-box',
                       }}
                     >
                       {/* Tipo */}
@@ -1219,6 +1238,7 @@ export function RequisicoesPage() {
                             descricao: m.descricao,
                             unidade: m.unidadeConsumo?.sigla,
                             saldoDisponivel: disponivel,
+                            limiteOrcamento: mapaLimitesOrcamento.get(m.id),
                             detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
                           }))}
                           valorSelecionadoId={linha.materialId}
@@ -1280,8 +1300,8 @@ export function RequisicoesPage() {
                       </div>
 
                       {/* Botao Excluir Linha */}
-                      <div>
-                        {itensForm.length > 1 && (
+                      {itensForm.length > 1 && (
+                        <div style={{ textAlign: 'center' }}>
                           <button
                             type="button"
                             onClick={() => handleRemoverItem(idx)}
@@ -1297,8 +1317,8 @@ export function RequisicoesPage() {
                           >
                             &times;
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
