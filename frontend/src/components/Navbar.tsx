@@ -103,6 +103,20 @@ export function Navbar() {
               </Link>
             </>
           )}
+          {(usuario.perfil === 'ADMIN' ||
+            usuario.perfil === 'ENGENHARIA' ||
+            usuario.perfil === 'ADMINISTRACAO') && (
+            <Link
+              to="/orcamento"
+              style={{
+                color: '#cbd5e1',
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+              }}
+            >
+              Orcamento da Obra
+            </Link>
+          )}
           {usuario.perfil === 'ADMIN' && (
             <Link
               to="/usuarios"

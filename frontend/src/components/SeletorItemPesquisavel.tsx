@@ -6,6 +6,7 @@ export interface ItemOpcaoBusca {
   descricao: string
   unidade?: string
   saldoDisponivel?: number
+  limiteOrcamento?: number
   detalheExtra?: string
 }
 
@@ -94,7 +95,11 @@ export function SeletorItemPesquisavel({
                   fontWeight: 600,
                 }}
               >
-                [Disp: {itemSelecionado.saldoDisponivel}]
+                [Disp: {itemSelecionado.saldoDisponivel}
+                {itemSelecionado.limiteOrcamento !== undefined
+                  ? ` | Limite: ${itemSelecionado.limiteOrcamento}`
+                  : ''}
+                ]
               </span>
             )}
           </div>
@@ -229,6 +234,7 @@ export function SeletorItemPesquisavel({
                           }}
                         >
                           Disp: {it.saldoDisponivel}
+                          {it.limiteOrcamento !== undefined ? ` | Limite: ${it.limiteOrcamento}` : ''}
                         </div>
                       )}
                     </div>

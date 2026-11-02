@@ -162,6 +162,14 @@ describe('RequisicoesPage Component', () => {
         material: mockMateriais[0],
       } as any,
     ])
+    vi.spyOn(apiClient, 'getLimitesOrcamentoObra').mockResolvedValue([
+      {
+        id: 'orc-1',
+        obraId: 'obra-1',
+        materialId: 'mat-1',
+        quantidadeOrcada: 200,
+      },
+    ])
   })
 
   it('deve listar as requisicoes do Encarregado com historico de solicitada vs entregue e ocultar opcoes de almoxarife', async () => {
@@ -231,9 +239,12 @@ describe('RequisicoesPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Cimento Votoran Todas as Obras')).toBeInTheDocument()
+      expect(screen.getByText(/Disp: 50 \| Limite: 200/i)).toBeInTheDocument()
     })
 
     fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
+
+    expect(screen.getByText(/\[Disp: 50 \| Limite: 200\]/i)).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText('ex: Urgente para a concretagem do bloco norte'), {
       target: { value: 'Material para inicio da alvenaria' },

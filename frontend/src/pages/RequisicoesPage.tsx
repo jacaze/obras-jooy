@@ -7,6 +7,7 @@ import {
   exportarRequisicoesSienge,
   getAreasObra,
   getFerramentas,
+  getLimitesOrcamentoObra,
   getObras,
   getRequisicoes,
   getSaldosEstoque,
@@ -113,6 +114,20 @@ export function RequisicoesPage() {
     queryFn: () => getSaldosEstoque({ obraId: obraIdSelecionada }),
     enabled: !!obraIdSelecionada,
   })
+
+  const { data: limitesOrcamentoObra = [] } = useQuery({
+    queryKey: ['limites-orcamento-obra', obraIdSelecionada],
+    queryFn: () => getLimitesOrcamentoObra(obraIdSelecionada),
+    enabled: !!obraIdSelecionada,
+  })
+
+  const mapaLimitesOrcamento = (() => {
+    const mapa = new Map<string, number>()
+    for (const lim of limitesOrcamentoObra) {
+      mapa.set(lim.materialId, Number(lim.quantidadeOrcada))
+    }
+    return mapa
+  })()
 
   const { data: ferramentas = [] } = useQuery({
     queryKey: ['ferramentas-disponiveis'],
@@ -1219,6 +1234,7 @@ export function RequisicoesPage() {
                             descricao: m.descricao,
                             unidade: m.unidadeConsumo?.sigla,
                             saldoDisponivel: disponivel,
+                            limiteOrcamento: mapaLimitesOrcamento.get(m.id),
                             detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
                           }))}
                           valorSelecionadoId={linha.materialId}

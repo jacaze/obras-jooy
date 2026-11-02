@@ -11,6 +11,7 @@ import { MateriaisPage } from './pages/MateriaisPage'
 import { FerramentasPage } from './pages/FerramentasPage'
 import { RequisicoesPage } from './pages/RequisicoesPage'
 import { EstoquePage } from './pages/EstoquePage'
+import { OrcamentoObraPage } from './pages/OrcamentoObraPage'
 import { SemPermissaoPage } from './pages/SemPermissaoPage'
 
 const queryClient = new QueryClient({
@@ -51,6 +52,17 @@ export function App() {
               <Route path="/obras" element={<ObrasPage />} />
               <Route path="/materiais" element={<MateriaisPage />} />
               <Route path="/ferramentas" element={<FerramentasPage />} />
+            </Route>
+
+            {/* Rotas Exclusivas para Engenharia, Administracao e Admin (T13) */}
+            <Route
+              element={
+                <ProtectedRoute
+                  perfisPermitidos={['ADMIN', 'ENGENHARIA', 'ADMINISTRACAO']}
+                />
+              }
+            >
+              <Route path="/orcamento" element={<OrcamentoObraPage />} />
             </Route>
 
             {/* Rotas Restritas Exclusivas para ADMIN */}

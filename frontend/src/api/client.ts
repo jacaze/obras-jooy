@@ -29,6 +29,14 @@ import type {
   MovimentacaoEstoqueItem,
   RegistrarMovimentacaoInput,
 } from '../types/estoque'
+import type {
+  AtualizarOrcamentoObraInput,
+  CriarOrcamentoObraInput,
+  FiltrosOrcamentoObra,
+  LimiteOrcamentoObra,
+  OrcamentoObraItem,
+  PainelOrcamentoObraResponse,
+} from '../types/orcamento'
 
 export const api = axios.create({
   baseURL: '/api',
@@ -418,4 +426,44 @@ export async function registrarMovimentacaoEstoque(dados: RegistrarMovimentacaoI
     saldo: EstoqueSaldoItem
   }>('/estoque/movimentacoes', dados)
   return response.data
+}
+
+// ----------------------------------------------------
+// ORCAMENTO E LIMITES DE MATERIAL POR OBRA (T13)
+// ----------------------------------------------------
+
+export async function getLimitesOrcamentoObra(obraId?: string): Promise<LimiteOrcamentoObra[]> {
+  const params = new URLSearchParams()
+  if (obraId) params.append('obraId', obraId)
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<LimiteOrcamentoObra[]>(`/orcamentos-obra/limites${queryStr}`)
+  return response.data
+}
+
+export async function getOrcamentosObra(filtros?: FiltrosOrcamentoObra): Promise<PainelOrcamentoObraResponse> {
+  const params = new URLSearchParams()
+  if (filtros?.obraId) params.append('obraId', filtros.obraId)
+  if (filtros?.materialId) params.append('materialId', filtros.materialId)
+  if (filtros?.status) params.append('status', filtros.status)
+  if (filtros?.busca) params.append('busca', filtros.busca)
+  const queryStr = params.toString() ? `?${params.toString()}` : ''
+  const response = await api.get<PainelOrcamentoObraResponse>(`/orcamentos-obra${queryStr}`)
+  return response.data
+}
+
+export async function createOrcamentoObra(dados: CriarOrcamentoObraInput): Promise<OrcamentoObraItem> {
+  const response = await api.post<OrcamentoObraItem>('/orcamentos-obra', dados)
+  return response.data
+}
+
+export async function updateOrcamentoObra(
+  id: string,
+  dados: AtualizarOrcamentoObraInput
+): Promise<OrcamentoObraItem> {
+  const response = await api.patch<OrcamentoObraItem>(`/orcamentos-obra/${id}`, dados)
+  return response.data
+}
+
+export async function deleteOrcamentoObra(id: string): Promise<void> {
+  await api.delete(`/orcamentos-obra/${id}`)
 }

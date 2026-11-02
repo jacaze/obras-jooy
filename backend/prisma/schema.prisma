@@ -74,8 +74,9 @@ model Obra {
   ativa         Boolean        @default(true)
   criadaEm      DateTime       @default(now()) @map("criada_em")
 
-  areas         AreaObra[]
-  locaisEstoque LocalEstoque[]
+  areas              AreaObra[]
+  locaisEstoque      LocalEstoque[]
+  orcamentosMaterial OrcamentoObraMaterial[]
 
   @@map("obra")
 }
@@ -140,6 +141,7 @@ model Material {
   itensRequisicao     RequisicaoItem[]
   saldos              EstoqueSaldo[]
   movimentacoes       MovimentacaoEstoque[]
+  orcamentosObra      OrcamentoObraMaterial[]
 
   @@map("material")
 }
@@ -288,4 +290,23 @@ model MovimentacaoEstoque {
   usuario           Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
 
   @@map("movimentacao_estoque")
+}
+
+// ----------------------------------------------------
+// ORCAMENTO E LIMITES DE MATERIAL POR OBRA (T13)
+// ----------------------------------------------------
+model OrcamentoObraMaterial {
+  id               String   @id @default(uuid()) @db.Uuid
+  obraId           String   @map("obra_id") @db.Uuid
+  materialId       String   @map("material_id") @db.Uuid
+  quantidadeOrcada Decimal  @map("quantidade_orcada") @db.Decimal(12, 4)
+  observacao       String?  @db.VarChar(255)
+  criadoEm         DateTime @default(now()) @map("criado_em")
+  atualizadoEm     DateTime @updatedAt @map("atualizado_em")
+
+  obra             Obra     @relation(fields: [obraId], references: [id], onDelete: Restrict)
+  material         Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@unique([obraId, materialId], name: "orcamento_obra_material_unico")
+  @@map("orcamento_obra_material")
 }
