@@ -1076,7 +1076,7 @@ export function RequisicoesPage() {
               backgroundColor: '#ffffff',
               borderRadius: '8px',
               padding: '1.75rem',
-              maxWidth: '650px',
+              maxWidth: '720px',
               width: '100%',
               maxHeight: '90vh',
               overflowY: 'auto',
@@ -1199,13 +1199,17 @@ export function RequisicoesPage() {
                       key={idx}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: '110px 1fr 100px 32px',
+                        gridTemplateColumns:
+                          itensForm.length > 1
+                            ? '105px minmax(0, 1fr) 88px 28px'
+                            : '105px minmax(0, 1fr) 88px',
                         gap: '0.5rem',
                         alignItems: 'center',
                         backgroundColor: '#f8fafc',
                         padding: '0.5rem',
                         borderRadius: '4px',
                         border: '1px solid #e2e8f0',
+                        boxSizing: 'border-box',
                       }}
                     >
                       {/* Tipo */}
@@ -1296,8 +1300,8 @@ export function RequisicoesPage() {
                       </div>
 
                       {/* Botao Excluir Linha */}
-                      <div>
-                        {itensForm.length > 1 && (
+                      {itensForm.length > 1 && (
+                        <div style={{ textAlign: 'center' }}>
                           <button
                             type="button"
                             onClick={() => handleRemoverItem(idx)}
@@ -1313,8 +1317,8 @@ export function RequisicoesPage() {
                           >
                             &times;
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

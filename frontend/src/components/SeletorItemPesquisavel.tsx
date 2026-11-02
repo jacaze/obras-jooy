@@ -55,7 +55,7 @@ export function SeletorItemPesquisavel({
   })
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', minWidth: 0 }}>
       {/* Visual quando um item ja esta selecionado */}
       {itemSelecionado && !aberto ? (
         <div
@@ -69,6 +69,7 @@ export function SeletorItemPesquisavel({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: '0.4rem',
             padding: '0.45rem 0.65rem',
             borderRadius: '4px',
             border: '1px solid #0284c7',
@@ -78,21 +79,34 @@ export function SeletorItemPesquisavel({
             color: '#0f172a',
             minHeight: '36px',
             boxSizing: 'border-box',
+            width: '100%',
+            minWidth: 0,
           }}
         >
-          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '0.5rem' }}>
+          <div
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
+              flex: 1,
+            }}
+          >
             <strong style={{ color: '#0369a1', marginRight: '0.35rem' }}>{itemSelecionado.codigo}</strong>
             <span>{itemSelecionado.descricao}</span>
             {itemSelecionado.unidade && (
               <span style={{ color: '#64748b', marginLeft: '0.3rem' }}>({itemSelecionado.unidade})</span>
             )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
             {itemSelecionado.saldoDisponivel !== undefined && (
               <span
                 style={{
-                  marginLeft: '0.4rem',
                   fontSize: '0.75rem',
                   color: itemSelecionado.saldoDisponivel > 0 ? '#15803d' : '#b91c1c',
                   fontWeight: 600,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 [Disp: {itemSelecionado.saldoDisponivel}
@@ -102,31 +116,32 @@ export function SeletorItemPesquisavel({
                 ]
               </span>
             )}
-          </div>
 
-          {!desabilitado && (
-            <button
-              type="button"
-              aria-label="Limpar selecao"
-              onClick={(e) => {
-                e.stopPropagation()
-                onSelecionar('')
-                setTermoBusca('')
-                setAberto(true)
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                padding: '0 0.2rem',
-                fontWeight: 700,
-              }}
-            >
-              &times;
-            </button>
-          )}
+            {!desabilitado && (
+              <button
+                type="button"
+                aria-label="Limpar selecao"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSelecionar('')
+                  setTermoBusca('')
+                  setAberto(true)
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  padding: '0 0.2rem',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                }}
+              >
+                &times;
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         /* Campo de texto de busca quando aberto ou sem selecao */
