@@ -121,10 +121,59 @@ export function RequisicoesPage() {
     enabled: !!obraIdSelecionada,
   })
 
+  const { data: todosLimitesOrcamento = [] } = useQuery({
+    queryKey: ['limites-orcamento-todas-obras'],
+    queryFn: () => getLimitesOrcamentoObra(),
+  })
+
   const mapaLimitesOrcamento = (() => {
     const mapa = new Map<string, number>()
     for (const lim of limitesOrcamentoObra) {
       mapa.set(lim.materialId, Number(lim.quantidadeOrcada))
+    }
+    return mapa
+  })()
+
+  const mapaDetalhesOrcamentoModal = (() => {
+    const mapa = new Map<
+      string,
+      { quantidadeOrcada: number; quantidadeConsumida: number; saldoOrcamento: number }
+    >()
+    for (const lim of limitesOrcamentoObra) {
+      const orcada = Number(lim.quantidadeOrcada)
+      const consumida =
+        lim.quantidadeConsumida !== undefined ? Number(lim.quantidadeConsumida) : 0
+      const saldo =
+        lim.saldoOrcamento !== undefined
+          ? Number(lim.saldoOrcamento)
+          : Number((orcada - consumida).toFixed(4))
+      mapa.set(lim.materialId, {
+        quantidadeOrcada: orcada,
+        quantidadeConsumida: consumida,
+        saldoOrcamento: saldo,
+      })
+    }
+    return mapa
+  })()
+
+  const mapaLimitesPorObraMaterial = (() => {
+    const mapa = new Map<
+      string,
+      { quantidadeOrcada: number; quantidadeConsumida: number; saldoOrcamento: number }
+    >()
+    for (const lim of todosLimitesOrcamento) {
+      const orcada = Number(lim.quantidadeOrcada)
+      const consumida =
+        lim.quantidadeConsumida !== undefined ? Number(lim.quantidadeConsumida) : 0
+      const saldo =
+        lim.saldoOrcamento !== undefined
+          ? Number(lim.saldoOrcamento)
+          : Number((orcada - consumida).toFixed(4))
+      mapa.set(`${lim.obraId}:${lim.materialId}`, {
+        quantidadeOrcada: orcada,
+        quantidadeConsumida: consumida,
+        saldoOrcamento: saldo,
+      })
     }
     return mapa
   })()
@@ -154,6 +203,98 @@ export function RequisicoesPage() {
     }
 
     return Array.from(mapa.values())
+  })()
+
+  // Mapa de saldo disponivel por materialId na obra selecionada
+  const mapaSaldoFisicoModal = (() => {
+    const mapa = new Map<string, { disponivel: number; material: any }>()
+    for (const item of materiaisEmEstoqueNaObra) {
+      mapa.set(item.material.id, item)
+    }
+    return mapa
+  })()
+
+  // Quantidade consolidada solicitada por materialId no formulario atual
+  const mapaQtdSolicitadaModal = (() => {
+    const mapa = new Map<string, number>()
+    for (const linha of itensForm) {
+      if (linha.tipo === 'MATERIAL' && linha.materialId && linha.quantidade > 0) {
+        const atual = mapa.get(linha.materialId) || 0
+        mapa.set(linha.materialId, Number((atual + Number(linha.quantidade)).toFixed(4)))
+      }
+    }
+    return mapa
+  })()
+
+  // Avaliacao em tempo real de estouro de orcamento e saldo fisico no modal
+  const alertasModalPorMaterial = (() => {
+    const listaEstouroOrcamento: Array<{
+      materialId: string
+      codigo: string
+      descricao: string
+      sigla: string
+      solicitado: number
+      orcado: number
+      consumido: number
+      saldoOrcamento: number
+      excedentePrevisto: number
+    }> = []
+
+    const listaFaltaEstoque: Array<{
+      materialId: string
+      codigo: string
+      descricao: string
+      sigla: string
+      solicitado: number
+      disponivel: number
+    }> = []
+
+    for (const [materialId, qtdSolicitada] of mapaQtdSolicitadaModal.entries()) {
+      const infoEstoque = mapaSaldoFisicoModal.get(materialId)
+      const mat = infoEstoque?.material
+      const codigo = mat?.codigo || 'MAT'
+      const descricao = mat?.descricao || 'Material'
+      const sigla = mat?.unidadeConsumo?.sigla || 'UN'
+      const disponivel = infoEstoque ? Number(infoEstoque.disponivel) : 0
+
+      if (infoEstoque && qtdSolicitada > disponivel) {
+        listaFaltaEstoque.push({
+          materialId,
+          codigo,
+          descricao,
+          sigla,
+          solicitado: qtdSolicitada,
+          disponivel,
+        })
+      }
+
+      const infoOrc = mapaDetalhesOrcamentoModal.get(materialId)
+      if (infoOrc) {
+        const totalPosPedido = Number(
+          (infoOrc.quantidadeConsumida + qtdSolicitada).toFixed(4)
+        )
+        if (
+          qtdSolicitada > infoOrc.saldoOrcamento ||
+          totalPosPedido > infoOrc.quantidadeOrcada
+        ) {
+          listaEstouroOrcamento.push({
+            materialId,
+            codigo,
+            descricao,
+            sigla,
+            solicitado: qtdSolicitada,
+            orcado: infoOrc.quantidadeOrcada,
+            consumido: infoOrc.quantidadeConsumida,
+            saldoOrcamento: infoOrc.saldoOrcamento,
+            excedentePrevisto: Number(
+              Math.max(0, totalPosPedido - infoOrc.quantidadeOrcada).toFixed(4)
+            ),
+          })
+        }
+      }
+    }
+
+    return { listaEstouroOrcamento, listaFaltaEstoque }
   })()
 
   // Mutations
@@ -756,6 +897,18 @@ export function RequisicoesPage() {
                         it.quantidadeEntregue !== null && it.quantidadeEntregue !== undefined
                       const qtdEnt = temEntregue ? Number(it.quantidadeEntregue) : null
 
+                      const obraItemId = r.area?.obra?.id || r.area?.obraId
+                      const infoOrcCard =
+                        obraItemId && it.materialId
+                          ? mapaLimitesPorObraMaterial.get(`${obraItemId}:${it.materialId}`)
+                          : undefined
+                      const excedeLimiteCard = Boolean(
+                        infoOrcCard &&
+                          r.status !== 'CANCELADA' &&
+                          (qtdSol > infoOrcCard.quantidadeOrcada ||
+                            infoOrcCard.quantidadeConsumida > infoOrcCard.quantidadeOrcada)
+                      )
+
                       return (
                         <li key={it.id} style={{ marginBottom: '0.25rem' }}>
                           {it.material ? (
@@ -777,6 +930,23 @@ export function RequisicoesPage() {
                                   &mdash; {it.material.descricao}{' '}
                                   <span style={{ color: '#64748b' }}>({it.material.codigo})</span>
                                 </>
+                              )}
+                              {excedeLimiteCard && infoOrcCard && (
+                                <span
+                                  style={{
+                                    marginLeft: '0.5rem',
+                                    backgroundColor: '#fef3c7',
+                                    color: '#92400e',
+                                    border: '1px solid #fde68a',
+                                    padding: '0.1rem 0.45rem',
+                                    borderRadius: '4px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Excede Limite Orcado ({infoOrcCard.quantidadeOrcada}{' '}
+                                  {it.material.unidadeConsumo.sigla})
+                                </span>
                               )}
                             </>
                           ) : it.ferramenta ? (
@@ -1322,6 +1492,77 @@ export function RequisicoesPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Alertas em Tempo Real: Saldo Fisico e Limite de Orcamento da Engenharia */}
+                {alertasModalPorMaterial.listaFaltaEstoque.length > 0 && (
+                  <div
+                    role="alert"
+                    style={{
+                      marginTop: '0.75rem',
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderRadius: '6px',
+                      padding: '0.75rem 0.9rem',
+                      color: '#991b1b',
+                      fontSize: '0.82rem',
+                    }}
+                  >
+                    <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
+                      Saldo fisico insuficiente no estoque da obra (Bloqueio de emissao):
+                    </strong>
+                    <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                      {alertasModalPorMaterial.listaFaltaEstoque.map((al) => (
+                        <li key={al.materialId}>
+                          <strong>
+                            {al.codigo} - {al.descricao}:
+                          </strong>{' '}
+                          solicitado {al.solicitado} {al.sigla}, mas ha apenas{' '}
+                          <strong>
+                            {al.disponivel} {al.sigla}
+                          </strong>{' '}
+                          disponiveis no almoxarifado desta obra.
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {alertasModalPorMaterial.listaEstouroOrcamento.length > 0 && (
+                  <div
+                    role="status"
+                    style={{
+                      marginTop: '0.75rem',
+                      backgroundColor: '#fffbeb',
+                      border: '1px solid #fde68a',
+                      borderRadius: '6px',
+                      padding: '0.75rem 0.9rem',
+                      color: '#92400e',
+                      fontSize: '0.82rem',
+                    }}
+                  >
+                    <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
+                      Alerta da Engenharia: Estouro de Orcamento Previsto na Obra
+                    </strong>
+                    <p style={{ margin: '0 0 0.35rem', color: '#b45309' }}>
+                      A quantidade solicitada ultrapassa o teto orcado pela Engenharia. O pedido
+                      podera ser enviado se houver saldo fisico, mas ficara destacado no Painel de
+                      Estouro de Orcamento:
+                    </p>
+                    <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                      {alertasModalPorMaterial.listaEstouroOrcamento.map((al) => (
+                        <li key={al.materialId}>
+                          <strong>
+                            {al.codigo} - {al.descricao}:
+                          </strong>{' '}
+                          solicitando {al.solicitado} {al.sigla} (Orcado: {al.orcado} {al.sigla} |
+                          Ja consumido: {al.consumido} {al.sigla} | Saldo orcado restante:{' '}
+                          {al.saldoOrcamento} {al.sigla} | Excedente: +{al.excedentePrevisto}{' '}
+                          {al.sigla}).
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Observacao */}

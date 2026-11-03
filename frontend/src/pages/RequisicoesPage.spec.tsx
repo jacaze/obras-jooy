@@ -354,4 +354,63 @@ describe('RequisicoesPage Component', () => {
       expect(cancelarSpy).toHaveBeenCalledWith('req-1')
     })
   })
+
+  it('deve exibir alerta de estouro de orcamento da engenharia em tempo real no modal e aviso de saldo insuficiente', async () => {
+    vi.spyOn(apiClient, 'getLimitesOrcamentoObra').mockResolvedValue([
+      {
+        id: 'orc-1',
+        obraId: 'obra-1',
+        materialId: 'mat-1',
+        quantidadeOrcada: 30,
+        quantidadeConsumida: 10,
+        saldoOrcamento: 20,
+      },
+    ])
+
+    renderRequisicoesPage(mockEncarregado)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /\+ Nova Requisicao/i }))
+
+    fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
+      target: { value: 'obra-1' },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Pavimento 02')).toBeInTheDocument()
+    })
+
+    const inputBuscaMaterial = screen.getByPlaceholderText(
+      'Digite codigo ou descricao do material em estoque...'
+    )
+    fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('Cimento Votoran Todas as Obras')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
+
+    // Digitar 25 SC: saldo em estoque e 50 SC (ok), mas o saldo de orcamento restante e 20 SC (10 ja consumidos + 25 = 35 > 30 orcados)
+    const inputQtd = screen.getByPlaceholderText('Qtd')
+    fireEvent.change(inputQtd, { target: { value: '25' } })
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Alerta da Engenharia: Estouro de Orcamento Previsto/i)
+      ).toBeInTheDocument()
+    })
+
+    // Digitar 60 SC: excede tambem o saldo fisico disponivel no estoque da obra (50 SC)
+    fireEvent.change(inputQtd, { target: { value: '60' } })
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Saldo fisico insuficiente no estoque da obra/i)
+      ).toBeInTheDocument()
+    })
+  })
 })
