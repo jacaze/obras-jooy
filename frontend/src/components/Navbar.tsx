@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
@@ -9,11 +9,33 @@ export function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuMaisAberto, setMenuMaisAberto] = useState(false)
+  const [menuGestaoAberto, setMenuGestaoAberto] = useState(false)
+  const dropdownGestaoRef = useRef<HTMLDivElement>(null)
 
   function handleLogout() {
     logout()
     navigate('/login')
   }
+
+  // Fechar menu de gestão ao clicar fora ou apertar Escape
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownGestaoRef.current && !dropdownGestaoRef.current.contains(e.target as Node)) {
+        setMenuGestaoAberto(false)
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setMenuGestaoAberto(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [])
 
   if (!usuario) {
     return null
@@ -25,14 +47,18 @@ export function Navbar() {
     usuario.perfil === 'ENGENHARIA' ||
     usuario.perfil === 'ADMINISTRACAO'
   const podeVerUsuarios = usuario.perfil === 'ADMIN'
+  const temItensGestao = podeVerEstoque || podeVerOrcamento || podeVerUsuarios
+
+  const rotasGestao = ['/obras', '/materiais', '/orcamento', '/orcamento-obra', '/usuarios']
+  const isGestaoAtiva = rotasGestao.some((r) => location.pathname.startsWith(r))
 
   return (
     <>
       {/* Top Header com estilo do Design System Obras */}
       <header className="sticky top-0 w-full z-40 bg-surface/85 backdrop-blur-xl border-b border-surface-container-high shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 group text-decoration-none">
+          <div className="flex items-center gap-6 min-w-0">
+            <Link to="/" className="flex items-center gap-2 group text-decoration-none shrink-0">
               <span className="ob-icon-tile">
                 <span className="material-symbols-outlined text-[20px]">domain</span>
               </span>
@@ -46,8 +72,8 @@ export function Navbar() {
               </div>
             </Link>
 
-            {/* Desktop Navigation Links usando ob-nav */}
-            <nav className="hidden lg:flex ob-nav" aria-label="Principal">
+            {/* Desktop Navigation Links usando ob-nav (flex-nowrap para não quebrar em 2 linhas) */}
+            <nav className="hidden lg:flex ob-nav flex-nowrap whitespace-nowrap shrink-0" aria-label="Principal">
               <NavLink to="/" end>
                 <span className="material-symbols-outlined">home</span>
                 Início
@@ -57,42 +83,89 @@ export function Navbar() {
                 Requisições
               </NavLink>
               {podeVerEstoque && (
-                <>
-                  <NavLink to="/estoque">
-                    <span className="material-symbols-outlined">inventory_2</span>
-                    Estoque
-                  </NavLink>
-                  <NavLink to="/obras">
-                    <span className="material-symbols-outlined">apartment</span>
-                    Obras
-                  </NavLink>
-                  <NavLink to="/materiais">
-                    <span className="material-symbols-outlined">category</span>
-                    Materiais
-                  </NavLink>
-                  <NavLink to="/ferramentas">
-                    <span className="material-symbols-outlined">construction</span>
-                    Ferramentas
-                  </NavLink>
-                </>
-              )}
-              {podeVerOrcamento && (
-                <NavLink to="/orcamento">
-                  <span className="material-symbols-outlined">query_stats</span>
-                  Orçamento
+                <NavLink to="/estoque">
+                  <span className="material-symbols-outlined">inventory_2</span>
+                  Estoque
                 </NavLink>
               )}
-              {podeVerUsuarios && (
-                <NavLink to="/usuarios">
-                  <span className="material-symbols-outlined">group</span>
-                  Usuários
-                </NavLink>
+              <NavLink to="/ferramentas">
+                <span className="material-symbols-outlined">construction</span>
+                Ferramentas
+              </NavLink>
+
+              {/* Dropdown de Gestão para Obras, Materiais, Orçamento e Usuários */}
+              {temItensGestao && (
+                <div className="relative" ref={dropdownGestaoRef}>
+                  <button
+                    type="button"
+                    onClick={() => setMenuGestaoAberto(!menuGestaoAberto)}
+                    aria-expanded={menuGestaoAberto}
+                    aria-haspopup="true"
+                    aria-current={isGestaoAtiva ? 'page' : undefined}
+                    className="ob-tab"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">tune</span>
+                    <span>Gestão</span>
+                    <span
+                      className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${
+                        menuGestaoAberto ? 'rotate-180' : ''
+                      }`}
+                    >
+                      expand_more
+                    </span>
+                  </button>
+
+                  {menuGestaoAberto && (
+                    <div className="ob-menu is-open left-0 top-full mt-2 shadow-2xl z-50">
+                      {podeVerEstoque && (
+                        <>
+                          <NavLink
+                            to="/obras"
+                            onClick={() => setMenuGestaoAberto(false)}
+                            aria-current={location.pathname.startsWith('/obras') ? 'page' : undefined}
+                          >
+                            <span className="material-symbols-outlined">apartment</span>
+                            <span>Obras &amp; Áreas</span>
+                          </NavLink>
+                          <NavLink
+                            to="/materiais"
+                            onClick={() => setMenuGestaoAberto(false)}
+                            aria-current={location.pathname.startsWith('/materiais') ? 'page' : undefined}
+                          >
+                            <span className="material-symbols-outlined">category</span>
+                            <span>Catálogo de Materiais</span>
+                          </NavLink>
+                        </>
+                      )}
+                      {podeVerOrcamento && (
+                        <NavLink
+                          to="/orcamento"
+                          onClick={() => setMenuGestaoAberto(false)}
+                          aria-current={location.pathname.startsWith('/orcamento') ? 'page' : undefined}
+                        >
+                          <span className="material-symbols-outlined">query_stats</span>
+                          <span>Orçamento da Obra</span>
+                        </NavLink>
+                      )}
+                      {podeVerUsuarios && (
+                        <NavLink
+                          to="/usuarios"
+                          onClick={() => setMenuGestaoAberto(false)}
+                          aria-current={location.pathname.startsWith('/usuarios') ? 'page' : undefined}
+                        >
+                          <span className="material-symbols-outlined">group</span>
+                          <span>Usuários &amp; Cargos</span>
+                        </NavLink>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
             </nav>
           </div>
 
           {/* User Badge, Theme Toggle and Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={toggleTheme}
@@ -104,16 +177,16 @@ export function Navbar() {
               </span>
             </button>
 
-            <div className="hidden sm:flex flex-col text-right">
-              <span className="text-sm font-semibold text-on-surface leading-tight">
+            <div className="hidden sm:flex flex-col text-right max-w-[200px]">
+              <span className="text-sm font-semibold text-on-surface leading-tight truncate">
                 {usuario.nome}
               </span>
-              <span className="text-xs text-on-surface-variant">
+              <span className="text-xs text-on-surface-variant truncate">
                 {usuario.cargo} • <strong className="text-accent-text font-semibold">{usuario.perfil}</strong>
               </span>
             </div>
 
-            <div className="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-xs shadow-sm">
+            <div className="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
               {usuario.nome.charAt(0).toUpperCase()}
             </div>
 
