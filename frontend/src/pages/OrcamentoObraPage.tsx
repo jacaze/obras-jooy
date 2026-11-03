@@ -34,26 +34,17 @@ function badgeStatusOrcamento(status: StatusOrcamentoMaterial) {
   switch (status) {
     case 'ULTRAPASSADO':
       return {
-        bg: '#fee2e2',
-        cor: '#991b1b',
-        borda: '#fecaca',
-        barra: '#b91c1c',
+        badgeClass: 'ob-badge--crit',
         texto: 'Orcamento Ultrapassado',
       }
     case 'ATENCAO':
       return {
-        bg: '#fef3c7',
-        cor: '#92400e',
-        borda: '#fde68a',
-        barra: '#b45309',
+        badgeClass: 'ob-badge--low',
         texto: 'Em Atencao (>= 80%)',
       }
     case 'DENTRO_DO_LIMITE':
       return {
-        bg: '#dcfce7',
-        cor: '#166534',
-        borda: '#bbf7d0',
-        barra: '#15803d',
+        badgeClass: 'ob-badge--ok',
         texto: 'Dentro do Limite',
       }
   }
@@ -527,8 +518,7 @@ export function OrcamentoObraPage() {
                         <strong className="text-on-surface">{it.quantidadeOrcada} {sigla}</strong>
                       </span>
                       <span
-                        className="inline-flex items-center px-2 py-0.5 rounded-full font-caption-2 font-bold whitespace-nowrap"
-                        style={{ color: cfg.cor, backgroundColor: cfg.bg }}
+                        className={`ob-badge ${cfg.badgeClass} font-mono font-bold whitespace-nowrap`}
                       >
                         {it.percentualConsumido}%
                         {it.excedente > 0 ? ` (+${it.excedente} ${sigla} acima do limite)` : ''}
@@ -625,14 +615,7 @@ export function OrcamentoObraPage() {
                         )}
                       </td>
                       <td className="p-3.5">
-                        <span
-                          className="px-2.5 py-1 rounded-full text-caption-2 font-semibold whitespace-nowrap"
-                          style={{
-                            backgroundColor: cfg.bg,
-                            color: cfg.cor,
-                            border: `1px solid ${cfg.borda}`,
-                          }}
-                        >
+                        <span className={`ob-badge ${cfg.badgeClass} whitespace-nowrap`}>
                           {cfg.texto}
                         </span>
                       </td>

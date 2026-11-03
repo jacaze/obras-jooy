@@ -536,31 +536,31 @@ export function RequisicoesPage() {
   function badgeStatus(status: StatusRequisicao) {
     switch (status) {
       case 'SOLICITADA':
-        return { bg: '#fef3c7', cor: '#92400e', texto: 'Pendente (Aguardando Almoxarifado)' }
+        return { badgeClass: 'ob-badge--low', texto: 'Pendente (Aguardando Almoxarifado)' }
       case 'EM_SEPARACAO':
-        return { bg: '#e0f2fe', cor: '#0369a1', texto: 'Em Separacao' }
+        return { badgeClass: 'ob-badge--info', texto: 'Em Separacao' }
       case 'PRONTA':
-        return { bg: '#dcfce7', cor: '#166534', texto: 'Pronta para Retirada' }
+        return { badgeClass: 'ob-badge--ok', texto: 'Pronta para Retirada' }
       case 'ATENDIDA':
-        return { bg: '#dcfce7', cor: '#166534', texto: 'Atendida / Entregue' }
+        return { badgeClass: 'ob-badge--ok', texto: 'Atendida / Entregue' }
       case 'CANCELADA':
-        return { bg: '#fee2e2', cor: '#991b1b', texto: 'Cancelada' }
+        return { badgeClass: 'ob-badge--crit', texto: 'Cancelada' }
     }
   }
 
   return (
-    <main className="flex flex-col w-full min-h-screen bg-surface pb-28">
+    <main className="flex flex-col w-full min-h-screen bg-surface pb-28 font-body text-on-surface">
       <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 flex flex-col gap-6">
-        {/* Cabecalho Nativo iOS */}
+        {/* Cabecalho Nativo */}
         <div className="flex flex-wrap justify-between items-center gap-4 pt-2">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            <span className="text-xs font-semibold uppercase tracking-wider text-accent-text">
               Controle de Canteiro
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
+            <h1 className="ob-heading text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
               {ehEncarregado ? 'Minhas Requisicoes de Obra' : 'Requisicoes de Obra'}
             </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant">
+            <p className="text-xs sm:text-sm text-on-surface-variant font-body">
               {ehEncarregado
                 ? 'Solicite materiais e ferramentas disponiveis no estoque da obra e acompanhe seus pedidos'
                 : 'Atenda requisicoes com baixa automatica no estoque e exporte os registros atendidos para o SIENGE'}
@@ -578,7 +578,7 @@ export function RequisicoesPage() {
                   const reexportar = filtroSienge === 'EXPORTADAS'
                   exportarSiengeMutation.mutate(reexportar)
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all disabled:opacity-50"
+                className="ob-btn ob-btn--outline ob-btn--sm min-h-[48px]"
               >
                 <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
                 <span>
@@ -592,7 +592,7 @@ export function RequisicoesPage() {
             <button
               type="button"
               onClick={handleAbrirModal}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all"
+              className="ob-btn ob-btn--primary ob-btn--sm min-h-[48px]"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>+ Nova Requisicao</span>
@@ -602,12 +602,12 @@ export function RequisicoesPage() {
 
         {/* Mensagens de Feedback */}
         {mensagemFeedback && (
-          <div className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm">
+          <div className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fade-up">
             <span className="font-medium">{mensagemFeedback}</span>
             <button
               type="button"
               onClick={() => setMensagemFeedback(null)}
-              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1"
+              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1 cursor-pointer"
             >
               &times;
             </button>
@@ -615,38 +615,37 @@ export function RequisicoesPage() {
         )}
 
         {erroFeedback && (
-          <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm">
+          <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fade-up">
             <span className="font-medium">{erroFeedback}</span>
             <button
               type="button"
               onClick={() => setErroFeedback(null)}
-              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1"
+              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1 cursor-pointer"
             >
               &times;
             </button>
           </div>
         )}
 
-        {/* Summary Spark Card (Stitch Design) */}
-        <div className="bg-surface-container-low rounded-2xl p-4 flex items-center justify-between shadow-sm border border-surface-container">
+        {/* Summary Spark Card */}
+        <div className="ob-card p-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed shadow-sm">
               <span className="material-symbols-outlined text-[22px]">pending_actions</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-on-surface">Pico matinal no Almoxarifado</p>
-              <p className="text-xs text-on-surface-variant">
+              <p className="text-xs text-on-surface-variant font-mono">
                 Tempo médio de espera atual: 8 minutos • Separação rápida ativa
               </p>
             </div>
           </div>
-          <span className="material-symbols-outlined text-primary text-[22px]">bolt</span>
+          <span className="material-symbols-outlined text-accent-text text-[22px]">bolt</span>
         </div>
 
-        {/* Barra de Filtros: iOS Segmented Control + Search */}
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-          {/* iOS Fluid Segmented Control */}
-          <div className="bg-surface-container rounded-xl p-1 flex items-center gap-1 select-none shadow-inner overflow-x-auto">
+        {/* Barra de Filtros: Tabs + Search */}
+        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <div className="ob-tabs" role="tablist">
             {[
               { id: 'TODAS', label: 'Todas' },
               { id: 'SOLICITADA', label: 'Pendentes' },
@@ -656,12 +655,10 @@ export function RequisicoesPage() {
               <button
                 key={st.id}
                 type="button"
+                role="tab"
+                aria-selected={filtroStatus === st.id}
                 onClick={() => setFiltroStatus(st.id)}
-                className={`flex-1 min-w-[76px] py-1.5 px-3 rounded-lg text-xs font-semibold text-center transition-all ${
-                  filtroStatus === st.id
-                    ? 'bg-surface-container-lowest text-primary shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                }`}
+                className="ob-tab"
               >
                 {st.label}
               </button>
@@ -669,20 +666,23 @@ export function RequisicoesPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="text"
-              placeholder="Buscar por #101, obra, solicitante..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              className="flex-1 sm:w-64 px-3.5 py-2 rounded-xl bg-surface-container-high focus:bg-surface-container-lowest border border-surface-container text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary shadow-sm transition-all"
-            />
+            <div className="ob-search flex-1 sm:w-64">
+              <span className="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Buscar por #101, obra, solicitante..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="ob-input text-xs sm:text-sm"
+              />
+            </div>
 
-            <label className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none">
+            <label className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none min-h-[44px]">
               <input
                 type="checkbox"
                 checked={ocultarAtendidas}
                 onChange={(e) => setOcultarAtendidas(e.target.checked)}
-                className="w-4 h-4 rounded text-primary"
+                className="w-4 h-4 rounded text-accent-text"
               />
               <span>Ocultar ja atendidas</span>
             </label>
@@ -692,7 +692,7 @@ export function RequisicoesPage() {
                 aria-label="Filtrar por status de exportacao SIENGE"
                 value={filtroSienge}
                 onChange={(e) => setFiltroSienge(e.target.value as any)}
-                className="px-3 py-2 rounded-xl bg-surface-container-high border border-surface-container text-xs text-on-surface font-medium focus:outline-none"
+                className="ob-input px-3 py-2 text-xs w-auto min-h-[44px]"
               >
                 <option value="TODAS">SIENGE: Todas</option>
                 <option value="PENDENTES">SIENGE: Pendentes</option>
@@ -702,13 +702,13 @@ export function RequisicoesPage() {
           </div>
         </div>
 
-        {/* Lista de Requisicoes (Inset Grouped Cards) */}
+        {/* Lista de Requisicoes */}
         {carregandoRequisicoes ? (
-          <div className="p-12 text-center text-sm text-on-surface-variant">
+          <div className="p-12 text-center text-sm text-on-surface-variant font-body">
             Carregando requisicoes...
           </div>
         ) : requisicoesFiltradas.length === 0 ? (
-          <div className="bg-surface-container-lowest p-8 rounded-2xl text-center text-sm text-on-surface-variant border border-dashed border-surface-container">
+          <div className="ob-card p-8 text-center text-sm text-on-surface-variant border border-dashed border-surface-container">
             Nenhuma requisicao encontrada para os filtros selecionados.
           </div>
         ) : (
@@ -723,28 +723,23 @@ export function RequisicoesPage() {
               return (
                 <div
                   key={r.id}
-                  className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-surface-container hover:shadow-md transition-all flex flex-col gap-3"
+                  className="ob-card p-4 sm:p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all"
                 >
                   {/* Linha Superior: #REQ e Status */}
                   <div className="flex flex-wrap justify-between items-center gap-2">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-sm sm:text-base font-bold text-primary tracking-tight">
+                      <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-accent-text tracking-tight">
                         #{r.numeroSequencial}
                       </span>
                       <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
-                      <span
-                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                        style={{ backgroundColor: statusConfig.bg, color: statusConfig.cor }}
-                      >
+                      <span className={`ob-badge ${statusConfig.badgeClass}`}>
                         {statusConfig.texto}
                       </span>
 
                       {podeAtenderEExportar && r.status === 'ATENDIDA' && (
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                            r.exportadaSienge
-                              ? 'bg-primary-fixed text-on-primary-fixed'
-                              : 'bg-surface-container-high text-on-surface-variant'
+                          className={`ob-badge ${
+                            r.exportadaSienge ? 'ob-badge--ok' : 'ob-badge--low'
                           }`}
                         >
                           {r.exportadaSienge ? 'Exportada SIENGE' : 'Pendente Exportacao SIENGE'}
@@ -752,7 +747,7 @@ export function RequisicoesPage() {
                       )}
                     </div>
 
-                    <span className="text-xs text-on-surface-variant">
+                    <span className="text-xs text-on-surface-variant font-mono tabular-nums">
                       Solicitado em: {new Date(r.solicitadaEm).toLocaleString('pt-BR')}
                     </span>
                   </div>
@@ -862,7 +857,7 @@ export function RequisicoesPage() {
                   </div>
 
                   {/* Observações e Ações do Card */}
-                  <div className="flex flex-wrap justify-between items-center gap-2 pt-1">
+                  <div className="flex flex-wrap justify-between items-center gap-2 pt-1 border-t border-surface-container">
                     <span className="text-xs text-on-surface-variant italic truncate max-w-md">
                       {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
                     </span>
@@ -872,7 +867,7 @@ export function RequisicoesPage() {
                         <button
                           type="button"
                           onClick={() => handleAbrirModalAtendimento(r)}
-                          className="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary text-xs font-semibold shadow-sm active:scale-95 transition-all"
+                          className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px]"
                         >
                           Atender / Entregar Material
                         </button>
@@ -891,7 +886,7 @@ export function RequisicoesPage() {
                               cancelarRequisicaoMutation.mutate(r.id)
                             }
                           }}
-                          className="px-3 py-2 rounded-xl bg-error-container text-on-error-container text-xs font-semibold hover:bg-error/20 active:scale-95 transition-all"
+                          className="ob-btn ob-btn--outline ob-btn--sm min-h-[44px] text-error border-error/30 hover:bg-error-container/20"
                         >
                           Cancelar Requisicao
                         </button>
@@ -907,109 +902,58 @@ export function RequisicoesPage() {
 
       {/* MODAL: ATENDER REQUISICAO (ALMOXARIFE / ADMIN) */}
       {requisicaoEmAtendimento && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '32px',
-              maxWidth: '620px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-2">
               Atender Requisicao #{requisicaoEmAtendimento.numeroSequencial}
             </h2>
-            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
+            <p className="text-sm text-on-surface-variant mb-4 font-body">
               Confirme ou ajuste as quantidades entregues e informe o nome de quem esta retirando o material na obra.
             </p>
 
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                padding: '16px',
-                marginBottom: '16px',
-                fontSize: '0.875rem',
-                color: '#334155',
-              }}
-            >
+            <div className="bg-surface-container-low border border-surface-container rounded-xl p-4 mb-4 text-sm text-on-surface space-y-1">
               <div>
                 <strong>Obra / Area:</strong> {requisicaoEmAtendimento.area?.obra?.codigo} -{' '}
                 {requisicaoEmAtendimento.area?.obra?.nome} &bull; {requisicaoEmAtendimento.area?.nome}
               </div>
-              <div style={{ marginTop: '8px' }}>
+              <div>
                 <strong>Solicitante:</strong> {requisicaoEmAtendimento.requisitante?.nome}
               </div>
             </div>
 
             {erroAtendimento && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '16px',
-                  borderRadius: '4px',
-                  marginBottom: '16px',
-                  fontSize: '0.875rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroAtendimento}
               </div>
             )}
 
-            <form onSubmit={handleSubmeterAtendimento} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleSubmeterAtendimento} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
+                <label className="block text-sm font-semibold text-on-surface mb-2 font-body">
                   Itens e Quantidades Entregues
                 </label>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="flex flex-col gap-2">
                   {requisicaoEmAtendimento.itens.map((it) => {
                     const sigla = it.material?.unidadeConsumo?.sigla || 'UN'
                     return (
                       <div
                         key={it.id}
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 140px',
-                          gap: '16px',
-                          alignItems: 'center',
-                          backgroundColor: '#f8fafc',
-                          padding: '8px 16px',
-                          borderRadius: '6px',
-                          border: '1px solid #e2e8f0',
-                        }}
+                        className="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-3 items-center bg-surface-container-low p-3.5 rounded-xl border border-surface-container"
                       >
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#0f172a' }}>
+                          <div className="font-semibold text-sm text-on-surface">
                             {it.material
                               ? `${it.material.codigo} - ${it.material.descricao}`
                               : `${it.ferramenta?.codigo} - ${it.ferramenta?.nome}`}
                           </div>
-                          <div style={{ fontSize: '0.875rem', color: '#475569' }}>
+                          <div className="text-xs text-on-surface-variant font-mono tabular-nums">
                             Quantidade solicitada: <strong>{Number(it.quantidade)} {sigla}</strong>
                           </div>
                         </div>
 
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.875rem', color: '#475569', marginBottom: '8px' }}>
+                          <label className="block text-xs text-on-surface-variant mb-1 font-body">
                             Qtd Entregue ({sigla})
                           </label>
                           <input
@@ -1026,16 +970,7 @@ export function RequisicoesPage() {
                                 [it.id]: e.target.value,
                               }))
                             }
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e1',
-                              backgroundColor: it.ferramenta ? '#f1f5f9' : '#ffffff',
-                              fontSize: '0.875rem',
-                              color: '#0f172a',
-                              boxSizing: 'border-box',
-                            }}
+                            className="ob-input font-mono tabular-nums text-sm py-2 px-3 w-full disabled:opacity-60"
                           />
                         </div>
                       </div>
@@ -1045,7 +980,7 @@ export function RequisicoesPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
+                <label className="block text-sm font-semibold text-on-surface mb-2 font-body">
                   Retirado por (Responsavel pelo recebimento na obra)
                 </label>
                 <input
@@ -1055,47 +990,22 @@ export function RequisicoesPage() {
                   placeholder="ex: Jose da Silva - Pedreiro"
                   value={retiradoPor}
                   onChange={(e) => setRetiradoPor(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    fontSize: '0.875rem',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input text-sm w-full font-body"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setRequisicaoEmAtendimento(null)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    fontWeight: 400,
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={atenderRequisicaoMutation.isPending}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#15803d',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {atenderRequisicaoMutation.isPending
                     ? 'Confirmando...'
@@ -1109,58 +1019,26 @@ export function RequisicoesPage() {
 
       {/* MODAL: NOVA REQUISICAO */}
       {modalNovaRequisicaoAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '32px',
-              maxWidth: '720px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-2xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl sm:text-2xl font-bold text-on-surface mb-2">
               Nova Requisicao de Obra
             </h2>
-            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
+            <p className="text-sm text-on-surface-variant mb-4 font-body">
               Informe o destino da aplicacao e adicione os materiais (limitados ao saldo disponivel no estoque da obra) ou ferramentas.
             </p>
 
             {erroForm && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '16px',
-                  borderRadius: '4px',
-                  marginBottom: '16px',
-                  fontSize: '0.875rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm font-body">
                 {erroForm}
               </div>
             )}
 
-            <form onSubmit={handleCriarRequisicao} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleCriarRequisicao} className="flex flex-col gap-4">
               {/* Selecao da Obra e Area */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
+                  <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                     Obra
                   </label>
                   <select
@@ -1170,15 +1048,7 @@ export function RequisicoesPage() {
                       setAreaIdSelecionada('')
                     }}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
-                      fontSize: '0.875rem',
-                    }}
+                    className="ob-input w-full text-sm font-body"
                   >
                     <option value="">Selecione a obra...</option>
                     {obras.map((o) => (
@@ -1190,7 +1060,7 @@ export function RequisicoesPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
+                  <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                     Area / Pavimento de Destino
                   </label>
                   <select
@@ -1198,15 +1068,7 @@ export function RequisicoesPage() {
                     onChange={(e) => setAreaIdSelecionada(e.target.value)}
                     required
                     disabled={!obraIdSelecionada}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: !obraIdSelecionada ? '#f1f5f9' : '#ffffff',
-                      color: '#0f172a',
-                      fontSize: '0.875rem',
-                    }}
+                    className="ob-input w-full text-sm disabled:opacity-50 font-body"
                   >
                     <option value="">
                       {!obraIdSelecionada ? 'Selecione a obra primeiro' : 'Selecione a area...'}
@@ -1222,64 +1084,36 @@ export function RequisicoesPage() {
 
               {/* Itens do Pedido */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 600 }}>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-semibold text-on-surface font-body">
                     Itens Solicitados
                   </label>
                   <button
                     type="button"
                     onClick={handleAdicionarItem}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#0369a1',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
+                    className="text-xs sm:text-sm font-semibold text-accent-text hover:underline cursor-pointer"
                   >
                     + Adicionar Outro Item
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="flex flex-col gap-2.5">
                   {itensForm.map((linha, idx) => (
                     <div
                       key={idx}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns:
-                          itensForm.length > 1
-                            ? '105px minmax(0, 1fr) 88px 28px'
-                            : '105px minmax(0, 1fr) 88px',
-                        gap: '8px',
-                        alignItems: 'center',
-                        backgroundColor: '#f8fafc',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        border: '1px solid #e2e8f0',
-                        boxSizing: 'border-box',
-                      }}
+                      className="grid grid-cols-1 sm:grid-cols-[105px_minmax(0,1fr)_100px_32px] gap-2 items-center bg-surface-container-low p-2.5 rounded-xl border border-surface-container"
                     >
                       {/* Tipo */}
                       <select
                         value={linha.tipo}
                         onChange={(e) => handleAtualizarItem(idx, 'tipo', e.target.value)}
-                        style={{
-                          padding: '8px',
-                          borderRadius: '4px',
-                          border: '1px solid #cbd5e1',
-                          backgroundColor: '#ffffff',
-                          fontSize: '0.875rem',
-                          color: '#0f172a',
-                        }}
+                        className="ob-input text-xs sm:text-sm py-2 px-2 font-body"
                       >
                         <option value="MATERIAL">Material</option>
                         <option value="FERRAMENTA">Ferramenta</option>
                       </select>
 
-                      {/* Select Item Pesquisavel: puxa exclusivamente materiais em estoque na obra */}
+                      {/* Select Item Pesquisavel */}
                       {linha.tipo === 'MATERIAL' ? (
                         <SeletorItemPesquisavel
                           itens={materiaisEmEstoqueNaObra.map(({ material: m, disponivel }) => ({
@@ -1331,44 +1165,28 @@ export function RequisicoesPage() {
                             placeholder="Qtd"
                             value={linha.quantidade}
                             onChange={(e) => handleAtualizarItem(idx, 'quantidade', parseFloat(e.target.value) || 0)}
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e1',
-                              backgroundColor: '#ffffff',
-                              fontSize: '0.875rem',
-                              color: '#0f172a',
-                              boxSizing: 'border-box',
-                            }}
+                            className="ob-input font-mono tabular-nums text-xs sm:text-sm py-2 px-2 w-full"
                           />
                         ) : (
-                          <span style={{ fontSize: '0.875rem', color: '#475569', textAlign: 'center', display: 'block' }}>
+                          <span className="text-xs text-on-surface-variant font-mono text-center block">
                             1 unidade
                           </span>
                         )}
                       </div>
 
                       {/* Botao Excluir Linha */}
-                      {itensForm.length > 1 && (
-                        <div style={{ textAlign: 'center' }}>
+                      {itensForm.length > 1 ? (
+                        <div className="text-center">
                           <button
                             type="button"
                             onClick={() => handleRemoverItem(idx)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#b91c1c',
-                              cursor: 'pointer',
-                              fontWeight: 600,
-                              fontSize: '1rem',
-                              padding: 0,
-                            }}
+                            className="text-error hover:text-on-error-container text-lg font-bold p-1 cursor-pointer"
+                            aria-label="Remover item"
                           >
                             &times;
                           </button>
                         </div>
-                      )}
+                      ) : <div />}
                     </div>
                   ))}
                 </div>
@@ -1377,27 +1195,19 @@ export function RequisicoesPage() {
                 {alertasModalPorMaterial.listaFaltaEstoque.length > 0 && (
                   <div
                     role="alert"
-                    style={{
-                      marginTop: '16px',
-                      backgroundColor: '#fef2f2',
-                      border: '1px solid #fecaca',
-                      borderRadius: '6px',
-                      padding: '16px 16px',
-                      color: '#991b1b',
-                      fontSize: '0.875rem',
-                    }}
+                    className="mt-4 bg-error-container text-on-error-container border border-error/20 rounded-xl p-4 text-sm font-body"
                   >
-                    <strong style={{ display: 'block', marginBottom: '8px' }}>
+                    <strong className="block mb-2 font-bold">
                       Saldo fisico insuficiente no estoque da obra (Bloqueio de emissao):
                     </strong>
-                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    <ul className="m-0 pl-4 list-disc space-y-1">
                       {alertasModalPorMaterial.listaFaltaEstoque.map((al) => (
                         <li key={al.materialId}>
                           <strong>
                             {al.codigo} - {al.descricao}:
                           </strong>{' '}
-                          solicitado {al.solicitado} {al.sigla}, mas ha apenas{' '}
-                          <strong>
+                          solicitado <span className="font-mono tabular-nums">{al.solicitado}</span> {al.sigla}, mas ha apenas{' '}
+                          <strong className="font-mono tabular-nums">
                             {al.disponivel} {al.sigla}
                           </strong>{' '}
                           disponiveis no almoxarifado desta obra.
@@ -1410,25 +1220,17 @@ export function RequisicoesPage() {
                 {alertasModalPorMaterial.listaEstouroOrcamento.length > 0 && (
                   <div
                     role="status"
-                    style={{
-                      marginTop: '16px',
-                      backgroundColor: '#fffbeb',
-                      border: '1px solid #fde68a',
-                      borderRadius: '6px',
-                      padding: '16px 16px',
-                      color: '#92400e',
-                      fontSize: '0.875rem',
-                    }}
+                    className="mt-4 bg-tertiary-fixed text-on-tertiary-fixed border border-tertiary/20 rounded-xl p-4 text-sm font-body"
                   >
-                    <strong style={{ display: 'block', marginBottom: '8px' }}>
+                    <strong className="block mb-2 font-bold">
                       Alerta da Engenharia: Estouro de Orcamento Previsto na Obra
                     </strong>
-                    <p style={{ margin: '0 0 8px', color: '#b45309' }}>
+                    <p className="mb-2 text-xs sm:text-sm opacity-90 font-body">
                       A quantidade solicitada ultrapassa o teto orcado pela Engenharia. O pedido
                       podera ser enviado se houver saldo fisico, mas ficara destacado no Painel de
                       Estouro de Orcamento:
                     </p>
-                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    <ul className="m-0 pl-4 list-disc space-y-1 text-xs sm:text-sm font-mono tabular-nums">
                       {alertasModalPorMaterial.listaEstouroOrcamento.map((al) => (
                         <li key={al.materialId}>
                           <strong>
@@ -1447,7 +1249,7 @@ export function RequisicoesPage() {
 
               {/* Observacao */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Observacao (opcional)
                 </label>
                 <input
@@ -1456,50 +1258,23 @@ export function RequisicoesPage() {
                   value={observacao}
                   onChange={(e) => setObservacao(e.target.value)}
                   placeholder="ex: Urgente para a concretagem do bloco norte"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    fontSize: '0.875rem',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input text-sm w-full font-body"
                 />
               </div>
 
               {/* Botoes do Modal */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalNovaRequisicaoAberto(false)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    fontWeight: 400,
-                    fontSize: '0.875rem',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarRequisicaoMutation.isPending}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0369a1',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                  }}
+                  className="ob-btn ob-btn--primary ob-btn--lg"
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}
                 </button>

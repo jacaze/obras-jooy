@@ -464,20 +464,20 @@ export function HomePage() {
           </div>
         )}
 
-        {/* Status Canteiro Visual Highlight Card (Stitch Inspired) */}
-        <div className="relative rounded-2xl overflow-hidden shadow-sm h-28 sm:h-32 flex items-end p-4 bg-gradient-to-r from-on-surface via-inverse-surface to-on-surface text-inverse-on-surface border border-surface-container">
-          <div className="relative z-10 flex items-center justify-between w-full">
+        {/* Status Canteiro Visual Highlight Card */}
+        <div className="relative rounded-2xl overflow-hidden shadow-sm p-4 sm:p-5 bg-surface-container-high text-on-surface border border-surface-container">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 w-full">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-fixed">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-accent-text">
                 Status do Canteiro Jooy
               </p>
-              <p className="text-sm sm:text-base font-bold text-white">
+              <p className="text-sm sm:text-base font-bold text-on-surface">
                 {obraPrincipalNome} • Estrutura & Alvenaria em Execução
               </p>
             </div>
             <Link
               to="/obras"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/15 backdrop-blur-md hover:bg-white/25 text-white text-xs font-semibold transition-all"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-on-surface text-xs font-semibold border border-surface-container transition-all"
             >
               <span>Ver Torres</span>
               <span className="material-symbols-outlined text-[16px]">chevron_right</span>

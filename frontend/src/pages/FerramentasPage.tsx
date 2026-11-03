@@ -195,7 +195,7 @@ export function FerramentasPage() {
                 setMensagemErro(null)
                 setModalFerramentaAberto(true)
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all"
+              className="ob-btn ob-btn--primary ob-btn--sm min-h-[48px]"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>+ Nova Ferramenta</span>
@@ -203,70 +203,38 @@ export function FerramentasPage() {
           )}
         </div>
 
-        {/* Industrial Metrics Dashboard: 4 Cards (Stitch Design) */}
+        {/* Industrial Metrics Dashboard: 4 Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Total Card */}
-          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                Total Cadastradas
-              </span>
-              <span className="text-2xl sm:text-3xl font-bold text-on-surface mt-1">
-                {totalFerramentas}
-              </span>
-              <span className="text-[11px] text-on-surface-variant mt-0.5">Ativos catalogados</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-              <span className="material-symbols-outlined text-[22px]">handyman</span>
-            </div>
+          <div className="ob-card ob-stat">
+            <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant font-mono">
+              Total Cadastradas
+            </span>
+            <div className="ob-stat__v">{totalFerramentas}</div>
+            <div className="ob-stat__d">Ativos catalogados</div>
           </div>
 
-          {/* Disponíveis Card */}
-          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-                Disponíveis
-              </span>
-              <span className="text-2xl sm:text-3xl font-bold text-secondary mt-1">
-                {totalDisponiveis}
-              </span>
-              <span className="text-[11px] text-secondary mt-0.5">Prontas para uso</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-secondary-fixed/50 flex items-center justify-center text-secondary">
-              <span className="material-symbols-outlined text-[22px]">check_circle</span>
-            </div>
+          <div className="ob-card ob-stat">
+            <span className="text-xs font-semibold uppercase tracking-wider text-secondary font-mono">
+              Disponíveis
+            </span>
+            <div className="ob-stat__v text-secondary">{totalDisponiveis}</div>
+            <div className="ob-stat__d">Prontas para uso</div>
           </div>
 
-          {/* Em Campo Card */}
-          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold uppercase tracking-wider text-tertiary">
-                Emprestadas
-              </span>
-              <span className="text-2xl sm:text-3xl font-bold text-tertiary mt-1">
-                {totalEmprestadas}
-              </span>
-              <span className="text-[11px] text-tertiary mt-0.5">Em campo</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-tertiary">
-              <span className="material-symbols-outlined text-[22px]">engineering</span>
-            </div>
+          <div className="ob-card ob-stat">
+            <span className="text-xs font-semibold uppercase tracking-wider text-tertiary font-mono">
+              Emprestadas
+            </span>
+            <div className="ob-stat__v text-tertiary">{totalEmprestadas}</div>
+            <div className="ob-stat__d">Em campo</div>
           </div>
 
-          {/* Manutenção Card */}
-          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold uppercase tracking-wider text-error">
-                Com Defeito
-              </span>
-              <span className="text-2xl sm:text-3xl font-bold text-error mt-1">
-                {totalComDefeito}
-              </span>
-              <span className="text-[11px] text-error mt-0.5">Em manutenção</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error">
-              <span className="material-symbols-outlined text-[22px]">build_circle</span>
-            </div>
+          <div className="ob-card ob-stat">
+            <span className="text-xs font-semibold uppercase tracking-wider text-error font-mono">
+              Com Defeito
+            </span>
+            <div className="ob-stat__v text-error">{totalComDefeito}</div>
+            <div className="ob-stat__d">Em manutenção</div>
           </div>
         </div>
 
@@ -274,13 +242,13 @@ export function FerramentasPage() {
         {mensagemSucesso && (
           <div
             role="status"
-            className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm"
+            className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fade-up"
           >
             <span className="font-medium">{mensagemSucesso}</span>
             <button
               type="button"
               onClick={() => setMensagemSucesso(null)}
-              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1"
+              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1 cursor-pointer"
             >
               &times;
             </button>
@@ -290,37 +258,35 @@ export function FerramentasPage() {
         {mensagemErro && (
           <div
             role="alert"
-            className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm"
+            className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fade-up"
           >
             <span className="font-medium">{mensagemErro}</span>
             <button
               type="button"
               onClick={() => setMensagemErro(null)}
-              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1"
+              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1 cursor-pointer"
             >
               &times;
             </button>
           </div>
         )}
 
-        {/* Filtros: iOS Search Bar + Segmented Control */}
+        {/* Filtros: Search Bar + Tabs */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-          <div className="relative flex items-center flex-1 max-w-md bg-surface-container-high rounded-xl px-3.5 h-11 focus-within:bg-surface-container-lowest focus-within:shadow-sm border border-surface-container transition-all">
-            <span className="material-symbols-outlined text-on-surface-variant text-[20px] mr-2">
-              search
-            </span>
+          <div className="ob-search flex-1 max-w-md">
+            <span className="material-symbols-outlined">search</span>
             <input
               id="filtro-ferramenta-busca"
               type="text"
               placeholder="Buscar por código ou nome..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              className="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none"
+              className="ob-input text-xs sm:text-sm"
             />
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="bg-surface-container rounded-xl p-1 flex items-center gap-1 select-none shadow-inner overflow-x-auto">
+            <div className="ob-tabs" role="tablist">
               {[
                 { id: '', label: 'Todas' },
                 { id: 'DISPONIVEL', label: 'Disponíveis' },
@@ -330,12 +296,10 @@ export function FerramentasPage() {
                 <button
                   key={st.id}
                   type="button"
+                  role="tab"
+                  aria-selected={statusFiltro === st.id}
                   onClick={() => setStatusFiltro(st.id)}
-                  className={`py-1.5 px-3 rounded-lg text-xs font-semibold text-center transition-all ${
-                    statusFiltro === st.id
-                      ? 'bg-surface-container-lowest text-primary shadow-sm'
-                      : 'text-on-surface-variant hover:text-on-surface'
-                  }`}
+                  className="ob-tab"
                 >
                   {st.label}
                 </button>
@@ -344,879 +308,481 @@ export function FerramentasPage() {
 
             <label
               htmlFor="filtro-ferramenta-ativas"
-              className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none"
+              className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none min-h-[44px]"
             >
               <input
                 id="filtro-ferramenta-ativas"
                 type="checkbox"
                 checked={somenteAtivas}
                 onChange={(e) => setSomenteAtivas(e.target.checked)}
-                className="w-4 h-4 rounded text-primary"
+                className="w-4 h-4 rounded text-accent-text"
               />
               <span>Exibir somente ativas</span>
             </label>
           </div>
         </div>
 
-        {/* Tabela de Ferramentas (Inset Grouped) */}
-        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container overflow-hidden">
+        {/* Tabela de Ferramentas */}
+        <div className="ob-card overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                <th
-                  style={{
-                    padding: '16px 16px',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#475569',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Código / Identificação
-                </th>
-                <th
-                  style={{
-                    padding: '16px 16px',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#475569',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Nome da Ferramenta
-                </th>
-                <th
-                  style={{
-                    padding: '16px 16px',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#475569',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Status
-                </th>
-                <th
-                  style={{
-                    padding: '16px 16px',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#475569',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Emprestado Para
-                </th>
-                {podeGerenciar && (
-                  <th
-                    style={{
-                      padding: '16px 16px',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      color: '#475569',
-                      textTransform: 'uppercase',
-                      textAlign: 'right',
-                    }}
-                  >
-                    Ações Operacionais
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {carregandoFerramentas ? (
+            <table className="ob-table">
+              <thead>
                 <tr>
-                  <td
-                    colSpan={podeGerenciar ? 5 : 4}
-                    style={{ padding: '32px', textAlign: 'center', color: '#475569' }}
-                  >
-                    Carregando ferramentas cadastradas...
-                  </td>
+                  <th>Código / Identificação</th>
+                  <th>Nome da Ferramenta</th>
+                  <th>Status</th>
+                  <th>Emprestado Para</th>
+                  {podeGerenciar && <th style={{ textAlign: 'right' }}>Ações Operacionais</th>}
                 </tr>
-              ) : ferramentas.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={podeGerenciar ? 5 : 4}
-                    style={{ padding: '32px', textAlign: 'center', color: '#475569' }}
-                  >
-                    Nenhuma ferramenta encontrada com os filtros selecionados.
-                  </td>
-                </tr>
-              ) : (
-                ferramentas.map((fer) => {
-                  return (
-                    <tr
-                      key={fer.id}
-                      style={{
-                        borderBottom: '1px solid #f1f5f9',
-                        opacity: fer.ativo ? 1 : 0.6,
-                      }}
+              </thead>
+              <tbody>
+                {carregandoFerramentas ? (
+                  <tr>
+                    <td
+                      colSpan={podeGerenciar ? 5 : 4}
+                      className="p-8 text-center text-on-surface-variant font-body"
                     >
-                      <td
-                        style={{
-                          padding: '16px 16px',
-                          fontWeight: 600,
-                          color: '#0f172a',
-                          fontSize: '0.875rem',
-                          fontFamily: 'monospace',
-                        }}
+                      Carregando ferramentas cadastradas...
+                    </td>
+                  </tr>
+                ) : ferramentas.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={podeGerenciar ? 5 : 4}
+                      className="p-8 text-center text-on-surface-variant font-body"
+                    >
+                      Nenhuma ferramenta encontrada com os filtros selecionados.
+                    </td>
+                  </tr>
+                ) : (
+                  ferramentas.map((fer) => {
+                    return (
+                      <tr
+                        key={fer.id}
+                        className={!fer.ativo ? 'opacity-60' : undefined}
                       >
-                        {fer.codigo}
-                        {!fer.ativo && (
-                          <span
-                            style={{
-                              marginLeft: '8px',
-                              padding: '8px 8px',
-                              backgroundColor: '#e2e8f0',
-                              color: '#475569',
-                              borderRadius: '4px',
-                              fontSize: '0.875rem',
-                              fontFamily: 'system-ui, sans-serif',
-                            }}
-                          >
-                            Inativa
+                        <td>
+                          <span className="ob-mono font-semibold text-accent-text">
+                            {fer.codigo}
                           </span>
-                        )}
-                      </td>
-                      <td
-                        style={{
-                          padding: '16px 16px',
-                          fontWeight: 600,
-                          color: '#1e293b',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        {fer.nome}
-                      </td>
-                      <td style={{ padding: '16px 16px' }}>
-                        {fer.status === 'DISPONIVEL' && (
-                          <span
-                            style={{
-                              padding: '8px 8px',
-                              backgroundColor: '#dcfce7',
-                              color: '#15803d',
-                              borderRadius: '4px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Disponível
-                          </span>
-                        )}
-                        {fer.status === 'EMPRESTADO' && (
-                          <span
-                            style={{
-                              padding: '8px 8px',
-                              backgroundColor: '#fef3c7',
-                              color: '#b45309',
-                              borderRadius: '4px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Emprestado
-                          </span>
-                        )}
-                        {fer.status === 'COM_DEFEITO' && (
-                          <span
-                            style={{
-                              padding: '8px 8px',
-                              backgroundColor: '#fee2e2',
-                              color: '#b91c1c',
-                              borderRadius: '4px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Com Defeito
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: '16px 16px', fontSize: '0.875rem' }}>
-                        {fer.status === 'EMPRESTADO' && fer.emprestadoPara ? (
-                          <div>
-                            <span style={{ fontWeight: 600, color: '#0369a1' }}>
-                              {fer.emprestadoPara.nome}
+                          {!fer.ativo && (
+                            <span className="ml-2 ob-badge ob-badge--low">
+                              Inativa
                             </span>
-                            <span
-                              style={{ color: '#475569', fontSize: '0.875rem', marginLeft: '8px' }}
-                            >
-                              (@{fer.emprestadoPara.login})
-                            </span>
-                          </div>
-                        ) : (
-                          <span style={{ color: '#475569' }}>-</span>
-                        )}
-                      </td>
-                      {podeGerenciar && (
-                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              gap: '8px',
-                              flexWrap: 'wrap',
-                              justifyContent: 'flex-end',
-                            }}
-                          >
-                            {fer.status === 'DISPONIVEL' && fer.ativo && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFerramentaParaEmprestimo(fer)
-                                  setUsuarioEmprestimoId('')
-                                  setMensagemErro(null)
-                                }}
-                                style={{
-                                  padding: '8px 8px',
-                                  backgroundColor: '#0369a1',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  color: '#ffffff',
-                                  fontSize: '0.875rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Emprestar
-                              </button>
-                            )}
-
-                            {fer.status === 'EMPRESTADO' && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFerramentaParaDevolucao(fer)
-                                  setDevolucaoComDefeito(false)
-                                  setMensagemErro(null)
-                                }}
-                                style={{
-                                  padding: '8px 8px',
-                                  backgroundColor: '#15803d',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  color: '#ffffff',
-                                  fontSize: '0.875rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Devolver
-                              </button>
-                            )}
-
-                            {fer.status === 'COM_DEFEITO' && (
-                              <button
-                                type="button"
-                                disabled={atualizarStatusFerramentaMutation.isPending}
-                                onClick={() =>
-                                  atualizarStatusFerramentaMutation.mutate({
-                                    id: fer.id,
-                                    dados: { status: 'DISPONIVEL' },
-                                    mensagemOk: `Manutencao concluida: ${fer.codigo} (${fer.nome}) liberada para uso.`,
-                                  })
-                                }
-                                style={{
-                                  padding: '8px 8px',
-                                  backgroundColor: '#0f766e',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  color: '#ffffff',
-                                  fontSize: '0.875rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Liberar Conserto
-                              </button>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFerramentaEmEdicao(fer)
-                                setFormCodigo(fer.codigo)
-                                setFormNome(fer.nome)
-                                setModalFerramentaAberto(true)
-                              }}
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                color: '#1e293b',
-                                fontSize: '0.875rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              Editar
-                            </button>
-
-                            {fer.status !== 'EMPRESTADO' && (
-                              <button
-                                type="button"
-                                disabled={atualizarStatusFerramentaMutation.isPending}
-                                onClick={() =>
-                                  atualizarStatusFerramentaMutation.mutate({
-                                    id: fer.id,
-                                    dados: { ativo: !fer.ativo },
-                                    mensagemOk: fer.ativo
-                                      ? `Ferramenta ${fer.codigo} inativada no catalogo.`
-                                      : `Ferramenta ${fer.codigo} reativada no catalogo.`,
-                                  })
-                                }
-                                style={{
-                                  padding: '8px 8px',
-                                  backgroundColor: fer.ativo ? '#fff1f2' : '#f0fdf4',
-                                  border: `1px solid ${fer.ativo ? '#fecdd3' : '#bbf7d0'}`,
-                                  borderRadius: '4px',
-                                  color: fer.ativo ? '#be123c' : '#15803d',
-                                  fontSize: '0.875rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                {fer.ativo ? 'Inativar' : 'Reativar'}
-                              </button>
-                            )}
-                          </div>
+                          )}
                         </td>
-                      )}
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
+                        <td className="font-medium text-on-surface">
+                          {fer.nome}
+                        </td>
+                        <td>
+                          {fer.status === 'DISPONIVEL' && (
+                            <span className="ob-badge ob-badge--ok">
+                              Disponível
+                            </span>
+                          )}
+                          {fer.status === 'EMPRESTADO' && (
+                            <span className="ob-badge ob-badge--info">
+                              Emprestado
+                            </span>
+                          )}
+                          {fer.status === 'COM_DEFEITO' && (
+                            <span className="ob-badge ob-badge--crit">
+                              Com Defeito
+                            </span>
+                          )}
+                        </td>
+                        <td className="text-sm font-body">
+                          {fer.status === 'EMPRESTADO' && fer.emprestadoPara ? (
+                            <div>
+                              <span className="font-semibold text-on-surface">
+                                {fer.emprestadoPara.nome}
+                              </span>
+                              <span className="text-on-surface-variant text-xs ml-1.5 font-mono">
+                                (@{fer.emprestadoPara.login})
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-on-surface-variant">-</span>
+                          )}
+                        </td>
+                        {podeGerenciar && (
+                          <td style={{ textAlign: 'right' }}>
+                            <div className="inline-flex items-center gap-2 flex-wrap justify-end">
+                              {fer.status === 'DISPONIVEL' && fer.ativo && (
+                                <button
+                                  type="button"
+                                  aria-label="Emprestar"
+                                  onClick={() => {
+                                    setFerramentaParaEmprestimo(fer)
+                                    setUsuarioEmprestimoId('')
+                                    setMensagemErro(null)
+                                  }}
+                                  className="ob-btn ob-btn--solid ob-btn--sm"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">output</span>
+                                  <span>Registrar saída</span>
+                                </button>
+                              )}
+
+                              {fer.status === 'EMPRESTADO' && (
+                                <button
+                                  type="button"
+                                  aria-label="Devolver"
+                                  onClick={() => {
+                                    setFerramentaParaDevolucao(fer)
+                                    setDevolucaoComDefeito(false)
+                                    setMensagemErro(null)
+                                  }}
+                                  className="ob-btn ob-btn--primary ob-btn--sm"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">assignment_return</span>
+                                  <span>Registrar devolução</span>
+                                </button>
+                              )}
+
+                              {fer.status === 'COM_DEFEITO' && (
+                                <button
+                                  type="button"
+                                  aria-label="Liberar Conserto"
+                                  disabled={atualizarStatusFerramentaMutation.isPending}
+                                  onClick={() =>
+                                    atualizarStatusFerramentaMutation.mutate({
+                                      id: fer.id,
+                                      dados: { status: 'DISPONIVEL' },
+                                      mensagemOk: `Manutencao concluida: ${fer.codigo} (${fer.nome}) liberada para uso.`,
+                                    })
+                                  }
+                                  className="ob-btn ob-btn--outline ob-btn--sm"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">build</span>
+                                  <span>Liberar Conserto</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                aria-label="Editar"
+                                onClick={() => {
+                                  setFerramentaEmEdicao(fer)
+                                  setFormCodigo(fer.codigo)
+                                  setFormNome(fer.nome)
+                                  setModalFerramentaAberto(true)
+                                }}
+                                className="ob-btn ob-btn--outline ob-btn--sm"
+                              >
+                                Editar
+                              </button>
+
+                              {fer.status !== 'EMPRESTADO' && (
+                                <button
+                                  type="button"
+                                  disabled={atualizarStatusFerramentaMutation.isPending}
+                                  onClick={() =>
+                                    atualizarStatusFerramentaMutation.mutate({
+                                      id: fer.id,
+                                      dados: { ativo: !fer.ativo },
+                                      mensagemOk: fer.ativo
+                                        ? `Ferramenta ${fer.codigo} inativada no catalogo.`
+                                        : `Ferramenta ${fer.codigo} reativada no catalogo.`,
+                                    })
+                                  }
+                                  className="ob-btn ob-btn--outline ob-btn--sm text-error border-error/30 hover:bg-error-container/20"
+                                >
+                                  {fer.ativo ? 'Inativar' : 'Reativar'}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Modal Registrar Emprestimo */}
-      {ferramentaParaEmprestimo && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '480px',
-              width: '100%',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
-                Registrar Emprestimo de Ferramenta
-              </h2>
-              <button
-                type="button"
-                onClick={() => setFerramentaParaEmprestimo(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1rem',
-                  color: '#475569',
-                  cursor: 'pointer',
-                }}
-              >
-                X
-              </button>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                padding: '16px',
-                marginBottom: '16px',
-                fontSize: '0.875rem',
-                color: '#334155',
-              }}
-            >
-              <div>
-                <strong>Ferramenta:</strong> {ferramentaParaEmprestimo.codigo} -{' '}
-                {ferramentaParaEmprestimo.nome}
-              </div>
-              <div style={{ marginTop: '8px', color: '#475569' }}>
-                Selecione o colaborador responsavel pela retirada e guarda do equipamento.
-              </div>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (!usuarioEmprestimoId) {
-                  setMensagemErro('Selecione o usuario solicitante para registrar o emprestimo.')
-                  return
-                }
-                emprestarFerramentaMutation.mutate({
-                  id: ferramentaParaEmprestimo.id,
-                  usuarioId: usuarioEmprestimoId,
-                })
-              }}
-              style={{ display: 'grid', gap: '16px' }}
-            >
-              <div>
-                <label
-                  htmlFor="emprestimo-usuario"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    marginBottom: '8px',
-                  }}
-                >
-                  Usuario Solicitante (Responsavel na Obra) *
-                </label>
-                <select
-                  id="emprestimo-usuario"
-                  required
-                  value={usuarioEmprestimoId}
-                  onChange={(e) => setUsuarioEmprestimoId(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">Selecione o colaborador...</option>
-                  {usuariosAtivos.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.nome} (@{u.login} - {u.cargo?.nome || u.perfil})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '16px',
-                  marginTop: '8px',
-                }}
-              >
+        {/* Modal Registrar Emprestimo */}
+        {ferramentaParaEmprestimo && (
+          <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+            <div className="w-full max-w-lg bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="ob-heading text-xl font-bold text-on-surface m-0">
+                  Registrar Emprestimo de Ferramenta
+                </h2>
                 <button
                   type="button"
                   onClick={() => setFerramentaParaEmprestimo(null)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#334155',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="text-on-surface-variant hover:text-on-surface text-lg cursor-pointer p-1"
+                  aria-label="Fechar"
                 >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={emprestarFerramentaMutation.isPending}
-                  style={{
-                    padding: '8px 24px',
-                    backgroundColor: '#0369a1',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {emprestarFerramentaMutation.isPending
-                    ? 'Registrando...'
-                    : 'Confirmar Emprestimo'}
+                  &times;
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Modal Registrar Devolucao */}
-      {ferramentaParaDevolucao && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '100%',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
-                Registrar Devolucao de Ferramenta
-              </h2>
-              <button
-                type="button"
-                onClick={() => setFerramentaParaDevolucao(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1rem',
-                  color: '#475569',
-                  cursor: 'pointer',
-                }}
-              >
-                X
-              </button>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                padding: '16px',
-                marginBottom: '16px',
-                fontSize: '0.875rem',
-                color: '#334155',
-              }}
-            >
-              <div>
-                <strong>Ferramenta:</strong> {ferramentaParaDevolucao.codigo} -{' '}
-                {ferramentaParaDevolucao.nome}
-              </div>
-              {ferramentaParaDevolucao.emprestadoPara && (
-                <div style={{ marginTop: '8px' }}>
-                  <strong>Devolvida por:</strong> {ferramentaParaDevolucao.emprestadoPara.nome} (@
-                  {ferramentaParaDevolucao.emprestadoPara.login})
+              <div className="bg-surface-container-low border border-surface-container rounded-xl p-4 mb-4 text-sm text-on-surface space-y-1">
+                <div>
+                  <strong>Ferramenta:</strong> {ferramentaParaEmprestimo.codigo} -{' '}
+                  {ferramentaParaEmprestimo.nome}
                 </div>
-              )}
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                devolverFerramentaMutation.mutate({
-                  id: ferramentaParaDevolucao.id,
-                  comDefeito: devolucaoComDefeito,
-                })
-              }}
-              style={{ display: 'grid', gap: '16px' }}
-            >
-              <div style={{ display: 'grid', gap: '8px' }}>
-                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>
-                  Condicao de retorno ao almoxarifado:
-                </span>
-
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: `1px solid ${!devolucaoComDefeito ? '#15803d' : '#cbd5e1'}`,
-                    backgroundColor: !devolucaoComDefeito ? '#f0fdf4' : '#ffffff',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    color: '#0f172a',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="condicao-devolucao"
-                    checked={!devolucaoComDefeito}
-                    onChange={() => setDevolucaoComDefeito(false)}
-                  />
-                  <span>
-                    <strong>Devolvida em perfeito estado</strong> (Retorna para Disponivel)
-                  </span>
-                </label>
-
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: `1px solid ${devolucaoComDefeito ? '#b91c1c' : '#cbd5e1'}`,
-                    backgroundColor: devolucaoComDefeito ? '#fef2f2' : '#ffffff',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    color: '#0f172a',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="condicao-devolucao"
-                    checked={devolucaoComDefeito}
-                    onChange={() => setDevolucaoComDefeito(true)}
-                  />
-                  <span>
-                    <strong>Devolvida com defeito / avaria</strong> (Bloqueia para Manutencao)
-                  </span>
-                </label>
+                <div className="text-xs text-on-surface-variant">
+                  Selecione o colaborador responsavel pela retirada e guarda do equipamento.
+                </div>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '16px',
-                  marginTop: '8px',
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (!usuarioEmprestimoId) {
+                    setMensagemErro('Selecione o usuario solicitante para registrar o emprestimo.')
+                    return
+                  }
+                  emprestarFerramentaMutation.mutate({
+                    id: ferramentaParaEmprestimo.id,
+                    usuarioId: usuarioEmprestimoId,
+                  })
                 }}
+                className="flex flex-col gap-4"
               >
+                <div>
+                  <label
+                    htmlFor="emprestimo-usuario"
+                    className="block text-sm font-semibold text-on-surface mb-1.5"
+                  >
+                    Usuario Solicitante (Responsavel na Obra) *
+                  </label>
+                  <select
+                    id="emprestimo-usuario"
+                    required
+                    value={usuarioEmprestimoId}
+                    onChange={(e) => setUsuarioEmprestimoId(e.target.value)}
+                    className="ob-input w-full text-sm font-body"
+                  >
+                    <option value="">Selecione o colaborador...</option>
+                    {usuariosAtivos.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.nome} (@{u.login} - {u.cargo?.nome || u.perfil})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setFerramentaParaEmprestimo(null)}
+                    className="ob-btn ob-btn--outline"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={emprestarFerramentaMutation.isPending}
+                    className="ob-btn ob-btn--solid"
+                  >
+                    {emprestarFerramentaMutation.isPending
+                      ? 'Registrando...'
+                      : 'Confirmar Emprestimo'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Registrar Devolucao */}
+        {ferramentaParaDevolucao && (
+          <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+            <div className="w-full max-w-lg bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="ob-heading text-xl font-bold text-on-surface m-0">
+                  Registrar Devolucao de Ferramenta
+                </h2>
                 <button
                   type="button"
                   onClick={() => setFerramentaParaDevolucao(null)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#334155',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="text-on-surface-variant hover:text-on-surface text-lg cursor-pointer p-1"
+                  aria-label="Fechar"
                 >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={devolverFerramentaMutation.isPending}
-                  style={{
-                    padding: '8px 24px',
-                    backgroundColor: devolucaoComDefeito ? '#b91c1c' : '#15803d',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {devolverFerramentaMutation.isPending
-                    ? 'Confirmando...'
-                    : 'Confirmar Devolucao'}
+                  &times;
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Modal Criar/Editar Ferramenta */}
-      {modalFerramentaAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '100%',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
-                {ferramentaEmEdicao
-                  ? `Editar Ferramenta (${ferramentaEmEdicao.codigo})`
-                  : 'Nova Ferramenta'}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setModalFerramentaAberto(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1rem',
-                  color: '#475569',
-                  cursor: 'pointer',
+              <div className="bg-surface-container-low border border-surface-container rounded-xl p-4 mb-4 text-sm text-on-surface space-y-1">
+                <div>
+                  <strong>Ferramenta:</strong> {ferramentaParaDevolucao.codigo} -{' '}
+                  {ferramentaParaDevolucao.nome}
+                </div>
+                {ferramentaParaDevolucao.emprestadoPara && (
+                  <div className="text-xs text-on-surface-variant">
+                    <strong>Devolvida por:</strong> {ferramentaParaDevolucao.emprestadoPara.nome} (@
+                    {ferramentaParaDevolucao.emprestadoPara.login})
+                  </div>
+                )}
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  devolverFerramentaMutation.mutate({
+                    id: ferramentaParaDevolucao.id,
+                    comDefeito: devolucaoComDefeito,
+                  })
                 }}
+                className="flex flex-col gap-4"
               >
-                X
-              </button>
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-on-surface">
+                    Condicao de retorno ao almoxarifado:
+                  </span>
+
+                  <label
+                    className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                      !devolucaoComDefeito
+                        ? 'border-secondary bg-secondary-container/30 text-on-surface'
+                        : 'border-surface-container bg-surface text-on-surface-variant'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="condicao-devolucao"
+                      checked={!devolucaoComDefeito}
+                      onChange={() => setDevolucaoComDefeito(false)}
+                      className="w-4 h-4 text-secondary"
+                    />
+                    <span className="text-sm">
+                      <strong>Devolvida em perfeito estado</strong> (Retorna para Disponivel)
+                    </span>
+                  </label>
+
+                  <label
+                    className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                      devolucaoComDefeito
+                        ? 'border-error bg-error-container/30 text-on-surface'
+                        : 'border-surface-container bg-surface text-on-surface-variant'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="condicao-devolucao"
+                      checked={devolucaoComDefeito}
+                      onChange={() => setDevolucaoComDefeito(true)}
+                      className="w-4 h-4 text-error"
+                    />
+                    <span className="text-sm">
+                      <strong>Devolvida com defeito / avaria</strong> (Bloqueia para Manutencao)
+                    </span>
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setFerramentaParaDevolucao(null)}
+                    className="ob-btn ob-btn--outline"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={devolverFerramentaMutation.isPending}
+                    className={`ob-btn ${devolucaoComDefeito ? 'ob-btn--solid text-error' : 'ob-btn--primary'}`}
+                  >
+                    {devolverFerramentaMutation.isPending
+                      ? 'Confirmando...'
+                      : 'Confirmar Devolucao'}
+                  </button>
+                </div>
+              </form>
             </div>
+          </div>
+        )}
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                salvarFerramentaMutation.mutate()
-              }}
-              style={{ display: 'grid', gap: '16px' }}
-            >
-              <div>
-                <label
-                  htmlFor="ferramenta-codigo"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    marginBottom: '8px',
-                  }}
-                >
-                  Código / Identificação da Obra *
-                </label>
-                <input
-                  id="ferramenta-codigo"
-                  type="text"
-                  required
-                  disabled={!!ferramentaEmEdicao}
-                  value={formCodigo}
-                  onChange={(e) => setFormCodigo(e.target.value.toUpperCase())}
-                  placeholder="Ex: MART-01 ou TAG-549"
-                  style={{
-                    width: '100%',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                    boxSizing: 'border-box',
-                    backgroundColor: ferramentaEmEdicao ? '#f1f5f9' : '#ffffff',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="ferramenta-nome"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    marginBottom: '8px',
-                  }}
-                >
-                  Nome da Ferramenta *
-                </label>
-                <input
-                  id="ferramenta-nome"
-                  type="text"
-                  required
-                  value={formNome}
-                  onChange={(e) => setFormNome(e.target.value)}
-                  placeholder="Ex: Martelete Perfurador Rompedor 800W"
-                  style={{
-                    width: '100%',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '16px',
-                  marginTop: '8px',
-                }}
-              >
+        {/* Modal Criar/Editar Ferramenta */}
+        {modalFerramentaAberto && (
+          <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+            <div className="w-full max-w-lg bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="ob-heading text-xl font-bold text-on-surface m-0">
+                  {ferramentaEmEdicao
+                    ? `Editar Ferramenta (${ferramentaEmEdicao.codigo})`
+                    : 'Nova Ferramenta'}
+                </h2>
                 <button
                   type="button"
                   onClick={() => setModalFerramentaAberto(false)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#334155',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="text-on-surface-variant hover:text-on-surface text-lg cursor-pointer p-1"
+                  aria-label="Fechar"
                 >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={salvarFerramentaMutation.isPending}
-                  style={{
-                    padding: '8px 24px',
-                    backgroundColor: '#0369a1',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {salvarFerramentaMutation.isPending ? 'Salvando...' : 'Salvar Ferramenta'}
+                  &times;
                 </button>
               </div>
-            </form>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  salvarFerramentaMutation.mutate()
+                }}
+                className="flex flex-col gap-4"
+              >
+                <div>
+                  <label
+                    htmlFor="ferramenta-codigo"
+                    className="block text-sm font-semibold text-on-surface mb-1.5"
+                  >
+                    Código / Identificação da Obra *
+                  </label>
+                  <input
+                    id="ferramenta-codigo"
+                    type="text"
+                    required
+                    disabled={!!ferramentaEmEdicao}
+                    value={formCodigo}
+                    onChange={(e) => setFormCodigo(e.target.value.toUpperCase())}
+                    placeholder="Ex: MART-01 ou TAG-549"
+                    className="ob-input w-full font-mono uppercase text-sm disabled:opacity-50"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="ferramenta-nome"
+                    className="block text-sm font-semibold text-on-surface mb-1.5"
+                  >
+                    Nome da Ferramenta *
+                  </label>
+                  <input
+                    id="ferramenta-nome"
+                    type="text"
+                    required
+                    value={formNome}
+                    onChange={(e) => setFormNome(e.target.value)}
+                    placeholder="Ex: Martelete Perfurador Rompedor 800W"
+                    className="ob-input w-full text-sm"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalFerramentaAberto(false)}
+                    className="ob-btn ob-btn--outline"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={salvarFerramentaMutation.isPending}
+                    className="ob-btn ob-btn--primary"
+                  >
+                    {salvarFerramentaMutation.isPending ? 'Salvando...' : 'Salvar Ferramenta'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </main>
   )
