@@ -71,80 +71,35 @@ export function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0f172a',
-        padding: '24px 16px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          backgroundColor: '#1e293b',
-          borderRadius: '8px',
-          padding: '32px',
-          border: '1px solid #334155',
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              color: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.14)',
-              padding: '8px 16px',
-              borderRadius: '999px',
-              marginBottom: '8px',
-            }}
-          >
-            JOOY Construtora • MVP Almoxarifado
-          </span>
-          <h1 style={{ color: '#f8fafc', margin: 0, fontSize: '2rem', fontWeight: 600 }}>
+    <div className="min-h-screen flex items-center justify-center bg-surface p-4 sm:p-6 font-body text-on-surface">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container shadow-sm mb-3">
+            <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+            <span className="text-caption-1 font-semibold text-on-surface tracking-tight">
+              JOOY Construtora • MVP Almoxarifado
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface">
             Obras Jooy
           </h1>
-          <p style={{ color: '#cbd5e1', margin: '8px 0 0', fontSize: '1rem', fontWeight: 400 }}>
+          <p className="text-caption-1 text-on-surface-variant mt-1.5">
             Acesso ao Sistema de Almoxarifado e Controle de Obras
           </p>
         </div>
 
         {erro && (
-          <div
-            style={{
-              backgroundColor: '#7f1d1d',
-              color: '#fee2e2',
-              padding: '16px',
-              borderRadius: '8px',
-              marginBottom: '16px',
-              fontSize: '0.875rem',
-              fontWeight: 400,
-              border: '1px solid #991b1b',
-            }}
-          >
-            {erro}
+          <div className="bg-error-container/20 border border-error/30 text-error p-3.5 rounded-xl mb-4 text-caption-1 font-medium flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{erro}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label
               htmlFor="login"
-              style={{
-                display: 'block',
-                color: '#cbd5e1',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                marginBottom: '8px',
-              }}
+              className="block text-caption-1 font-semibold text-on-surface mb-1.5"
             >
               Login de Usuario
             </label>
@@ -155,32 +110,14 @@ export function LoginPage() {
               value={loginVal}
               onChange={(e) => setLoginVal(e.target.value)}
               placeholder="ex: admin"
-              style={{
-                width: '100%',
-                minHeight: '48px',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
-                fontSize: '1rem',
-                fontWeight: 400,
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
+              className="w-full min-h-[48px] px-3.5 rounded-xl bg-surface-container-low border border-surface-container text-on-surface text-body outline-none focus:border-primary transition-all"
             />
           </div>
 
           <div>
             <label
               htmlFor="senha"
-              style={{
-                display: 'block',
-                color: '#cbd5e1',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                marginBottom: '8px',
-              }}
+              className="block text-caption-1 font-semibold text-on-surface mb-1.5"
             >
               Senha
             </label>
@@ -191,96 +128,39 @@ export function LoginPage() {
               value={senhaVal}
               onChange={(e) => setSenhaVal(e.target.value)}
               placeholder="Sua senha de acesso"
-              style={{
-                width: '100%',
-                minHeight: '48px',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
-                fontSize: '1rem',
-                fontWeight: 400,
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
+              className="w-full min-h-[48px] px-3.5 rounded-xl bg-surface-container-low border border-surface-container text-on-surface text-body outline-none focus:border-primary transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={submetendo}
-            style={{
-              marginTop: '8px',
-              minHeight: '48px',
-              backgroundColor: '#0369a1',
-              color: '#ffffff',
-              padding: '8px 24px',
-              borderRadius: '8px',
-              border: 'none',
-              fontWeight: 600,
-              fontSize: '1rem',
-              cursor: submetendo ? 'not-allowed' : 'pointer',
-              opacity: submetendo ? 0.7 : 1,
-            }}
+            className="w-full min-h-[48px] bg-primary text-on-primary rounded-xl font-headline text-headline flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-95 transition-all cursor-pointer disabled:opacity-60 mt-1"
           >
-            {submetendo ? 'Entrando...' : 'Entrar no Sistema'}
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">login</span>
+            <span>{submetendo ? 'Entrando...' : 'Entrar no Sistema'}</span>
           </button>
         </form>
 
         {/* Painel de Acesso Rapido para Apresentacao do MVP */}
-        <div
-          style={{
-            marginTop: '24px',
-            paddingTop: '24px',
-            borderTop: '1px solid #334155',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#cbd5e1',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '16px',
-            }}
-          >
+        <div className="mt-6 pt-5 border-t border-surface-container">
+          <div className="text-caption-2 uppercase font-semibold tracking-wider text-on-surface-variant mb-3 text-center sm:text-left">
             Acesso Rapido de Demonstracao (1 Clique por Perfil)
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '8px',
-            }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {CONTAS_DEMO_MVP.map((conta) => (
               <button
                 key={conta.login}
                 type="button"
                 disabled={submetendo}
                 onClick={() => handleAcessoRapidoDemo(conta)}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  justifyContent: 'center',
-                  minHeight: '48px',
-                  textAlign: 'left',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid #475569',
-                  backgroundColor: '#0f172a',
-                  color: '#f8fafc',
-                  cursor: submetendo ? 'not-allowed' : 'pointer',
-                }}
+                className="flex flex-col items-start justify-center min-h-[48px] p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container text-left transition-all active:scale-[0.98] cursor-pointer"
               >
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#38bdf8' }}>
+                <div className="text-caption-1 font-semibold text-primary">
                   {conta.rotulo}
                 </div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 400, color: '#cbd5e1' }}>
+                <div className="text-caption-2 text-on-surface-variant line-clamp-1">
                   {conta.papel}
                 </div>
               </button>

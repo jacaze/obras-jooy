@@ -549,481 +549,361 @@ export function RequisicoesPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
-      {/* Cabecalho */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-          flexWrap: 'wrap',
-          gap: '16px',
-        }}
-      >
-        <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 8px', fontSize: '2rem' }}>
-            {ehEncarregado ? 'Minhas Requisicoes de Obra' : 'Painel de Requisicoes de Obra'}
-          </h1>
-          <p style={{ color: '#475569', margin: 0, fontSize: '0.875rem' }}>
-            {ehEncarregado
-              ? 'Solicite materiais e ferramentas disponiveis no estoque da obra e acompanhe seus pedidos'
-              : 'Atenda requisicoes com baixa automatica no estoque e exporte os registros atendidos para o SIENGE'}
-          </p>
-        </div>
+    <main className="flex flex-col w-full min-h-screen bg-surface pb-28">
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 flex flex-col gap-6">
+        {/* Cabecalho Nativo iOS */}
+        <div className="flex flex-wrap justify-between items-center gap-4 pt-2">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Controle de Canteiro
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
+              {ehEncarregado ? 'Minhas Requisicoes de Obra' : 'Requisicoes de Obra'}
+            </h1>
+            <p className="text-xs sm:text-sm text-on-surface-variant">
+              {ehEncarregado
+                ? 'Solicite materiais e ferramentas disponiveis no estoque da obra e acompanhe seus pedidos'
+                : 'Atenda requisicoes com baixa automatica no estoque e exporte os registros atendidos para o SIENGE'}
+            </p>
+          </div>
 
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          {podeAtenderEExportar && (
+          <div className="flex flex-wrap items-center gap-2">
+            {podeAtenderEExportar && (
+              <button
+                type="button"
+                disabled={exportarSiengeMutation.isPending}
+                onClick={() => {
+                  setMensagemFeedback(null)
+                  setErroFeedback(null)
+                  const reexportar = filtroSienge === 'EXPORTADAS'
+                  exportarSiengeMutation.mutate(reexportar)
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                <span>
+                  {exportarSiengeMutation.isPending
+                    ? 'Exportando CSV...'
+                    : `Exportar para SIENGE (CSV)${qtdPendentesSienge > 0 ? ` [${qtdPendentesSienge}]` : ''}`}
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
-              disabled={exportarSiengeMutation.isPending}
-              onClick={() => {
-                setMensagemFeedback(null)
-                setErroFeedback(null)
-                const reexportar = filtroSienge === 'EXPORTADAS'
-                exportarSiengeMutation.mutate(reexportar)
-              }}
-              style={{
-                backgroundColor: '#0f766e',
-                color: '#ffffff',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-              }}
+              onClick={handleAbrirModal}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all"
             >
-              {exportarSiengeMutation.isPending
-                ? 'Exportando CSV...'
-                : `Exportar para SIENGE (CSV)${qtdPendentesSienge > 0 ? ` [${qtdPendentesSienge}]` : ''}`}
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>+ Nova Requisicao</span>
             </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleAbrirModal}
-            style={{
-              backgroundColor: '#0369a1',
-              color: '#ffffff',
-              border: 'none',
-              padding: '8px 24px',
-              borderRadius: '6px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-            }}
-          >
-            + Nova Requisicao
-          </button>
+          </div>
         </div>
-      </div>
 
-      {/* Mensagens de Feedback */}
-      {mensagemFeedback && (
-        <div
-          style={{
-            backgroundColor: '#f0fdf4',
-            color: '#166534',
-            border: '1px solid #bbf7d0',
-            padding: '16px 16px',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '0.875rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span>{mensagemFeedback}</span>
-          <button
-            type="button"
-            onClick={() => setMensagemFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 600 }}
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {erroFeedback && (
-        <div
-          style={{
-            backgroundColor: '#fef2f2',
-            color: '#b91c1c',
-            border: '1px solid #fecaca',
-            padding: '16px 16px',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '0.875rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span>{erroFeedback}</span>
-          <button
-            type="button"
-            onClick={() => setErroFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontWeight: 600 }}
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {/* Barra de Filtros e Busca */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '16px',
-          marginBottom: '24px',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Buscar por numero (#101), obra, pavimento, solicitante ou quem retirou..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{
-            flex: '1',
-            minWidth: '250px',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            backgroundColor: '#ffffff',
-            color: '#0f172a',
-            fontSize: '0.875rem',
-          }}
-        />
-
-        {/* Botoes dos 3 Status Principais + Todas */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {[
-            { id: 'TODAS', label: 'Todas' },
-            { id: 'SOLICITADA', label: 'Pendentes' },
-            { id: 'ATENDIDA', label: 'Atendidas' },
-            { id: 'CANCELADA', label: 'Canceladas' },
-          ].map((st) => (
+        {/* Mensagens de Feedback */}
+        {mensagemFeedback && (
+          <div className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm">
+            <span className="font-medium">{mensagemFeedback}</span>
             <button
-              key={st.id}
               type="button"
-              onClick={() => setFiltroStatus(st.id)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                border: '1px solid',
-                borderColor: filtroStatus === st.id ? '#0369a1' : '#cbd5e1',
-                backgroundColor: filtroStatus === st.id ? '#0369a1' : '#ffffff',
-                color: filtroStatus === st.id ? '#ffffff' : '#475569',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: filtroStatus === st.id ? 600 : 400,
-              }}
+              onClick={() => setMensagemFeedback(null)}
+              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1"
             >
-              {st.label}
+              &times;
             </button>
-          ))}
+          </div>
+        )}
+
+        {erroFeedback && (
+          <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm">
+            <span className="font-medium">{erroFeedback}</span>
+            <button
+              type="button"
+              onClick={() => setErroFeedback(null)}
+              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+
+        {/* Summary Spark Card (Stitch Design) */}
+        <div className="bg-surface-container-low rounded-2xl p-4 flex items-center justify-between shadow-sm border border-surface-container">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed shadow-sm">
+              <span className="material-symbols-outlined text-[22px]">pending_actions</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-on-surface">Pico matinal no Almoxarifado</p>
+              <p className="text-xs text-on-surface-variant">
+                Tempo médio de espera atual: 8 minutos • Separação rápida ativa
+              </p>
+            </div>
+          </div>
+          <span className="material-symbols-outlined text-primary text-[22px]">bolt</span>
         </div>
 
-        {/* Filtro rapido para ocultar requisicoes ja atendidas */}
-        <label
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '0.875rem',
-            color: '#334155',
-            cursor: 'pointer',
-            backgroundColor: '#f8fafc',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={ocultarAtendidas}
-            onChange={(e) => setOcultarAtendidas(e.target.checked)}
-          />
-          Ocultar ja atendidas
-        </label>
+        {/* Barra de Filtros: iOS Segmented Control + Search */}
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          {/* iOS Fluid Segmented Control */}
+          <div className="bg-surface-container rounded-xl p-1 flex items-center gap-1 select-none shadow-inner overflow-x-auto">
+            {[
+              { id: 'TODAS', label: 'Todas' },
+              { id: 'SOLICITADA', label: 'Pendentes' },
+              { id: 'ATENDIDA', label: 'Atendidas' },
+              { id: 'CANCELADA', label: 'Canceladas' },
+            ].map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setFiltroStatus(st.id)}
+                className={`flex-1 min-w-[76px] py-1.5 px-3 rounded-lg text-xs font-semibold text-center transition-all ${
+                  filtroStatus === st.id
+                    ? 'bg-surface-container-lowest text-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Filtro de Exportacao SIENGE (Exclusivo Almoxarife / Admin) */}
-        {podeAtenderEExportar && (
-          <select
-            aria-label="Filtrar por status de exportacao SIENGE"
-            value={filtroSienge}
-            onChange={(e) => setFiltroSienge(e.target.value as any)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              color: '#0f172a',
-              fontSize: '0.875rem',
-            }}
-          >
-            <option value="TODAS">SIENGE: Todas</option>
-            <option value="PENDENTES">SIENGE: Pendentes de Exportacao</option>
-            <option value="EXPORTADAS">SIENGE: Ja Exportadas</option>
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              placeholder="Buscar por #101, obra, solicitante..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="flex-1 sm:w-64 px-3.5 py-2 rounded-xl bg-surface-container-high focus:bg-surface-container-lowest border border-surface-container text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary shadow-sm transition-all"
+            />
+
+            <label className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={ocultarAtendidas}
+                onChange={(e) => setOcultarAtendidas(e.target.checked)}
+                className="w-4 h-4 rounded text-primary"
+              />
+              <span>Ocultar ja atendidas</span>
+            </label>
+
+            {podeAtenderEExportar && (
+              <select
+                aria-label="Filtrar por status de exportacao SIENGE"
+                value={filtroSienge}
+                onChange={(e) => setFiltroSienge(e.target.value as any)}
+                className="px-3 py-2 rounded-xl bg-surface-container-high border border-surface-container text-xs text-on-surface font-medium focus:outline-none"
+              >
+                <option value="TODAS">SIENGE: Todas</option>
+                <option value="PENDENTES">SIENGE: Pendentes</option>
+                <option value="EXPORTADAS">SIENGE: Exportadas</option>
+              </select>
+            )}
+          </div>
+        </div>
+
+        {/* Lista de Requisicoes (Inset Grouped Cards) */}
+        {carregandoRequisicoes ? (
+          <div className="p-12 text-center text-sm text-on-surface-variant">
+            Carregando requisicoes...
+          </div>
+        ) : requisicoesFiltradas.length === 0 ? (
+          <div className="bg-surface-container-lowest p-8 rounded-2xl text-center text-sm text-on-surface-variant border border-dashed border-surface-container">
+            Nenhuma requisicao encontrada para os filtros selecionados.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {requisicoesFiltradas.map((r) => {
+              const statusConfig = badgeStatus(r.status)
+              const podeCancelar =
+                r.status === 'SOLICITADA' &&
+                (usuario?.id === r.requisitanteId || podeAtenderEExportar)
+              const podeAtender = r.status === 'SOLICITADA' && podeAtenderEExportar
+
+              return (
+                <div
+                  key={r.id}
+                  className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-surface-container hover:shadow-md transition-all flex flex-col gap-3"
+                >
+                  {/* Linha Superior: #REQ e Status */}
+                  <div className="flex flex-wrap justify-between items-center gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-sm sm:text-base font-bold text-primary tracking-tight">
+                        #{r.numeroSequencial}
+                      </span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
+                      <span
+                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={{ backgroundColor: statusConfig.bg, color: statusConfig.cor }}
+                      >
+                        {statusConfig.texto}
+                      </span>
+
+                      {podeAtenderEExportar && r.status === 'ATENDIDA' && (
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            r.exportadaSienge
+                              ? 'bg-primary-fixed text-on-primary-fixed'
+                              : 'bg-surface-container-high text-on-surface-variant'
+                          }`}
+                        >
+                          {r.exportadaSienge ? 'Exportada SIENGE' : 'Pendente Exportacao SIENGE'}
+                        </span>
+                      )}
+                    </div>
+
+                    <span className="text-xs text-on-surface-variant">
+                      Solicitado em: {new Date(r.solicitadaEm).toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+
+                  {/* Localizacao, Solicitante e Retirada */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 bg-surface-container-low p-3 rounded-xl text-xs sm:text-sm">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="material-symbols-outlined text-[17px] text-primary">
+                        apartment
+                      </span>
+                      <span className="text-on-surface-variant">Obra / Destino:</span>
+                      <strong className="text-on-surface truncate">
+                        {r.area?.obra?.codigo} &bull; {r.area?.nome}
+                      </strong>
+                    </div>
+
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="material-symbols-outlined text-[17px] text-primary">
+                        engineering
+                      </span>
+                      <span className="text-on-surface-variant">Solicitante:</span>
+                      <strong className="text-on-surface truncate">{r.requisitante?.nome}</strong>
+                    </div>
+
+                    {r.status === 'ATENDIDA' && r.retiradoPor && (
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="material-symbols-outlined text-[17px] text-secondary">
+                          badge
+                        </span>
+                        <span className="text-on-surface-variant">Retirado na obra por:</span>
+                        <strong className="text-secondary truncate">{r.retiradoPor}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Itens Requisitados */}
+                  <div className="bg-surface-container-lowest p-3 rounded-xl border border-surface-container">
+                    <div className="text-xs font-bold text-on-surface-variant mb-2 uppercase tracking-wide">
+                      Itens da Requisicao ({r.itens.length}):
+                    </div>
+                    <ul className="m-0 pl-4 text-xs sm:text-sm text-on-surface space-y-1">
+                      {r.itens.map((it) => {
+                        const qtdSol = Number(it.quantidade)
+                        const temEntregue =
+                          it.quantidadeEntregue !== null && it.quantidadeEntregue !== undefined
+                        const qtdEnt = temEntregue ? Number(it.quantidadeEntregue) : null
+
+                        const obraItemId = r.area?.obra?.id || r.area?.obraId
+                        const infoOrcCard =
+                          obraItemId && it.materialId
+                            ? mapaLimitesPorObraMaterial.get(`${obraItemId}:${it.materialId}`)
+                            : undefined
+                        const excedeLimiteCard = Boolean(
+                          infoOrcCard &&
+                            r.status !== 'CANCELADA' &&
+                            (qtdSol > infoOrcCard.quantidadeOrcada ||
+                              infoOrcCard.quantidadeConsumida > infoOrcCard.quantidadeOrcada)
+                        )
+
+                        return (
+                          <li key={it.id}>
+                            {it.material ? (
+                              <span>
+                                {r.status === 'ATENDIDA' && qtdEnt !== null ? (
+                                  <span>
+                                    <strong>
+                                      Solicitado: {qtdSol} {it.material.unidadeConsumo.sigla} |
+                                      Entregue: {qtdEnt} {it.material.unidadeConsumo.sigla}
+                                    </strong>{' '}
+                                    &mdash; {it.material.descricao}{' '}
+                                    <span className="text-on-surface-variant">
+                                      ({it.material.codigo})
+                                    </span>
+                                  </span>
+                                ) : (
+                                  <span>
+                                    <strong>
+                                      {qtdSol} {it.material.unidadeConsumo.sigla}
+                                    </strong>{' '}
+                                    &mdash; {it.material.descricao}{' '}
+                                    <span className="text-on-surface-variant">
+                                      ({it.material.codigo})
+                                    </span>
+                                  </span>
+                                )}
+                                {excedeLimiteCard && infoOrcCard && (
+                                  <span className="ml-2 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold">
+                                    Excede Limite Orcado ({infoOrcCard.quantidadeOrcada}{' '}
+                                    {it.material.unidadeConsumo.sigla})
+                                  </span>
+                                )}
+                              </span>
+                            ) : it.ferramenta ? (
+                              <span>
+                                <strong>1 un</strong> &mdash; {it.ferramenta.nome}{' '}
+                                <span className="text-on-surface-variant">
+                                  [Ferramenta cod: {it.ferramenta.codigo}]
+                                </span>
+                              </span>
+                            ) : (
+                              <span>Item nao especificado</span>
+                            )}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+
+                  {/* Observações e Ações do Card */}
+                  <div className="flex flex-wrap justify-between items-center gap-2 pt-1">
+                    <span className="text-xs text-on-surface-variant italic truncate max-w-md">
+                      {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
+                    </span>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                      {podeAtender && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirModalAtendimento(r)}
+                          className="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary text-xs font-semibold shadow-sm active:scale-95 transition-all"
+                        >
+                          Atender / Entregar Material
+                        </button>
+                      )}
+
+                      {podeCancelar && (
+                        <button
+                          type="button"
+                          disabled={cancelarRequisicaoMutation.isPending}
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Deseja cancelar a requisicao #${r.numeroSequencial}?`
+                              )
+                            ) {
+                              cancelarRequisicaoMutation.mutate(r.id)
+                            }
+                          }}
+                          className="px-3 py-2 rounded-xl bg-error-container text-on-error-container text-xs font-semibold hover:bg-error/20 active:scale-95 transition-all"
+                        >
+                          Cancelar Requisicao
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
-
-      {/* Lista de Requisicoes */}
-      {carregandoRequisicoes ? (
-        <p style={{ color: '#475569' }}>Carregando requisicoes...</p>
-      ) : requisicoesFiltradas.length === 0 ? (
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            padding: '32px',
-            borderRadius: '8px',
-            textAlign: 'center',
-            color: '#475569',
-            border: '1px dashed #cbd5e1',
-          }}
-        >
-          Nenhuma requisicao encontrada para os filtros selecionados.
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {requisicoesFiltradas.map((r) => {
-            const statusConfig = badgeStatus(r.status)
-            const podeCancelar =
-              r.status === 'SOLICITADA' &&
-              (usuario?.id === r.requisitanteId || podeAtenderEExportar)
-            const podeAtender =
-              r.status === 'SOLICITADA' && podeAtenderEExportar
-
-            return (
-              <div
-                key={r.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                  padding: '24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                }}
-              >
-                {/* Linha Superior */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span
-                      style={{
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        color: '#0f172a',
-                      }}
-                    >
-                      #{r.numeroSequencial}
-                    </span>
-                    <span
-                      style={{
-                        backgroundColor: statusConfig.bg,
-                        color: statusConfig.cor,
-                        padding: '8px 8px',
-                        borderRadius: '4px',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {statusConfig.texto}
-                    </span>
-
-                    {/* Badge SIENGE exclusivo para Almoxarife e Admin nas requisicoes atendidas */}
-                    {podeAtenderEExportar && r.status === 'ATENDIDA' && (
-                      <span
-                        style={{
-                          backgroundColor: r.exportadaSienge ? '#e0f2fe' : '#f1f5f9',
-                          color: r.exportadaSienge ? '#0369a1' : '#475569',
-                          border: `1px solid ${r.exportadaSienge ? '#bae6fd' : '#cbd5e1'}`,
-                          padding: '8px 8px',
-                          borderRadius: '4px',
-                          fontSize: '0.875rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {r.exportadaSienge
-                          ? `Exportada para SIENGE${r.exportadaEm ? ` (${new Date(r.exportadaEm).toLocaleDateString('pt-BR')})` : ''}`
-                          : 'Pendente Exportacao SIENGE'}
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ fontSize: '0.875rem', color: '#475569' }}>
-                    Solicitado em: {new Date(r.solicitadaEm).toLocaleString('pt-BR')}
-                  </div>
-                </div>
-
-                {/* Localizacao, Solicitante e Quem Retirou */}
-                <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', fontSize: '0.875rem' }}>
-                  <div>
-                    <span style={{ color: '#475569' }}>Obra / Destino: </span>
-                    <strong style={{ color: '#1e293b' }}>
-                      {r.area?.obra?.codigo} - {r.area?.obra?.nome} &bull; {r.area?.nome}
-                    </strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#475569' }}>Solicitante: </span>
-                    <strong style={{ color: '#1e293b' }}>
-                      {r.requisitante?.nome} ({r.requisitante?.cargo?.nome || 'Encarregado'})
-                    </strong>
-                  </div>
-                  {r.status === 'ATENDIDA' && r.retiradoPor && (
-                    <div>
-                      <span style={{ color: '#475569' }}>Retirado na obra por: </span>
-                      <strong style={{ color: '#15803d' }}>{r.retiradoPor}</strong>
-                    </div>
-                  )}
-                </div>
-
-                {/* Itens da Requisicao (com historico Solicitado vs Entregue) */}
-                <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '6px' }}>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
-                    Itens da Requisicao ({r.itens.length}):
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.875rem', color: '#334155' }}>
-                    {r.itens.map((it) => {
-                      const qtdSol = Number(it.quantidade)
-                      const temEntregue =
-                        it.quantidadeEntregue !== null && it.quantidadeEntregue !== undefined
-                      const qtdEnt = temEntregue ? Number(it.quantidadeEntregue) : null
-
-                      const obraItemId = r.area?.obra?.id || r.area?.obraId
-                      const infoOrcCard =
-                        obraItemId && it.materialId
-                          ? mapaLimitesPorObraMaterial.get(`${obraItemId}:${it.materialId}`)
-                          : undefined
-                      const excedeLimiteCard = Boolean(
-                        infoOrcCard &&
-                          r.status !== 'CANCELADA' &&
-                          (qtdSol > infoOrcCard.quantidadeOrcada ||
-                            infoOrcCard.quantidadeConsumida > infoOrcCard.quantidadeOrcada)
-                      )
-
-                      return (
-                        <li key={it.id} style={{ marginBottom: '8px' }}>
-                          {it.material ? (
-                            <>
-                              {r.status === 'ATENDIDA' && qtdEnt !== null ? (
-                                <span>
-                                  <strong>
-                                    Solicitado: {qtdSol} {it.material.unidadeConsumo.sigla} | Entregue:{' '}
-                                    {qtdEnt} {it.material.unidadeConsumo.sigla}
-                                  </strong>{' '}
-                                  &mdash; {it.material.descricao}{' '}
-                                  <span style={{ color: '#475569' }}>({it.material.codigo})</span>
-                                </span>
-                              ) : (
-                                <>
-                                  <strong>
-                                    {qtdSol} {it.material.unidadeConsumo.sigla}
-                                  </strong>{' '}
-                                  &mdash; {it.material.descricao}{' '}
-                                  <span style={{ color: '#475569' }}>({it.material.codigo})</span>
-                                </>
-                              )}
-                              {excedeLimiteCard && infoOrcCard && (
-                                <span
-                                  style={{
-                                    marginLeft: '8px',
-                                    backgroundColor: '#fef3c7',
-                                    color: '#92400e',
-                                    border: '1px solid #fde68a',
-                                    padding: '8px 8px',
-                                    borderRadius: '4px',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  Excede Limite Orcado ({infoOrcCard.quantidadeOrcada}{' '}
-                                  {it.material.unidadeConsumo.sigla})
-                                </span>
-                              )}
-                            </>
-                          ) : it.ferramenta ? (
-                            <>
-                              <strong>1 un</strong> &mdash; {it.ferramenta.nome}{' '}
-                              <span style={{ color: '#475569' }}>[Ferramenta cod: {it.ferramenta.codigo}]</span>
-                            </>
-                          ) : (
-                            <span>Item nao especificado</span>
-                          )}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-
-                {/* Observacao e Acoes */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
-                  <div style={{ fontSize: '0.875rem', color: '#475569', fontStyle: r.observacao ? 'normal' : 'italic' }}>
-                    {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
-                    {r.status === 'ATENDIDA' && r.atendidoPor && (
-                      <span style={{ marginLeft: '16px', fontStyle: 'normal', color: '#475569' }}>
-                        &bull; Atendido por: <strong>{r.atendidoPor.nome}</strong>
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {podeAtender && (
-                      <button
-                        type="button"
-                        onClick={() => handleAbrirModalAtendimento(r)}
-                        style={{
-                          backgroundColor: '#15803d',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '8px 16px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        Atender / Entregar Material
-                      </button>
-                    )}
-
-                    {podeCancelar && (
-                      <button
-                        type="button"
-                        disabled={cancelarRequisicaoMutation.isPending}
-                        onClick={() => {
-                          if (window.confirm(`Deseja cancelar a requisicao #${r.numeroSequencial}?`)) {
-                            cancelarRequisicaoMutation.mutate(r.id)
-                          }
-                        }}
-                        style={{
-                          backgroundColor: '#fff1f2',
-                          color: '#be123c',
-                          border: '1px solid #fecdd3',
-                          padding: '8px 16px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          fontWeight: 400,
-                        }}
-                      >
-                        Cancelar Requisicao
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
 
       {/* MODAL: ATENDER REQUISICAO (ALMOXARIFE / ADMIN) */}
       {requisicaoEmAtendimento && (
@@ -1628,6 +1508,6 @@ export function RequisicoesPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }

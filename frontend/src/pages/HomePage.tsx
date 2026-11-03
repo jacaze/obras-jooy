@@ -41,7 +41,7 @@ export function HomePage() {
     enabled: Boolean(usuario),
   })
 
-  // Calculo de indicadores operacionais e executivos
+  // Indicadores Operacionais
   const totalObrasAtivas = obras.length
   const requisicoesPendentes = requisicoes.filter((r) => r.status === 'SOLICITADA')
   const requisicoesAtendidas = requisicoes.filter((r) => r.status === 'ATENDIDA')
@@ -67,702 +67,462 @@ export function HomePage() {
     usuario?.perfil === 'ENGENHARIA' ||
     usuario?.perfil === 'ADMINISTRACAO'
 
+  const obraPrincipalNome = obras.length > 0 ? obras[0].nome : 'Residencial Jooy Ilhas'
+
   return (
-    <div
-      style={{
-        padding: '32px 16px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        maxWidth: '1200px',
-        margin: '0 auto',
-      }}
-    >
-      {/* Cabecalho */}
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '16px',
-          borderBottom: '1px solid #e2e8f0',
-          paddingBottom: '24px',
-          marginBottom: '24px',
-        }}
-      >
-        <div>
-          <span
-            style={{
-              display: 'inline-block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              color: '#0369a1',
-              marginBottom: '8px',
-            }}
-          >
-            Painel Operacional e Executivo
-          </span>
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '2rem', fontWeight: 600 }}>
-            Obras Jooy - Almoxarifado
-          </h1>
-          <p style={{ color: '#475569', margin: '8px 0 0', fontSize: '1rem', fontWeight: 400 }}>
-            Sistema de Gestao e Estoque para Canteiros de Obras
-          </p>
-        </div>
-
-        {/* Status compacto no topo */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            minHeight: '44px',
-            gap: '8px',
-            padding: '8px 16px',
-            borderRadius: '999px',
-            backgroundColor: isError ? '#fef2f2' : '#f0fdf4',
-            border: `1px solid ${isError ? '#fecaca' : '#bbf7d0'}`,
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            color: isError ? '#991b1b' : '#166534',
-          }}
-        >
-          <span
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: isError ? '#b91c1c' : '#15803d',
-              display: 'inline-block',
-            }}
-          />
-          {isLoading
-            ? 'Sincronizando API...'
-            : isError
-              ? 'API Indisponivel'
-              : `Servidor Online (${data?.status || 'UP'})`}
-        </div>
-      </header>
-
-      {/* Bloco de Identificacao do Usuario e Atalhos Rapidos por Perfil */}
-      {usuario && (
-        <section
-          style={{
-            background: '#ffffff',
-            padding: '24px',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0',
-            marginBottom: '24px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px',
-          }}
-        >
+    <main className="flex flex-col w-full min-h-screen bg-surface pb-28">
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 flex flex-col gap-6">
+        {/* Top Title Banner with System Status Pill */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div>
-            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#0f172a', margin: '0 0 8px' }}>
-              Bem-vindo(a), {usuario.nome}!
-            </h2>
-            <p style={{ color: '#475569', fontSize: '0.875rem', fontWeight: 400, margin: 0 }}>
-              Cargo: <strong>{usuario.cargo}</strong> • Perfil: <strong>{usuario.perfil}</strong>
+            <span className="text-xs uppercase tracking-wider font-semibold text-primary">
+              Painel Operacional e Executivo
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
+              Obras Jooy - Almoxarifado
+            </h1>
+            <p className="text-sm text-on-surface-variant">
+              Gestão de insumos, ferramentas e controle orçamentário de canteiro
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <Link
-              to="/requisicoes"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '48px',
-                backgroundColor: '#0369a1',
-                color: '#ffffff',
-                textDecoration: 'none',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-              }}
-            >
-              {usuario.perfil === 'ENCARREGADO'
-                ? 'Minhas Requisicoes / Novo Pedido'
-                : 'Atender Requisicoes de Obra'}
-            </Link>
-
-            {podeVerEstoque && (
-              <Link
-                to="/estoque"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '48px',
-                  backgroundColor: '#f8fafc',
-                  color: '#0f172a',
-                  border: '1px solid #cbd5e1',
-                  textDecoration: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                }}
-              >
-                Saldos e Movimentacoes
-              </Link>
-            )}
-
-            <Link
-              to="/ferramentas"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '48px',
-                backgroundColor: '#f8fafc',
-                color: '#0f172a',
-                border: '1px solid #cbd5e1',
-                textDecoration: 'none',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-              }}
-            >
-              Controle de Ferramentas
-            </Link>
-
-            {podeVerOrcamento && (
-              <Link
-                to="/orcamento-obra"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '48px',
-                  backgroundColor: '#fffbeb',
-                  color: '#92400e',
-                  border: '1px solid #fde68a',
-                  textDecoration: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                }}
-              >
-                Orcamento vs Consumido
-              </Link>
-            )}
-
-            {usuario.perfil === 'ADMIN' && (
-              <Link
-                to="/usuarios"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '48px',
-                  backgroundColor: '#0f172a',
-                  color: '#ffffff',
-                  textDecoration: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                }}
-              >
-                Gerenciar Usuarios e Cargos
-              </Link>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Faixa de KPIs Operacionais e Executivos (Visivel quando logado) */}
-      {usuario && (
-        <>
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '16px',
-              marginBottom: '24px',
-            }}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full shadow-sm text-xs font-semibold ${
+              isError
+                ? 'bg-error-container text-on-error-container border border-error/20'
+                : 'bg-secondary-container text-on-secondary-container'
+            }`}
           >
-            {/* Card 1: Requisicoes Pendentes */}
-            <div
-              style={{
-                backgroundColor: requisicoesPendentes.length > 0 ? '#fffbeb' : '#ffffff',
-                border: `1px solid ${requisicoesPendentes.length > 0 ? '#fde68a' : '#e2e8f0'}`,
-                borderRadius: '8px',
-                padding: '24px',
-              }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  color: requisicoesPendentes.length > 0 ? '#92400e' : '#475569',
-                }}
-              >
-                Requisicoes Pendentes
-              </span>
-              <strong
-                style={{
-                  display: 'block',
-                  fontSize: '2rem',
-                  fontWeight: 600,
-                  color: requisicoesPendentes.length > 0 ? '#92400e' : '#0f172a',
-                  marginTop: '8px',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {requisicoesPendentes.length}
-              </strong>
-              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#475569' }}>
-                Aguardando separacao e entrega no almoxarifado
-              </span>
-            </div>
-
-            {/* Card 2: Exportacao SIENGE */}
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '24px',
-              }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  color: '#0369a1',
-                }}
-              >
-                Pendentes Exportacao SIENGE
-              </span>
-              <strong
-                style={{
-                  display: 'block',
-                  fontSize: '2rem',
-                  fontWeight: 600,
-                  color: '#0f172a',
-                  marginTop: '8px',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {pendentesExportacaoSienge.length}
-              </strong>
-              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#475569' }}>
-                {requisicoesAtendidas.length} requisicao(oes) atendida(s) no total
-              </span>
-            </div>
-
-            {/* Card 3: Ferramentas e Ativos */}
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '24px',
-              }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  color: '#475569',
-                }}
-              >
-                Ferramentas em Campo
-              </span>
-              <strong
-                style={{
-                  display: 'block',
-                  fontSize: '2rem',
-                  fontWeight: 600,
-                  color: '#0f172a',
-                  marginTop: '8px',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {ferramentasEmprestadas.length}
-              </strong>
-              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#475569' }}>
-                {ferramentasDisponiveis.length} disponiveis • {ferramentasComDefeito.length} em
-                manutencao
-              </span>
-            </div>
-
-            {/* Card 4: Obras Ativas e Alertas de Orcamento */}
-            <div
-              style={{
-                backgroundColor: itensComEstouroOrcamento.length > 0 ? '#fef2f2' : '#ffffff',
-                border: `1px solid ${itensComEstouroOrcamento.length > 0 ? '#fecaca' : '#e2e8f0'}`,
-                borderRadius: '8px',
-                padding: '24px',
-              }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#166534',
-                }}
-              >
-                Controle de Orcamento ({totalObrasAtivas} Obra(s))
-              </span>
-              <strong
-                style={{
-                  display: 'block',
-                  fontSize: '2rem',
-                  fontWeight: 600,
-                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#166534',
-                  marginTop: '8px',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {itensComEstouroOrcamento.length}
-              </strong>
-              <span
-                style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 400,
-                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#475569',
-                }}
-              >
-                {itensComEstouroOrcamento.length > 0
-                  ? `${itensComEstouroOrcamento.length} item(ns) com estouro de orcamento`
-                  : `${limitesOrcamento.length} limite(s) monitorado(s) dentro da meta`}
-              </span>
-            </div>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isError ? 'bg-error' : 'bg-secondary animate-pulse'
+              }`}
+            />
+            <span>
+              {isLoading
+                ? 'Sincronizando API...'
+                : isError
+                  ? 'API Indisponível'
+                  : `Servidor Online (${data?.status || 'UP'})`}
+            </span>
           </div>
+        </div>
 
-          {/* Grid Principal de 2 Colunas: Fila de Requisicoes Pendentes + Ferramentas em Uso/Manutencao */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-              gap: '24px',
-              marginBottom: '24px',
-            }}
-          >
-            {/* Coluna 1: Requisicoes Aguardando Atendimento */}
-            <section
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '16px',
-                  }}
-                >
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
-                    Fila de Requisicoes Pendentes
-                  </h3>
-                  <Link
-                    to="/requisicoes"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      minHeight: '44px',
-                      padding: '8px',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      color: '#0369a1',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Ver todas
-                  </Link>
+        {/* User Profile Quick Actions Inset Card (Stitch Inset Card) */}
+        {usuario && (
+          <section className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-surface-container transition-all hover:shadow-md">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="relative w-12 h-12 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-lg shadow-inner flex-shrink-0">
+                  {usuario.nome.charAt(0).toUpperCase()}
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-secondary rounded-full ring-2 ring-surface-container-lowest" />
                 </div>
-
-                {requisicoesPendentes.length === 0 ? (
-                  <p
-                    style={{
-                      margin: '24px 0',
-                      color: '#475569',
-                      fontSize: '0.875rem',
-                      fontWeight: 400,
-                      textAlign: 'center',
-                    }}
-                  >
-                    Nenhuma requisicao pendente de atendimento no momento.
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="text-base sm:text-lg font-bold text-on-surface truncate">
+                      Bem-vindo(a), {usuario.nome}!
+                    </h2>
+                    <span className="material-symbols-outlined text-[18px] text-primary">
+                      verified
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-on-surface-variant truncate">
+                    Cargo: <strong className="text-on-surface">{usuario.cargo}</strong> • Perfil:{' '}
+                    <strong className="text-primary">{usuario.perfil}</strong>
                   </p>
+                  <div className="inline-flex items-center gap-1 mt-0.5 text-xs text-on-surface-variant truncate">
+                    <span className="material-symbols-outlined text-[14px]">apartment</span>
+                    <span>{obraPrincipalNome}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                <Link
+                  to="/requisicoes"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-xs sm:text-sm font-semibold shadow-sm hover:bg-primary-container active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                  {usuario.perfil === 'ENCARREGADO'
+                    ? 'Minhas Requisicoes / Novo Pedido'
+                    : 'Atender Requisicoes de Obra'}
+                </Link>
+
+                {podeVerEstoque && (
+                  <Link
+                    to="/estoque"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+                    Saldos e Movimentacoes
+                  </Link>
+                )}
+
+                <Link
+                  to="/ferramentas"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-[18px]">construction</span>
+                  Controle de Ferramentas
+                </Link>
+
+                {podeVerOrcamento && (
+                  <Link
+                    to="/orcamento"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed text-xs sm:text-sm font-semibold shadow-sm hover:bg-tertiary-container hover:text-on-tertiary-container active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">query_stats</span>
+                    Orcamento vs Consumido
+                  </Link>
+                )}
+
+                {usuario.perfil === 'ADMIN' && (
+                  <Link
+                    to="/usuarios"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm hover:bg-surface-container-highest active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">group</span>
+                    Gerenciar Usuarios e Cargos
+                  </Link>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 2x2 KPI Executive Grid (Stitch Styled) */}
+        {usuario && (
+          <section className="flex flex-col gap-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
+                Métricas de Turno & Operação
+              </span>
+              <span className="text-xs text-primary font-semibold">Hoje • Tempo Real</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Card 1: Requisições Pendentes */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span className="w-9 h-9 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[20px]">pending_actions</span>
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      requisicoesPendentes.length > 0
+                        ? 'bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant'
+                        : 'bg-surface-container text-on-surface-variant'
+                    }`}
+                  >
+                    {requisicoesPendentes.length > 0
+                      ? `${requisicoesPendentes.length} no balcão`
+                      : 'Zerado'}
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-on-surface leading-none tracking-tight">
+                    {requisicoesPendentes.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Requisicoes Pendentes
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    Aguardando separacao e entrega no almoxarifado
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 2: Exportação SIENGE */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span className="w-9 h-9 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[20px]">cloud_upload</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-primary-fixed-dim/40 text-on-primary-fixed-variant text-[11px] font-bold">
+                    Sync ERP
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-on-surface leading-none tracking-tight">
+                    {pendentesExportacaoSienge.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Pendentes Exportacao SIENGE
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    {requisicoesAtendidas.length} requisicao(oes) atendida(s) no total
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3: Ferramentas em Campo */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span className="w-9 h-9 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[20px]">handyman</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-[11px] font-bold">
+                    {ferramentasComDefeito.length} em reparo
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-on-surface leading-none tracking-tight">
+                    {ferramentasEmprestadas.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Ferramentas em Campo
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    {ferramentasDisponiveis.length} disponíveis no almoxarifado
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 4: Controle de Orçamento */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
+                      itensComEstouroOrcamento.length > 0
+                        ? 'bg-error-container text-on-error-container'
+                        : 'bg-secondary-fixed text-on-secondary-fixed'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">query_stats</span>
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      itensComEstouroOrcamento.length > 0
+                        ? 'bg-error-container text-on-error-container animate-pulse'
+                        : 'bg-secondary-container text-on-secondary-container'
+                    }`}
+                  >
+                    {itensComEstouroOrcamento.length > 0 ? 'Alerta Crítico' : 'No Limite'}
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span
+                    className={`text-3xl font-bold leading-none tracking-tight ${
+                      itensComEstouroOrcamento.length > 0 ? 'text-error' : 'text-secondary'
+                    }`}
+                  >
+                    {itensComEstouroOrcamento.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Controle de Orcamento ({totalObrasAtivas} Obra(s))
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    {itensComEstouroOrcamento.length > 0
+                      ? `${itensComEstouroOrcamento.length} item(ns) com estouro de orcamento`
+                      : `${limitesOrcamento.length} limites monitorados dentro da meta`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Inset Grouped Section: Fila de Requisições e Ferramentas */}
+        {usuario && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Coluna 1: Fila de Requisições Pendentes */}
+            <section className="flex flex-col gap-2">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
+                  Fila de Requisicoes Pendentes
+                </span>
+                <Link
+                  to="/requisicoes"
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  Ver todas
+                </Link>
+              </div>
+
+              <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container divide-y divide-surface-container overflow-hidden">
+                {requisicoesPendentes.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-on-surface-variant">
+                    Nenhuma requisicao pendente de atendimento no momento.
+                  </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {requisicoesPendentes.slice(0, 4).map((req) => (
-                      <div
-                        key={req.id}
-                        style={{
-                          padding: '16px',
-                          borderRadius: '8px',
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '8px',
-                          }}
-                        >
-                          <strong style={{ color: '#0f172a', fontWeight: 600 }}>
+                  requisicoesPendentes.slice(0, 4).map((req) => (
+                    <div
+                      key={req.id}
+                      className="p-4 flex flex-col gap-2 hover:bg-surface-container-low transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-primary">
                             #{req.numeroSequencial}
-                          </strong>
-                          <span
-                            style={{
-                              backgroundColor: '#fef3c7',
-                              color: '#92400e',
-                              padding: '8px',
-                              borderRadius: '8px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Aguardando Entrega
+                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
+                          <span className="text-xs font-semibold text-on-surface truncate">
+                            {req.area?.obra?.codigo} - {req.area?.nome}
                           </span>
                         </div>
-                        <div style={{ color: '#334155', fontWeight: 400 }}>
-                          {req.area?.obra?.codigo} - {req.area?.nome} • Solicitante:{' '}
-                          <strong style={{ fontWeight: 600 }}>{req.requisitante?.nome}</strong>
+                        <span className="px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold">
+                          Aguardando Entrega
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <div className="text-xs text-on-surface-variant">
+                            Solicitante:{' '}
+                            <strong className="text-on-surface font-semibold">
+                              {req.requisitante?.nome}
+                            </strong>
+                          </div>
+                          <div className="text-[11px] text-on-surface-variant mt-0.5">
+                            {req.itens.length} item(ns) solicitado(s)
+                          </div>
                         </div>
-                        <div
-                          style={{
-                            color: '#475569',
-                            fontSize: '0.875rem',
-                            fontWeight: 400,
-                            marginTop: '8px',
-                          }}
+
+                        <Link
+                          to="/requisicoes"
+                          className="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-sm hover:bg-primary-container active:scale-95 transition-all"
                         >
-                          {req.itens.length} item(ns) solicitado(s)
+                          Atender
+                        </Link>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
+            {/* Coluna 2: Ferramentas em Uso e Manutenção */}
+            <section className="flex flex-col gap-2">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
+                  Ferramentas Emprestadas e em Manutencao
+                </span>
+                <Link
+                  to="/ferramentas"
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  Gerenciar ativos
+                </Link>
+              </div>
+
+              <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container divide-y divide-surface-container overflow-hidden">
+                {ferramentasEmprestadas.length === 0 && ferramentasComDefeito.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-on-surface-variant">
+                    Todas as ferramentas ativas estao disponiveis no almoxarifado.
+                  </div>
+                ) : (
+                  [...ferramentasEmprestadas, ...ferramentasComDefeito].slice(0, 4).map((fer) => (
+                    <div
+                      key={fer.id}
+                      className="p-4 flex items-center justify-between gap-3 hover:bg-surface-container-low transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                            fer.status === 'EMPRESTADO'
+                              ? 'bg-surface-container-high text-on-surface'
+                              : 'bg-error-container text-on-error-container'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[20px]">
+                            {fer.status === 'EMPRESTADO' ? 'construction' : 'build_circle'}
+                          </span>
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-mono font-bold text-primary">
+                              {fer.codigo}
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-outline-variant" />
+                            <span className="text-xs sm:text-sm font-semibold text-on-surface truncate">
+                              {fer.nome}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-on-surface-variant mt-0.5 truncate">
+                            {fer.status === 'EMPRESTADO' && fer.emprestadoPara
+                              ? `Responsável: ${fer.emprestadoPara.nome}`
+                              : 'Equipamento bloqueado aguardando reparo'}
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold flex-shrink-0 ${
+                          fer.status === 'EMPRESTADO'
+                            ? 'bg-secondary-fixed text-on-secondary-fixed'
+                            : 'bg-error-container text-on-error-container'
+                        }`}
+                      >
+                        {fer.status === 'EMPRESTADO' ? 'Emprestado' : 'Com Defeito'}
+                      </span>
+                    </div>
+                  ))
                 )}
               </div>
             </section>
+          </div>
+        )}
 
-            {/* Coluna 2: Rastreamento de Ferramentas (Emprestadas e em Manutencao) */}
-            <section
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
+        {/* Status Canteiro Visual Highlight Card (Stitch Inspired) */}
+        <div className="relative rounded-2xl overflow-hidden shadow-sm h-28 sm:h-32 flex items-end p-4 bg-gradient-to-r from-on-surface via-inverse-surface to-on-surface text-inverse-on-surface border border-surface-container">
+          <div className="relative z-10 flex items-center justify-between w-full">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-fixed">
+                Status do Canteiro Jooy
+              </p>
+              <p className="text-sm sm:text-base font-bold text-white">
+                {obraPrincipalNome} • Estrutura & Alvenaria em Execução
+              </p>
+            </div>
+            <Link
+              to="/obras"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/15 backdrop-blur-md hover:bg-white/25 text-white text-xs font-semibold transition-all"
             >
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '16px',
-                  }}
-                >
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
-                    Ferramentas Emprestadas e em Manutencao
-                  </h3>
-                  <Link
-                    to="/ferramentas"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      minHeight: '44px',
-                      padding: '8px',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      color: '#0369a1',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Gerenciar ativos
-                  </Link>
-                </div>
-
-                {ferramentasEmprestadas.length === 0 && ferramentasComDefeito.length === 0 ? (
-                  <p
-                    style={{
-                      margin: '24px 0',
-                      color: '#475569',
-                      fontSize: '0.875rem',
-                      fontWeight: 400,
-                      textAlign: 'center',
-                    }}
-                  >
-                    Todas as ferramentas ativas estao disponiveis no almoxarifado.
-                  </p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {[...ferramentasEmprestadas, ...ferramentasComDefeito]
-                      .slice(0, 4)
-                      .map((fer) => (
-                        <div
-                          key={fer.id}
-                          style={{
-                            padding: '16px',
-                            borderRadius: '8px',
-                            backgroundColor: '#f8fafc',
-                            border: '1px solid #e2e8f0',
-                            fontSize: '0.875rem',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: '8px',
-                          }}
-                        >
-                          <div>
-                            <div style={{ fontWeight: 600, color: '#0f172a' }}>
-                              <span style={{ fontFamily: 'monospace', marginRight: '8px' }}>
-                                {fer.codigo}
-                              </span>
-                              {fer.nome}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: '0.875rem',
-                                fontWeight: 400,
-                                color: '#475569',
-                                marginTop: '8px',
-                              }}
-                            >
-                              {fer.status === 'EMPRESTADO' && fer.emprestadoPara
-                                ? `Responsavel: ${fer.emprestadoPara.nome} (@${fer.emprestadoPara.login})`
-                                : 'Equipamento bloqueado aguardando reparo'}
-                            </div>
-                          </div>
-
-                          <span
-                            style={{
-                              padding: '8px',
-                              borderRadius: '8px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                              backgroundColor:
-                                fer.status === 'EMPRESTADO' ? '#fef3c7' : '#fee2e2',
-                              color: fer.status === 'EMPRESTADO' ? '#92400e' : '#991b1b',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {fer.status === 'EMPRESTADO' ? 'Emprestado' : 'Com Defeito'}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            </section>
+              <span>Ver Torres</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </Link>
           </div>
-        </>
-      )}
+        </div>
 
-      {/* Rodape Tecnico: Status de Integracao com a API */}
-      <section
-        style={{
-          background: '#f8fafc',
-          padding: '24px',
-          borderRadius: '8px',
-          border: '1px solid #cbd5e1',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: '#334155',
-            marginTop: 0,
-            marginBottom: '16px',
-          }}
-        >
-          Status de Integracao com a API
-        </h2>
+        {/* Rodapé Técnico: Status de Integração com a API */}
+        <section className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-surface-container">
+          <h2 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-primary">dns</span>
+            Status de Integracao com a API
+          </h2>
 
-        {isLoading && (
-          <p style={{ color: '#0369a1', fontSize: '0.875rem', margin: 0 }}>
-            Verificando comunicacao com o servidor...
-          </p>
-        )}
+          {isLoading && (
+            <p className="text-xs text-primary">Verificando comunicacao com o servidor...</p>
+          )}
 
-        {isError && (
-          <div
-            style={{
-              color: '#991b1b',
-              background: '#fef2f2',
-              padding: '16px',
-              borderRadius: '8px',
-              border: '1px solid #fecaca',
-              fontSize: '0.875rem',
-            }}
-          >
-            <strong>Falha na conexao com a API:</strong>{' '}
-            {error instanceof Error ? error.message : 'Erro desconhecido'}
-          </div>
-        )}
+          {isError && (
+            <div className="p-3 rounded-xl bg-error-container text-on-error-container text-xs border border-error/20">
+              <strong>Falha na conexao com a API:</strong>{' '}
+              {error instanceof Error ? error.message : 'Erro desconhecido'}
+            </div>
+          )}
 
-        {data && (
-          <div
-            style={{
-              color: '#166534',
-              background: '#f0fdf4',
-              padding: '16px',
-              borderRadius: '8px',
-              border: '1px solid #bbf7d0',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '24px',
-              alignItems: 'center',
-              fontSize: '0.875rem',
-            }}
-          >
-            <p style={{ margin: 0 }}>
-              <strong>Status do Back-end:</strong> {data.status}
-            </p>
-            <p style={{ margin: 0 }}>
-              <strong>Servico:</strong> {data.servico}
-            </p>
-            <p style={{ margin: 0 }}>
-              <strong>Versao:</strong> {data.versao}
-            </p>
-            <p style={{ margin: 0, color: '#166534' }}>
-              <strong>Sincronizado em:</strong> {new Date(data.timestamp).toLocaleString('pt-BR')}
-            </p>
-          </div>
-        )}
-      </section>
-    </div>
+          {data && (
+            <div className="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant bg-surface-container-low p-3.5 rounded-xl">
+              <p className="m-0">
+                <strong className="text-on-surface">Status do Back-end:</strong> {data.status}
+              </p>
+              <p className="m-0">
+                <strong className="text-on-surface">Servico:</strong> {data.servico}
+              </p>
+              <p className="m-0">
+                <strong className="text-on-surface">Versao:</strong> {data.versao}
+              </p>
+              <p className="m-0 text-secondary">
+                <strong className="text-on-surface">Sincronizado em:</strong>{' '}
+                {new Date(data.timestamp).toLocaleString('pt-BR')}
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
   )
 }
 export default HomePage

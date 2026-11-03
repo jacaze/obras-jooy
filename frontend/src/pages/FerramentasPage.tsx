@@ -169,384 +169,198 @@ export function FerramentasPage() {
   })
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '32px auto', padding: '0 16px' }}>
-      {/* Cabecalho */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px',
-          marginBottom: '24px',
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
-            Controle de Ferramentas e Ativos
-          </h1>
-          <p style={{ margin: '8px 0 0 0', color: '#475569', fontSize: '1rem' }}>
-            Itens devolutivos individuais com rastreamento de emprestimo, devolucao e manutencao em obra.
-          </p>
+    <main className="flex flex-col w-full min-h-screen bg-surface pb-28">
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 flex flex-col gap-6">
+        {/* Cabecalho Nativo iOS */}
+        <div className="flex flex-wrap justify-between items-center gap-4 pt-2">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Gestão Patrimonial
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
+              Controle de Ferramentas e Ativos
+            </h1>
+            <p className="text-xs sm:text-sm text-on-surface-variant">
+              Itens devolutivos individuais com rastreamento de emprestimo, devolucao e manutencao em obra.
+            </p>
+          </div>
+
+          {podeGerenciar && (
+            <button
+              type="button"
+              onClick={() => {
+                setFerramentaEmEdicao(null)
+                setFormCodigo('')
+                setFormNome('')
+                setMensagemErro(null)
+                setModalFerramentaAberto(true)
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>+ Nova Ferramenta</span>
+            </button>
+          )}
         </div>
 
-        {podeGerenciar && (
-          <button
-            type="button"
-            onClick={() => {
-              setFerramentaEmEdicao(null)
-              setFormCodigo('')
-              setFormNome('')
-              setMensagemErro(null)
-              setModalFerramentaAberto(true)
-            }}
-            style={{
-              padding: '8px 24px',
-              backgroundColor: '#0369a1',
-              border: 'none',
-              borderRadius: '6px',
-              color: '#ffffff',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+        {/* Industrial Metrics Dashboard: 4 Cards (Stitch Design) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Total Card */}
+          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                Total Cadastradas
+              </span>
+              <span className="text-2xl sm:text-3xl font-bold text-on-surface mt-1">
+                {totalFerramentas}
+              </span>
+              <span className="text-[11px] text-on-surface-variant mt-0.5">Ativos catalogados</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+              <span className="material-symbols-outlined text-[22px]">handyman</span>
+            </div>
+          </div>
+
+          {/* Disponíveis Card */}
+          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+                Disponíveis
+              </span>
+              <span className="text-2xl sm:text-3xl font-bold text-secondary mt-1">
+                {totalDisponiveis}
+              </span>
+              <span className="text-[11px] text-secondary mt-0.5">Prontas para uso</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-secondary-fixed/50 flex items-center justify-center text-secondary">
+              <span className="material-symbols-outlined text-[22px]">check_circle</span>
+            </div>
+          </div>
+
+          {/* Em Campo Card */}
+          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold uppercase tracking-wider text-tertiary">
+                Emprestadas
+              </span>
+              <span className="text-2xl sm:text-3xl font-bold text-tertiary mt-1">
+                {totalEmprestadas}
+              </span>
+              <span className="text-[11px] text-tertiary mt-0.5">Em campo</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-tertiary">
+              <span className="material-symbols-outlined text-[22px]">engineering</span>
+            </div>
+          </div>
+
+          {/* Manutenção Card */}
+          <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-surface-container flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold uppercase tracking-wider text-error">
+                Com Defeito
+              </span>
+              <span className="text-2xl sm:text-3xl font-bold text-error mt-1">
+                {totalComDefeito}
+              </span>
+              <span className="text-[11px] text-error mt-0.5">Em manutenção</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error">
+              <span className="material-symbols-outlined text-[22px]">build_circle</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Alertas */}
+        {mensagemSucesso && (
+          <div
+            role="status"
+            className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm"
           >
-            + Nova Ferramenta
-          </button>
+            <span className="font-medium">{mensagemSucesso}</span>
+            <button
+              type="button"
+              onClick={() => setMensagemSucesso(null)}
+              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1"
+            >
+              &times;
+            </button>
+          </div>
         )}
-      </div>
 
-      {/* Faixa de Indicadores Operacionais (KPIs) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: '16px',
-          marginBottom: '24px',
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0',
-            padding: '16px 24px',
-          }}
-        >
-          <span
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#475569',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-            }}
+        {mensagemErro && (
+          <div
+            role="alert"
+            className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm"
           >
-            Total Cadastradas
-          </span>
-          <strong
-            style={{
-              display: 'block',
-              fontSize: '2rem',
-              fontWeight: 600,
-              color: '#0f172a',
-              marginTop: '8px',
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {totalFerramentas}
-          </strong>
-          <span style={{ fontSize: '0.875rem', color: '#475569' }}>
-            Ativos catalogados no almoxarifado
-          </span>
+            <span className="font-medium">{mensagemErro}</span>
+            <button
+              type="button"
+              onClick={() => setMensagemErro(null)}
+              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+
+        {/* Filtros: iOS Search Bar + Segmented Control */}
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          <div className="relative flex items-center flex-1 max-w-md bg-surface-container-high rounded-xl px-3.5 h-11 focus-within:bg-surface-container-lowest focus-within:shadow-sm border border-surface-container transition-all">
+            <span className="material-symbols-outlined text-on-surface-variant text-[20px] mr-2">
+              search
+            </span>
+            <input
+              id="filtro-ferramenta-busca"
+              type="text"
+              placeholder="Buscar por código ou nome..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="bg-surface-container rounded-xl p-1 flex items-center gap-1 select-none shadow-inner overflow-x-auto">
+              {[
+                { id: '', label: 'Todas' },
+                { id: 'DISPONIVEL', label: 'Disponíveis' },
+                { id: 'EMPRESTADO', label: 'Em Campo' },
+                { id: 'COM_DEFEITO', label: 'Com Defeito' },
+              ].map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => setStatusFiltro(st.id)}
+                  className={`py-1.5 px-3 rounded-lg text-xs font-semibold text-center transition-all ${
+                    statusFiltro === st.id
+                      ? 'bg-surface-container-lowest text-primary shadow-sm'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
+
+            <label
+              htmlFor="filtro-ferramenta-ativas"
+              className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none"
+            >
+              <input
+                id="filtro-ferramenta-ativas"
+                type="checkbox"
+                checked={somenteAtivas}
+                onChange={(e) => setSomenteAtivas(e.target.checked)}
+                className="w-4 h-4 rounded text-primary"
+              />
+              <span>Exibir somente ativas</span>
+            </label>
+          </div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: '#f0fdf4',
-            borderRadius: '8px',
-            border: '1px solid #bbf7d0',
-            padding: '16px 24px',
-          }}
-        >
-          <span
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#166534',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-            }}
-          >
-            Disponiveis para Uso
-          </span>
-          <strong
-            style={{
-              display: 'block',
-              fontSize: '2rem',
-              fontWeight: 600,
-              color: '#15803d',
-              marginTop: '8px',
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {totalDisponiveis}
-          </strong>
-          <span style={{ fontSize: '0.875rem', color: '#166534' }}>
-            Prontas para retirada imediata
-          </span>
-        </div>
-
-        <div
-          style={{
-            backgroundColor: '#fffbeb',
-            borderRadius: '8px',
-            border: '1px solid #fde68a',
-            padding: '16px 24px',
-          }}
-        >
-          <span
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#b45309',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-            }}
-          >
-            Emprestadas em Campo
-          </span>
-          <strong
-            style={{
-              display: 'block',
-              fontSize: '2rem',
-              fontWeight: 600,
-              color: '#b45309',
-              marginTop: '8px',
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {totalEmprestadas}
-          </strong>
-          <span style={{ fontSize: '0.875rem', color: '#92400e' }}>
-            Sob responsabilidade de colaboradores
-          </span>
-        </div>
-
-        <div
-          style={{
-            backgroundColor: '#fef2f2',
-            borderRadius: '8px',
-            border: '1px solid #fecaca',
-            padding: '16px 24px',
-          }}
-        >
-          <span
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#b91c1c',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-            }}
-          >
-            Em Manutencao / Defeito
-          </span>
-          <strong
-            style={{
-              display: 'block',
-              fontSize: '2rem',
-              fontWeight: 600,
-              color: '#b91c1c',
-              marginTop: '8px',
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {totalComDefeito}
-          </strong>
-          <span style={{ fontSize: '0.875rem', color: '#991b1b' }}>
-            Bloqueadas ate conclusao de conserto
-          </span>
-        </div>
-      </div>
-
-      {/* Alertas */}
-      {mensagemSucesso && (
-        <div
-          role="status"
-          style={{
-            padding: '16px 16px',
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '6px',
-            color: '#166534',
-            marginBottom: '16px',
-            fontSize: '0.875rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span>{mensagemSucesso}</span>
-          <button
-            type="button"
-            onClick={() => setMensagemSucesso(null)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#166534',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
-            X
-          </button>
-        </div>
-      )}
-
-      {mensagemErro && (
-        <div
-          role="alert"
-          style={{
-            padding: '16px 16px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '6px',
-            color: '#991b1b',
-            marginBottom: '16px',
-            fontSize: '0.875rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span>{mensagemErro}</span>
-          <button
-            type="button"
-            onClick={() => setMensagemErro(null)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#991b1b',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
-            X
-          </button>
-        </div>
-      )}
-
-      {/* Filtros */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '16px',
-          backgroundColor: '#f8fafc',
-          padding: '24px',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          marginBottom: '24px',
-          alignItems: 'end',
-        }}
-      >
-        <div>
-          <label
-            htmlFor="filtro-ferramenta-busca"
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#475569',
-              marginBottom: '8px',
-            }}
-          >
-            Buscar Ferramenta
-          </label>
-          <input
-            id="filtro-ferramenta-busca"
-            type="text"
-            placeholder="Nome ou código..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.875rem',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="filtro-ferramenta-status"
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#475569',
-              marginBottom: '8px',
-            }}
-          >
-            Status Operacional
-          </label>
-          <select
-            id="filtro-ferramenta-status"
-            value={statusFiltro}
-            onChange={(e) => setStatusFiltro(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.875rem',
-              backgroundColor: '#ffffff',
-              boxSizing: 'border-box',
-            }}
-          >
-            <option value="">Todos os status</option>
-            <option value="DISPONIVEL">Disponível</option>
-            <option value="EMPRESTADO">Emprestado</option>
-            <option value="COM_DEFEITO">Com Defeito</option>
-          </select>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '8px' }}>
-          <input
-            id="filtro-ferramenta-ativas"
-            type="checkbox"
-            checked={somenteAtivas}
-            onChange={(e) => setSomenteAtivas(e.target.checked)}
-            style={{ width: '1rem', height: '1rem', cursor: 'pointer' }}
-          />
-          <label
-            htmlFor="filtro-ferramenta-ativas"
-            style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 400, cursor: 'pointer' }}
-          >
-            Exibir somente ativas
-          </label>
-        </div>
-      </div>
-
-      {/* Tabela de Ferramentas */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        }}
-      >
-        <div style={{ overflowX: 'auto' }}>
+        {/* Tabela de Ferramentas (Inset Grouped) */}
+        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container overflow-hidden">
+          <div className="overflow-x-auto">
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
@@ -1403,7 +1217,8 @@ export function FerramentasPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </main>
   )
 }
 export default FerramentasPage

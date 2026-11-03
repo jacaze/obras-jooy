@@ -280,7 +280,7 @@ export function MateriaisPage() {
   const unCompraObj = unidades.find((u) => u.id === formUnCompraId)
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '32px auto', padding: '0 16px' }}>
+    <main className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-24 font-body text-on-surface">
       {/* Cabecalho da Pagina */}
       <div
         style={{
@@ -1426,7 +1426,7 @@ export function MateriaisPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }
 export default MateriaisPage

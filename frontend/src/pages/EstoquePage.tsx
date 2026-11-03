@@ -315,7 +315,7 @@ export function EstoquePage() {
     : locaisAtivos
 
   return (
-    <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <main className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-24 font-body text-on-surface">
       {/* Cabecalho */}
       <div
         style={{
@@ -1319,6 +1319,6 @@ export function EstoquePage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }
