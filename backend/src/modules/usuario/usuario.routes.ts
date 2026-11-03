@@ -146,6 +146,50 @@ export async function usuarioRoutes(app: FastifyInstance) {
   )
 
   // ----------------------------------------------------
+  // OPCOES DE USUARIOS ATIVOS PARA SELETORES OPERACIONAIS (EMPRESTIMO DE FERRAMENTAS)
+  // ----------------------------------------------------
+  app.get(
+    '/usuarios/opcoes',
+    {
+      preHandler: [
+        authenticate,
+        requireRole([
+          PerfilUsuario.ADMIN,
+          PerfilUsuario.ALMOXARIFE,
+          PerfilUsuario.ENGENHARIA,
+        ]),
+      ],
+      schema: {
+        tags: ['Usuarios'],
+        summary: 'Listagem enxuta de usuarios ativos para seletores operacionais (ADMIN, ALMOXARIFE, ENGENHARIA)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (_request, reply) => {
+      const usuariosAtivos = await prisma.usuario.findMany({
+        where: { ativo: true },
+        select: {
+          id: true,
+          nome: true,
+          login: true,
+          perfil: true,
+          ativo: true,
+          criadoEm: true,
+          cargo: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+        orderBy: { nome: 'asc' },
+      })
+
+      return reply.status(200).send(usuariosAtivos)
+    }
+  )
+
+  // ----------------------------------------------------
   // GESTAO DE USUARIOS (EXCLUSIVO ADMIN)
   // ----------------------------------------------------
 

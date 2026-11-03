@@ -200,6 +200,38 @@ describe('Modulo de Usuarios e Autenticacao (Rotas e Regras de Negocio)', () => 
       expect(response.statusCode).toBe(403)
     })
 
+    it('deve permitir que ALMOXARIFE consulte opcoes de usuarios ativos para emprestimo (/api/usuarios/opcoes)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValueOnce({
+        id: almoxarifeUserId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.usuario, 'findMany').mockResolvedValueOnce([
+        {
+          id: 'enc-01',
+          nome: 'Carlos Mestre',
+          login: 'carlos.mestre',
+          perfil: PerfilUsuario.ENCARREGADO,
+          ativo: true,
+          criadoEm: new Date(),
+          cargo: { id: 'c-mestre', nome: 'Mestre de Obras' },
+        },
+      ] as any)
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/usuarios/opcoes',
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body).toHaveLength(1)
+      expect(body[0].nome).toBe('Carlos Mestre')
+    })
+
     it('deve cadastrar novo usuario quando solicitado por ADMIN (201)', async () => {
       vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValueOnce({
         id: adminUserId,

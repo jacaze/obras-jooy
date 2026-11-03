@@ -28,3 +28,8 @@ if (!_env.success) {
 }
 
 export const env = _env.data
+
+// Garante que o Prisma Client encontre DATABASE_URL no process.env mesmo em ambiente de testes sem arquivo .env
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = env.DATABASE_URL
+}
