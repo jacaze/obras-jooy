@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export function Navbar() {
@@ -14,142 +14,127 @@ export function Navbar() {
     return null
   }
 
+  function estiloLink({ isActive }: { isActive: boolean }) {
+    return {
+      color: isActive ? '#38bdf8' : '#cbd5e1',
+      backgroundColor: isActive ? 'rgba(56, 189, 248, 0.12)' : 'transparent',
+      borderBottom: isActive ? '2px solid #38bdf8' : '2px solid transparent',
+      textDecoration: 'none',
+      fontSize: '0.9rem',
+      fontWeight: isActive ? 600 : 500,
+      padding: '0.4rem 0.65rem',
+      borderRadius: '4px 4px 0 0',
+      transition: 'all 0.15s ease',
+      whiteSpace: 'nowrap' as const,
+    }
+  }
+
   return (
     <nav
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0.75rem 2rem',
+        flexWrap: 'wrap',
+        gap: '0.75rem 1.5rem',
+        padding: '0.65rem 1.5rem',
         backgroundColor: '#0f172a',
         color: '#f8fafc',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        borderBottom: '1px solid #1e293b',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.25rem',
+          flexWrap: 'wrap',
+        }}
+      >
         <Link
           to="/"
           style={{
-            fontSize: '1.25rem',
-            fontWeight: 'bold',
+            fontSize: '1.2rem',
+            fontWeight: 700,
             color: '#38bdf8',
             textDecoration: 'none',
+            letterSpacing: '-0.02em',
           }}
         >
           Obras Jooy
         </Link>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link
-            to="/"
-            style={{
-              color: '#cbd5e1',
-              textDecoration: 'none',
-              fontSize: '0.95rem',
-            }}
-          >
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          <NavLink to="/" end style={estiloLink}>
             Inicio
-          </Link>
-          <Link
-            to="/requisicoes"
-            style={{
-              color: '#cbd5e1',
-              textDecoration: 'none',
-              fontSize: '0.95rem',
-            }}
-          >
+          </NavLink>
+
+          <NavLink to="/requisicoes" style={estiloLink}>
             Requisicoes
-          </Link>
+          </NavLink>
+
           {usuario.perfil !== 'ENCARREGADO' && (
             <>
-              <Link
-                to="/estoque"
-                style={{
-                  color: '#cbd5e1',
-                  textDecoration: 'none',
-                  fontSize: '0.95rem',
-                }}
-              >
+              <NavLink to="/estoque" style={estiloLink}>
                 Estoque e Kardex
-              </Link>
-              <Link
-                to="/obras"
-                style={{
-                  color: '#cbd5e1',
-                  textDecoration: 'none',
-                  fontSize: '0.95rem',
-                }}
-              >
+              </NavLink>
+              <NavLink to="/obras" style={estiloLink}>
                 Obras e Pavimentos
-              </Link>
-              <Link
-                to="/materiais"
-                style={{
-                  color: '#cbd5e1',
-                  textDecoration: 'none',
-                  fontSize: '0.95rem',
-                }}
-              >
+              </NavLink>
+              <NavLink to="/materiais" style={estiloLink}>
                 Catalogo de Materiais
-              </Link>
-              <Link
-                to="/ferramentas"
-                style={{
-                  color: '#cbd5e1',
-                  textDecoration: 'none',
-                  fontSize: '0.95rem',
-                }}
-              >
+              </NavLink>
+              <NavLink to="/ferramentas" style={estiloLink}>
                 Ferramentas
-              </Link>
+              </NavLink>
             </>
           )}
+
           {(usuario.perfil === 'ADMIN' ||
             usuario.perfil === 'ENGENHARIA' ||
             usuario.perfil === 'ADMINISTRACAO') && (
-            <Link
-              to="/orcamento"
-              style={{
-                color: '#cbd5e1',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-              }}
-            >
+            <NavLink to="/orcamento" style={estiloLink}>
               Orcamento da Obra
-            </Link>
+            </NavLink>
           )}
+
           {usuario.perfil === 'ADMIN' && (
-            <Link
-              to="/usuarios"
-              style={{
-                color: '#cbd5e1',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-              }}
-            >
+            <NavLink to="/usuarios" style={estiloLink}>
               Usuarios
-            </Link>
+            </NavLink>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ textAlign: 'right', fontSize: '0.85rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
+        <div style={{ textAlign: 'right', fontSize: '0.82rem', lineHeight: 1.3 }}>
           <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{usuario.nome}</div>
           <div style={{ color: '#94a3b8' }}>
-            <span>{usuario.cargo}</span> • <span style={{ color: '#38bdf8' }}>{usuario.perfil}</span>
+            <span>{usuario.cargo}</span> •{' '}
+            <span style={{ color: '#38bdf8', fontWeight: 600 }}>{usuario.perfil}</span>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={handleLogout}
           style={{
-            backgroundColor: '#334155',
+            backgroundColor: '#1e293b',
             color: '#f8fafc',
-            border: 'none',
-            padding: '0.4rem 0.8rem',
-            borderRadius: '4px',
+            border: '1px solid #334155',
+            padding: '0.4rem 0.85rem',
+            borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '0.85rem',
+            fontSize: '0.82rem',
+            fontWeight: 600,
           }}
         >
           Sair
@@ -158,3 +143,4 @@ export function Navbar() {
     </nav>
   )
 }
+export default Navbar
