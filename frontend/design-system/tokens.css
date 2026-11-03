@@ -1,0 +1,157 @@
+/* Design system "Obras" — tokens. Gerado a partir da análise de lp.pierre.finance (lima #cfff04 + Geist)
+   adaptado para almoxarifado de obra: tema claro (campo, sol) e escuro (escritório).
+   Cores são canais RGB para o Tailwind aceitar opacidade: bg-surface/85, border-error/30.
+   Troca de tema: adicione/remova a classe "dark" no <html> (ver theme.js). */
+
+:root {
+  --ob-background: 247 248 250;
+  --ob-surface: 247 248 250;
+  --ob-surface-bright: 255 255 255;
+  --ob-surface-dim: 220 222 227;
+  --ob-surface-container-lowest: 255 255 255;
+  --ob-surface-container-low: 241 242 245;
+  --ob-surface-container: 235 237 240;
+  --ob-surface-container-high: 227 229 233;
+  --ob-surface-container-highest: 220 222 227;
+  --ob-surface-variant: 227 229 233;
+  --ob-surface-tint: 9 9 11;
+  --ob-on-background: 9 9 11;
+  --ob-on-surface: 9 9 11;
+  --ob-on-surface-variant: 82 82 91;
+  --ob-outline: 113 113 122;
+  --ob-outline-variant: 212 212 216;
+  --ob-inverse-surface: 24 24 27;
+  --ob-inverse-on-surface: 244 244 245;
+  --ob-inverse-primary: 207 255 4;
+  --ob-primary: 9 9 11;
+  --ob-on-primary: 255 255 255;
+  --ob-primary-container: 207 255 4;
+  --ob-on-primary-container: 9 9 11;
+  --ob-primary-fixed: 245 255 205;
+  --ob-primary-fixed-dim: 228 255 106;
+  --ob-on-primary-fixed: 9 9 11;
+  --ob-on-primary-fixed-variant: 61 74 0;
+  --ob-secondary: 21 128 61;
+  --ob-on-secondary: 255 255 255;
+  --ob-secondary-container: 220 252 231;
+  --ob-on-secondary-container: 20 83 45;
+  --ob-secondary-fixed: 187 247 208;
+  --ob-secondary-fixed-dim: 74 222 128;
+  --ob-on-secondary-fixed: 5 46 22;
+  --ob-on-secondary-fixed-variant: 20 83 45;
+  --ob-tertiary: 146 64 14;
+  --ob-on-tertiary: 255 255 255;
+  --ob-tertiary-container: 180 83 9;
+  --ob-on-tertiary-container: 255 255 255;
+  --ob-tertiary-fixed: 254 243 199;
+  --ob-tertiary-fixed-dim: 252 211 77;
+  --ob-on-tertiary-fixed: 69 26 3;
+  --ob-on-tertiary-fixed-variant: 120 53 15;
+  --ob-error: 185 28 28;
+  --ob-on-error: 255 255 255;
+  --ob-error-container: 254 226 226;
+  --ob-on-error-container: 127 29 29;
+  --ob-accent: 207 255 4;
+  --ob-on-accent: 9 9 11;
+  --ob-accent-text: 83 102 2;
+  --ob-info: 29 78 216;
+  --ob-info-container: 219 234 254;
+  --ob-on-info-container: 30 58 138;
+}
+
+:root.dark {
+  --ob-background: 9 9 11;
+  --ob-surface: 9 9 11;
+  --ob-surface-bright: 39 39 42;
+  --ob-surface-dim: 5 5 6;
+  --ob-surface-container-lowest: 17 17 19;
+  --ob-surface-container-low: 24 24 27;
+  --ob-surface-container: 31 31 35;
+  --ob-surface-container-high: 39 39 42;
+  --ob-surface-container-highest: 50 50 54;
+  --ob-surface-variant: 39 39 42;
+  --ob-surface-tint: 207 255 4;
+  --ob-on-background: 255 255 255;
+  --ob-on-surface: 255 255 255;
+  --ob-on-surface-variant: 180 180 187;
+  --ob-outline: 139 139 147;
+  --ob-outline-variant: 50 50 54;
+  --ob-inverse-surface: 235 235 235;
+  --ob-inverse-on-surface: 24 24 27;
+  --ob-inverse-primary: 9 9 11;
+  --ob-primary: 207 255 4;
+  --ob-on-primary: 9 9 11;
+  --ob-primary-container: 207 255 4;
+  --ob-on-primary-container: 9 9 11;
+  --ob-primary-fixed: 35 42 5;
+  --ob-primary-fixed-dim: 58 70 8;
+  --ob-on-primary-fixed: 207 255 4;
+  --ob-on-primary-fixed-variant: 230 255 112;
+  --ob-secondary: 74 222 128;
+  --ob-on-secondary: 5 46 22;
+  --ob-secondary-container: 15 46 26;
+  --ob-on-secondary-container: 134 239 172;
+  --ob-secondary-fixed: 20 83 45;
+  --ob-secondary-fixed-dim: 34 197 94;
+  --ob-on-secondary-fixed: 187 247 208;
+  --ob-on-secondary-fixed-variant: 134 239 172;
+  --ob-tertiary: 251 191 36;
+  --ob-on-tertiary: 28 17 0;
+  --ob-tertiary-container: 120 53 15;
+  --ob-on-tertiary-container: 253 230 138;
+  --ob-tertiary-fixed: 59 42 5;
+  --ob-tertiary-fixed-dim: 180 83 9;
+  --ob-on-tertiary-fixed: 253 230 138;
+  --ob-on-tertiary-fixed-variant: 252 211 77;
+  --ob-error: 248 113 113;
+  --ob-on-error: 42 0 0;
+  --ob-error-container: 59 18 18;
+  --ob-on-error-container: 254 202 202;
+  --ob-accent: 207 255 4;
+  --ob-on-accent: 9 9 11;
+  --ob-accent-text: 207 255 4;
+  --ob-info: 163 191 255;
+  --ob-info-container: 20 33 61;
+  --ob-on-info-container: 219 234 254;
+}
+
+:root {
+  /* ---------- Tipografia ---------- */
+  --ob-font: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ob-font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ob-tracking-heading: -0.03em;
+
+  /* ---------- Forma ---------- */
+  --ob-radius-sm: .5rem;
+  --ob-radius-md: .75rem;
+  --ob-radius-lg: 1rem;      /* cards */
+  --ob-radius-xl: 1.5rem;
+  --ob-radius-nav: 2.25rem;  /* barra de navegação */
+  --ob-radius-pill: 100vw;   /* botões */
+  --ob-hit: 3rem;            /* alvo de toque mínimo (48px) */
+  --ob-hit-field: 4rem;      /* ação principal em campo (luva / sol) */
+  --ob-border-w: .094rem;
+  --ob-focus-w: .125rem;
+  --ob-focus-offset: .1875rem;
+
+  /* ---------- Movimento (extraído da Pierre) ---------- */
+  --ob-ease: ease;
+  --ob-ease-card: cubic-bezier(.25, .46, .45, .94);
+  --ob-dur-fast: .1s;
+  --ob-dur-ui: .2s;     /* hover de botão / borda de card */
+  --ob-dur-med: .3s;    /* transform de imagem, tabs */
+  --ob-dur-menu: .4s;   /* menu / dropdown (clip-path) */
+  --ob-dur-enter: .7s;  /* entrada fade-up e preenchimento de barra */
+}
+
+@keyframes ob-fade-up { from { opacity: 0; transform: translateY(20%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ob-menu-open  { from { clip-path: polygon(0 0,100% 0,100% 0,0 0); } to { clip-path: polygon(0 0,100% 0,100% 100%,0 100%); } }
+@keyframes ob-menu-close { from { clip-path: polygon(0 0,100% 0,100% 100%,0 100%); } to { clip-path: polygon(0 0,100% 0,100% 0,0 0); } }
+@keyframes ob-pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }

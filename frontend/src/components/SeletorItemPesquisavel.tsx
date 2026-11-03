@@ -65,52 +65,28 @@ export function SeletorItemPesquisavel({
               setTermoBusca('')
             }
           }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: '1px solid #0369a1',
-            backgroundColor: '#f0f9ff',
-            cursor: desabilitado ? 'not-allowed' : 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: 400,
-            color: '#0f172a',
-            minHeight: '44px',
-            boxSizing: 'border-box',
-            width: '100%',
-            minWidth: 0,
-          }}
+          className={`flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl border border-primary/30 bg-surface-container-low text-on-surface min-h-[48px] w-full transition-all ${
+            desabilitado ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-primary'
+          }`}
         >
-          <div
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              minWidth: 0,
-              flex: 1,
-            }}
-          >
-            <strong style={{ color: '#0369a1', fontWeight: 600, marginRight: '8px' }}>
+          <div className="overflow-hidden text-ellipsis whitespace-nowrap min-w-0 flex-1 text-sm font-body">
+            <strong className="ob-mono font-semibold text-accent-text mr-2">
               {itemSelecionado.codigo}
             </strong>
-            <span>{itemSelecionado.descricao}</span>
+            <span className="text-on-surface">{itemSelecionado.descricao}</span>
             {itemSelecionado.unidade && (
-              <span style={{ color: '#475569', marginLeft: '8px' }}>({itemSelecionado.unidade})</span>
+              <span className="text-on-surface-variant ml-1.5 font-mono">
+                ({itemSelecionado.unidade})
+              </span>
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <div className="flex items-center gap-2 shrink-0">
             {itemSelecionado.saldoDisponivel !== undefined && (
               <span
-                style={{
-                  fontSize: '0.875rem',
-                  color: itemSelecionado.saldoDisponivel > 0 ? '#15803d' : '#b91c1c',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                }}
+                className={`ob-badge ${
+                  itemSelecionado.saldoDisponivel > 0 ? 'ob-badge--ok' : 'ob-badge--crit'
+                } ob-mono text-xs`}
               >
                 [Disp: {itemSelecionado.saldoDisponivel}
                 {itemSelecionado.limiteOrcamento !== undefined
@@ -130,18 +106,7 @@ export function SeletorItemPesquisavel({
                   setTermoBusca('')
                   setAberto(true)
                 }}
-                style={{
-                  minWidth: '44px',
-                  minHeight: '44px',
-                  background: 'none',
-                  border: 'none',
-                  color: '#475569',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  padding: '8px',
-                  fontWeight: 600,
-                  lineHeight: 1,
-                }}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-on-surface-variant hover:text-on-surface text-lg cursor-pointer transition-colors"
               >
                 &times;
               </button>
@@ -150,7 +115,8 @@ export function SeletorItemPesquisavel({
         </div>
       ) : (
         /* Campo de texto de busca quando aberto ou sem selecao */
-        <div style={{ position: 'relative' }}>
+        <div className="ob-search relative w-full">
+          <span className="material-symbols-outlined">search</span>
           <input
             type="text"
             role="combobox"
@@ -169,47 +135,13 @@ export function SeletorItemPesquisavel({
               if (!aberto) setAberto(true)
             }}
             onFocus={() => setAberto(true)}
-            style={{
-              width: '100%',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              fontSize: '0.875rem',
-              fontWeight: 400,
-              color: '#0f172a',
-              boxSizing: 'border-box',
-              minHeight: '44px',
-            }}
+            className="ob-input"
           />
 
           {aberto && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                marginTop: '8px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                boxShadow: '0 8px 16px rgba(15, 23, 42, 0.08)',
-                maxHeight: '240px',
-                overflowY: 'auto',
-                zIndex: 9999,
-              }}
-            >
+            <div className="absolute top-full left-0 right-0 mt-2 bg-surface-container-lowest border border-surface-container-high rounded-2xl shadow-xl max-h-60 overflow-y-auto z-50 divide-y divide-surface-container">
               {itensFiltrados.length === 0 ? (
-                <div
-                  style={{
-                    padding: '16px',
-                    fontSize: '0.875rem',
-                    fontWeight: 400,
-                    color: '#475569',
-                    textAlign: 'center',
-                  }}
-                >
+                <div className="p-4 text-sm text-on-surface-variant text-center font-body">
                   Nenhum item encontrado para "{termoBusca}".
                 </div>
               ) : (
@@ -225,36 +157,24 @@ export function SeletorItemPesquisavel({
                         setAberto(false)
                         setTermoBusca('')
                       }}
-                      style={{
-                        minHeight: '44px',
-                        padding: '8px 16px',
-                        borderBottom: '1px solid #f1f5f9',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: 400,
-                        backgroundColor: ehOSelecionado ? '#f0f9ff' : '#ffffff',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: '8px',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!ehOSelecionado) e.currentTarget.style.backgroundColor = '#f8fafc'
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!ehOSelecionado) e.currentTarget.style.backgroundColor = '#ffffff'
-                      }}
+                      className={`min-h-[48px] px-4 py-2.5 flex justify-between items-center gap-2 cursor-pointer transition-colors text-sm font-body ${
+                        ehOSelecionado
+                          ? 'bg-primary/10'
+                          : 'hover:bg-surface-container-low'
+                      }`}
                     >
-                      <div>
-                        <strong style={{ color: '#0369a1', fontWeight: 600, marginRight: '8px' }}>
+                      <div className="min-w-0 flex-1">
+                        <strong className="ob-mono font-semibold text-accent-text mr-2">
                           {it.codigo}
                         </strong>
-                        <span style={{ color: '#0f172a' }}>{it.descricao}</span>
+                        <span className="text-on-surface">{it.descricao}</span>
                         {it.unidade && (
-                          <span style={{ color: '#475569', marginLeft: '8px' }}>({it.unidade})</span>
+                          <span className="text-on-surface-variant ml-1.5 font-mono">
+                            ({it.unidade})
+                          </span>
                         )}
                         {it.detalheExtra && (
-                          <div style={{ fontSize: '0.875rem', color: '#475569', marginTop: '8px' }}>
+                          <div className="text-xs text-on-surface-variant mt-0.5">
                             {it.detalheExtra}
                           </div>
                         )}
@@ -262,16 +182,9 @@ export function SeletorItemPesquisavel({
 
                       {it.saldoDisponivel !== undefined && (
                         <div
-                          style={{
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            color: it.saldoDisponivel > 0 ? '#166534' : '#991b1b',
-                            backgroundColor: it.saldoDisponivel > 0 ? '#dcfce7' : '#fee2e2',
-                            padding: '8px',
-                            borderRadius: '8px',
-                            whiteSpace: 'nowrap',
-                            marginLeft: '8px',
-                          }}
+                          className={`ob-badge ${
+                            it.saldoDisponivel > 0 ? 'ob-badge--ok' : 'ob-badge--crit'
+                          } ob-mono text-xs shrink-0`}
                         >
                           Disp: {it.saldoDisponivel}
                           {it.limiteOrcamento !== undefined ? ` | Limite: ${it.limiteOrcamento}` : ''}

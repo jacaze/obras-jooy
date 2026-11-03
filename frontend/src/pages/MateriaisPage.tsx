@@ -282,27 +282,18 @@ export function MateriaisPage() {
   return (
     <main className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-24 font-body text-on-surface">
       {/* Cabecalho da Pagina */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px',
-          marginBottom: '24px',
-        }}
-      >
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+          <h1 className="text-2xl font-bold tracking-tight text-on-surface">
             Catálogo de Materiais
           </h1>
-          <p style={{ margin: '8px 0 0 0', color: '#475569', fontSize: '1rem' }}>
+          <p className="text-sm text-on-surface-variant mt-1">
             Controle de insumos, unidades de medida e taxas opcionais de conversão de compra.
           </p>
         </div>
 
         {podeGerenciar && (
-          <div style={{ display: 'flex', gap: '16px' }}>
+          <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => {
@@ -311,16 +302,7 @@ export function MateriaisPage() {
                 setMensagemErro(null)
                 setModalGerenciarCategorias(true)
               }}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                color: '#334155',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--outline text-sm"
             >
               Gerenciar Categorias
             </button>
@@ -333,32 +315,14 @@ export function MateriaisPage() {
                 setMensagemErro(null)
                 setModalGerenciarUnidades(true)
               }}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                color: '#334155',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--outline text-sm"
             >
               Gerenciar Unidades
             </button>
             <button
               type="button"
               onClick={abrirModalCriacao}
-              style={{
-                padding: '8px 24px',
-                backgroundColor: '#0369a1',
-                border: 'none',
-                borderRadius: '6px',
-                color: '#ffffff',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--primary text-sm font-semibold"
             >
               + Cadastrar Material
             </button>
@@ -370,15 +334,7 @@ export function MateriaisPage() {
       {mensagemSucesso && (
         <div
           role="status"
-          style={{
-            padding: '16px 16px',
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '6px',
-            color: '#166534',
-            marginBottom: '16px',
-            fontSize: '0.875rem',
-          }}
+          className="p-4 mb-4 rounded-xl bg-secondary-container text-on-secondary-container border border-secondary text-sm"
         >
           {mensagemSucesso}
         </div>
@@ -387,38 +343,18 @@ export function MateriaisPage() {
       {mensagemErro && (
         <div
           role="alert"
-          style={{
-            padding: '16px 16px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '6px',
-            color: '#991b1b',
-            marginBottom: '16px',
-            fontSize: '0.875rem',
-          }}
+          className="p-4 mb-4 rounded-xl bg-error-container text-on-error-container border border-error text-sm"
         >
           {mensagemErro}
         </div>
       )}
 
       {/* Barra de Filtros e Busca */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '16px',
-          backgroundColor: '#f8fafc',
-          padding: '24px',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          marginBottom: '24px',
-          alignItems: 'end',
-        }}
-      >
+      <div className="ob-card p-4 sm:p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
         <div>
           <label
             htmlFor="filtro-busca"
-            style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}
+            className="ob-label"
           >
             Buscar Insumo
           </label>
@@ -428,21 +364,14 @@ export function MateriaisPage() {
             placeholder="Nome ou código..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.875rem',
-              boxSizing: 'border-box',
-            }}
+            className="ob-input w-full"
           />
         </div>
 
         <div>
           <label
             htmlFor="filtro-categoria"
-            style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}
+            className="ob-label"
           >
             Categoria
           </label>
@@ -450,15 +379,7 @@ export function MateriaisPage() {
             id="filtro-categoria"
             value={categoriaFiltro}
             onChange={(e) => setCategoriaFiltro(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.875rem',
-              backgroundColor: '#ffffff',
-              boxSizing: 'border-box',
-            }}
+            className="ob-input w-full bg-surface"
           >
             <option value="">Todas as categorias</option>
             {categorias.map((cat) => (
@@ -469,17 +390,17 @@ export function MateriaisPage() {
           </select>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '8px' }}>
+        <div className="flex items-center gap-2 pb-2">
           <input
             id="filtro-somente-ativos"
             type="checkbox"
             checked={somenteAtivos}
             onChange={(e) => setSomenteAtivos(e.target.checked)}
-            style={{ width: '1rem', height: '1rem', cursor: 'pointer' }}
+            className="w-4 h-4 accent-primary cursor-pointer"
           />
           <label
             htmlFor="filtro-somente-ativos"
-            style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 400, cursor: 'pointer' }}
+            className="text-sm text-on-surface cursor-pointer select-none"
           >
             Exibir somente materiais ativos
           </label>
@@ -487,39 +408,31 @@ export function MateriaisPage() {
       </div>
 
       {/* Tabela de Materiais */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        }}
-      >
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="ob-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="ob-table w-full">
             <thead>
-              <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>
+              <tr>
+                <th className="font-semibold text-xs uppercase tracking-wider">
                   Código
                 </th>
-                <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>
+                <th className="font-semibold text-xs uppercase tracking-wider">
                   Descrição / Insumo
                 </th>
-                <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>
+                <th className="font-semibold text-xs uppercase tracking-wider">
                   Categoria
                 </th>
-                <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>
+                <th className="font-semibold text-xs uppercase tracking-wider">
                   Unidade Padrão
                 </th>
-                <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>
+                <th className="font-semibold text-xs uppercase tracking-wider">
                   Conversão de Compra
                 </th>
-                <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>
+                <th className="font-semibold text-xs uppercase tracking-wider">
                   Situação
                 </th>
                 {podeGerenciar && (
-                  <th style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>
+                  <th className="font-semibold text-xs uppercase tracking-wider text-right">
                     Ações
                   </th>
                 )}
@@ -528,13 +441,13 @@ export function MateriaisPage() {
             <tbody>
               {carregandoMateriais ? (
                 <tr>
-                  <td colSpan={podeGerenciar ? 7 : 6} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
+                  <td colSpan={podeGerenciar ? 7 : 6} className="p-8 text-center text-on-surface-variant">
                     Carregando catálogo de materiais...
                   </td>
                 </tr>
               ) : materiais.length === 0 ? (
                 <tr>
-                  <td colSpan={podeGerenciar ? 7 : 6} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
+                  <td colSpan={podeGerenciar ? 7 : 6} className="p-8 text-center text-on-surface-variant">
                     Nenhum material encontrado com os filtros selecionados.
                   </td>
                 </tr>
@@ -547,111 +460,61 @@ export function MateriaisPage() {
                   return (
                     <tr
                       key={mat.id}
-                      style={{
-                        borderBottom: '1px solid #f1f5f9',
-                        opacity: mat.ativo ? 1 : 0.6,
-                      }}
+                      className={mat.ativo ? '' : 'opacity-60'}
                     >
-                      <td style={{ padding: '16px 16px', fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                      <td className="font-mono font-bold text-on-surface">
                         {mat.codigo}
                       </td>
-                      <td style={{ padding: '16px 16px' }}>
-                        <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.875rem' }}>
+                      <td>
+                        <div className="font-semibold text-on-surface">
                           {mat.descricao}
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <div className="flex flex-wrap gap-2 mt-2">
                           {mat.exigeTesteQualidade && (
-                            <span
-                              style={{
-                                fontSize: '0.875rem',
-                                padding: '8px 8px',
-                                backgroundColor: '#fef3c7',
-                                color: '#92400e',
-                                borderRadius: '4px',
-                                fontWeight: 600,
-                              }}
-                            >
+                            <span className="ob-badge ob-badge--low text-xs">
                               Exige Teste de Qualidade
                             </span>
                           )}
                           {mat.ehKit && (
-                            <span
-                              style={{
-                                fontSize: '0.875rem',
-                                padding: '8px 8px',
-                                backgroundColor: '#f3e8ff',
-                                color: '#6b21a8',
-                                borderRadius: '4px',
-                                fontWeight: 600,
-                              }}
-                            >
+                            <span className="ob-badge ob-badge--info text-xs">
                               Kit de Materiais
                             </span>
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '16px 16px', fontSize: '0.875rem', color: '#334155' }}>
+                      <td className="text-on-surface-variant">
                         {mat.categoria?.nome || '-'}
                       </td>
-                      <td style={{ padding: '16px 16px', fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                      <td className="font-semibold text-on-surface">
                         {mat.unidadeConsumo?.sigla} ({mat.unidadeConsumo?.descricao})
                       </td>
-                      <td style={{ padding: '16px 16px', fontSize: '0.875rem' }}>
+                      <td>
                         {possuiConversaoAtiva ? (
-                          <span style={{ fontWeight: 600, color: '#0369a1' }}>
+                          <span className="font-mono font-semibold text-accent-text dark:text-primary">
                             1 {mat.unidadeCompra?.sigla} = {fatorNum} {mat.unidadeConsumo?.sigla}
                           </span>
                         ) : (
-                          <span style={{ color: '#475569' }}>Direta (1:1)</span>
+                          <span className="text-on-surface-variant">Direta (1:1)</span>
                         )}
                       </td>
-                      <td style={{ padding: '16px 16px' }}>
+                      <td>
                         {mat.ativo ? (
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              padding: '8px 8px',
-                              backgroundColor: '#dcfce7',
-                              color: '#15803d',
-                              borderRadius: '4px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
-                          >
+                          <span className="ob-badge ob-badge--ok">
                             Ativo
                           </span>
                         ) : (
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              padding: '8px 8px',
-                              backgroundColor: '#f1f5f9',
-                              color: '#475569',
-                              borderRadius: '4px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
-                          >
+                          <span className="ob-badge">
                             Inativo
                           </span>
                         )}
                       </td>
                       {podeGerenciar && (
-                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <td className="text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
                               onClick={() => abrirModalEdicao(mat)}
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                color: '#1e293b',
-                                fontSize: '0.875rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                              }}
+                              className="ob-btn ob-btn--outline text-xs py-1 px-3"
                             >
                               Editar
                             </button>
@@ -660,16 +523,11 @@ export function MateriaisPage() {
                               onClick={() =>
                                 toggleSituacaoMutation.mutate({ id: mat.id, ativo: !mat.ativo })
                               }
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: mat.ativo ? '1px solid #fca5a5' : '1px solid #86efac',
-                                borderRadius: '4px',
-                                color: mat.ativo ? '#b91c1c' : '#15803d',
-                                fontSize: '0.875rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                              }}
+                              className={`ob-btn text-xs py-1 px-3 border ${
+                                mat.ativo
+                                  ? 'border-error text-error hover:bg-error-container'
+                                  : 'border-secondary text-secondary hover:bg-secondary-container'
+                              }`}
                             >
                               {mat.ativo ? 'Desativar' : 'Reativar'}
                             </button>
@@ -687,55 +545,27 @@ export function MateriaisPage() {
 
       {/* Modal de Cadastro / Edição de Material */}
       {modalMaterialAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '650px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
+        <div className="fixed inset-0 bg-inverse-surface/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-surface-container-lowest text-on-surface rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-outline-variant">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-on-surface">
                 {materialEmEdicao ? `Editar Insumo (${materialEmEdicao.codigo})` : 'Novo Insumo'}
               </h2>
               <button
                 type="button"
                 onClick={fecharModalMaterial}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1rem',
-                  color: '#475569',
-                  cursor: 'pointer',
-                }}
+                className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg"
               >
                 X
               </button>
             </div>
 
-            <form onSubmit={handleSalvarMaterial} style={{ display: 'grid', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px' }}>
+            <form onSubmit={handleSalvarMaterial} className="grid gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label
                     htmlFor="material-codigo"
-                    style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px' }}
+                    className="ob-label"
                   >
                     Código (Sienge/ERP) *
                   </label>
@@ -747,22 +577,16 @@ export function MateriaisPage() {
                     value={formCodigo}
                     onChange={(e) => setFormCodigo(e.target.value.toUpperCase())}
                     placeholder="Ex: CIM-01"
-                    style={{
-                      width: '100%',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      boxSizing: 'border-box',
-                      backgroundColor: materialEmEdicao ? '#f1f5f9' : '#ffffff',
-                    }}
+                    className={`ob-input w-full font-mono ${
+                      materialEmEdicao ? 'bg-surface-container-high opacity-70 cursor-not-allowed' : ''
+                    }`}
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label
                     htmlFor="material-descricao"
-                    style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px' }}
+                    className="ob-label"
                   >
                     Descrição Completa *
                   </label>
@@ -773,23 +597,16 @@ export function MateriaisPage() {
                     value={formDescricao}
                     onChange={(e) => setFormDescricao(e.target.value)}
                     placeholder="Ex: Cimento CP-II F 32 50kg"
-                    style={{
-                      width: '100%',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      boxSizing: 'border-box',
-                    }}
+                    className="ob-input w-full"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="material-categoria"
-                    style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px' }}
+                    className="ob-label"
                   >
                     Categoria *
                   </label>
@@ -798,15 +615,7 @@ export function MateriaisPage() {
                     required
                     value={formCategoriaId}
                     onChange={(e) => setFormCategoriaId(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      backgroundColor: '#ffffff',
-                      boxSizing: 'border-box',
-                    }}
+                    className="ob-input w-full bg-surface"
                   >
                     <option value="">Selecione uma categoria...</option>
                     {categorias.map((cat) => (
@@ -820,7 +629,7 @@ export function MateriaisPage() {
                 <div>
                   <label
                     htmlFor="material-un-consumo"
-                    style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px' }}
+                    className="ob-label"
                   >
                     Unidade Padrão de Estoque/Uso *
                   </label>
@@ -829,15 +638,7 @@ export function MateriaisPage() {
                     required
                     value={formUnConsumoId}
                     onChange={(e) => setFormUnConsumoId(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      backgroundColor: '#ffffff',
-                      boxSizing: 'border-box',
-                    }}
+                    className="ob-input w-full bg-surface"
                   >
                     <option value="">Selecione a unidade...</option>
                     {unidades.map((u) => (
@@ -850,17 +651,8 @@ export function MateriaisPage() {
               </div>
 
               {/* Conversão Opcional de Unidade de Compra */}
-              <div
-                style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  padding: '16px',
-                  display: 'grid',
-                  gap: '16px',
-                }}
-              >
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <div className="p-4 rounded-xl border border-outline-variant bg-surface-container-low grid gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={temConversao}
@@ -871,19 +663,19 @@ export function MateriaisPage() {
                         setFormFatorConversao('1')
                       }
                     }}
-                    style={{ width: '1rem', height: '1rem' }}
+                    className="w-4 h-4 accent-primary"
                   />
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>
+                  <span className="text-sm font-semibold text-on-surface">
                     Material possui unidade de compra diferente (com taxa de conversão)?
                   </span>
                 </label>
 
                 {temConversao && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '8px' }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                     <div>
                       <label
                         htmlFor="material-un-compra"
-                        style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}
+                        className="ob-label"
                       >
                         Unidade de Compra *
                       </label>
@@ -892,14 +684,7 @@ export function MateriaisPage() {
                         required={temConversao}
                         value={formUnCompraId}
                         onChange={(e) => setFormUnCompraId(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          backgroundColor: '#ffffff',
-                        }}
+                        className="ob-input w-full bg-surface"
                       >
                         <option value="">Selecione a unidade de compra...</option>
                         {unidades.map((u) => (
@@ -913,7 +698,7 @@ export function MateriaisPage() {
                     <div>
                       <label
                         htmlFor="material-fator"
-                        style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}
+                        className="ob-label"
                       >
                         Fator de Conversão *
                       </label>
@@ -925,20 +710,12 @@ export function MateriaisPage() {
                         required={temConversao}
                         value={formFatorConversao}
                         onChange={(e) => setFormFatorConversao(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          backgroundColor: '#ffffff',
-                          boxSizing: 'border-box',
-                        }}
+                        className="ob-input w-full font-mono tabular-nums"
                       />
                     </div>
 
                     {unCompraObj && unConsumoObj && (
-                      <div style={{ gridColumn: 'span 2', fontSize: '0.875rem', color: '#0369a1', fontStyle: 'italic' }}>
+                      <div className="sm:col-span-2 text-sm text-accent-text dark:text-primary italic">
                         Exemplo: Cada 1 {unCompraObj.sigla} comprado gerará {formFatorConversao || 1} {unConsumoObj.sigla} no saldo de estoque.
                       </div>
                     )}
@@ -947,57 +724,41 @@ export function MateriaisPage() {
               </div>
 
               {/* Indicadores adicionais */}
-              <div style={{ display: 'flex', gap: '32px', marginTop: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>
+              <div className="flex flex-wrap gap-6 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-on-surface">
                   <input
                     type="checkbox"
                     checked={formExigeTeste}
                     onChange={(e) => setFormExigeTeste(e.target.checked)}
+                    className="w-4 h-4 accent-primary"
                   />
                   <span>Exige Teste de Qualidade no Recebimento</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-on-surface">
                   <input
                     type="checkbox"
                     checked={formEhKit}
                     onChange={(e) => setFormEhKit(e.target.checked)}
+                    className="w-4 h-4 accent-primary"
                   />
                   <span>Composição em Kit de Materiais</span>
                 </label>
               </div>
 
               {/* Botões de Ação */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '24px' }}>
+              <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
                   onClick={fecharModalMaterial}
-                  style={{
-                    padding: '8px 24px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#334155',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline text-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarMaterialMutation.isPending || atualizarMaterialMutation.isPending}
-                  style={{
-                    padding: '8px 24px',
-                    backgroundColor: '#0369a1',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary text-sm font-semibold"
                 >
                   {criarMaterialMutation.isPending || atualizarMaterialMutation.isPending
                     ? 'Salvando...'
@@ -1013,38 +774,16 @@ export function MateriaisPage() {
 
       {/* Modal Gerenciar Categorias */}
       {modalGerenciarCategorias && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '600px',
-              width: '100%',
-              padding: '24px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
+        <div className="fixed inset-0 bg-inverse-surface/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-surface-container-lowest text-on-surface rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-outline-variant">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-on-surface">
                 Gerenciar Categorias de Materiais
               </h2>
               <button
                 type="button"
                 onClick={() => setModalGerenciarCategorias(false)}
-                style={{ background: 'none', border: 'none', fontSize: '1rem', color: '#475569', cursor: 'pointer' }}
+                className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg"
               >
                 X
               </button>
@@ -1057,15 +796,7 @@ export function MateriaisPage() {
                   salvarCategoriaMutation.mutate()
                 }
               }}
-              style={{
-                display: 'flex',
-                gap: '8px',
-                marginBottom: '24px',
-                backgroundColor: '#f8fafc',
-                padding: '16px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-              }}
+              className="flex gap-2 mb-6 p-4 rounded-xl bg-surface-container-low border border-outline-variant"
             >
               <input
                 type="text"
@@ -1073,27 +804,12 @@ export function MateriaisPage() {
                 value={nomeCategoriaInput}
                 onChange={(e) => setNomeCategoriaInput(e.target.value)}
                 placeholder={categoriaEmEdicao ? 'Alterar nome da categoria...' : 'Nome da nova categoria...'}
-                style={{
-                  flex: 1,
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.875rem',
-                }}
+                className="ob-input flex-1 text-sm"
               />
               <button
                 type="submit"
                 disabled={salvarCategoriaMutation.isPending}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#0369a1',
-                  border: 'none',
-                  borderRadius: '6px',
-                  color: '#ffffff',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className="ob-btn ob-btn--primary text-sm font-semibold whitespace-nowrap"
               >
                 {categoriaEmEdicao ? 'Salvar' : 'Adicionar'}
               </button>
@@ -1104,69 +820,48 @@ export function MateriaisPage() {
                     setCategoriaEmEdicao(null)
                     setNomeCategoriaInput('')
                   }}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#475569',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline text-sm"
                 >
                   Cancelar
                 </button>
               )}
             </form>
 
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+            <div className="border border-outline-variant rounded-xl overflow-hidden">
+              <table className="ob-table w-full text-sm">
                 <thead>
-                  <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569' }}>Nome da Categoria</th>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Materiais</th>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Ações</th>
+                  <tr>
+                    <th className="font-semibold text-xs uppercase tracking-wider">Nome da Categoria</th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-center">Materiais</th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {categorias.map((cat) => {
                     const totalVinculados = cat._count?.materiais || 0
                     return (
-                      <tr key={cat.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '8px 16px', fontWeight: 400, color: '#1e293b' }}>
+                      <tr key={cat.id}>
+                        <td className="text-on-surface">
                           {cat.nome}
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'center', color: '#475569' }}>
+                        <td className="text-center">
                           <span
-                            style={{
-                              padding: '8px 8px',
-                              backgroundColor: totalVinculados > 0 ? '#e0f2fe' : '#f1f5f9',
-                              color: totalVinculados > 0 ? '#0369a1' : '#475569',
-                              borderRadius: '999px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
+                            className={`ob-badge text-xs ${
+                              totalVinculados > 0 ? 'ob-badge--info' : ''
+                            }`}
                           >
                             {totalVinculados} vinculado(s)
                           </span>
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <td className="text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
                               onClick={() => {
                                 setCategoriaEmEdicao(cat)
                                 setNomeCategoriaInput(cat.nome)
                               }}
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                fontSize: '0.875rem',
-                                color: '#1e293b',
-                                cursor: 'pointer',
-                              }}
+                              className="ob-btn ob-btn--outline text-xs py-1 px-2.5"
                             >
                               Editar
                             </button>
@@ -1183,15 +878,11 @@ export function MateriaisPage() {
                                   excluirCategoriaMutation.mutate(cat.id)
                                 }
                               }}
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: totalVinculados > 0 ? '1px solid #e2e8f0' : '1px solid #fca5a5',
-                                borderRadius: '4px',
-                                fontSize: '0.875rem',
-                                color: totalVinculados > 0 ? '#475569' : '#b91c1c',
-                                cursor: totalVinculados > 0 ? 'not-allowed' : 'pointer',
-                              }}
+                              className={`ob-btn text-xs py-1 px-2.5 border ${
+                                totalVinculados > 0
+                                  ? 'border-outline text-on-surface-variant opacity-40 cursor-not-allowed'
+                                  : 'border-error text-error hover:bg-error-container'
+                              }`}
                             >
                               Excluir
                             </button>
@@ -1209,38 +900,16 @@ export function MateriaisPage() {
 
       {/* Modal Gerenciar Unidades */}
       {modalGerenciarUnidades && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              maxWidth: '650px',
-              width: '100%',
-              padding: '24px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
+        <div className="fixed inset-0 bg-inverse-surface/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-surface-container-lowest text-on-surface rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-outline-variant">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-on-surface">
                 Gerenciar Unidades de Medida
               </h2>
               <button
                 type="button"
                 onClick={() => setModalGerenciarUnidades(false)}
-                style={{ background: 'none', border: 'none', fontSize: '1rem', color: '#475569', cursor: 'pointer' }}
+                className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg"
               >
                 X
               </button>
@@ -1253,17 +922,9 @@ export function MateriaisPage() {
                   salvarUnidadeMutation.mutate()
                 }
               }}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: unidadeEmEdicao ? '1fr auto auto' : '1fr 2fr auto',
-                gap: '8px',
-                marginBottom: '24px',
-                backgroundColor: '#f8fafc',
-                padding: '16px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                alignItems: 'center',
-              }}
+              className={`grid ${
+                unidadeEmEdicao ? 'grid-cols-1 sm:grid-cols-[1fr_auto_auto]' : 'grid-cols-1 sm:grid-cols-[1fr_2fr_auto]'
+              } gap-2 mb-6 p-4 rounded-xl bg-surface-container-low border border-outline-variant items-center`}
             >
               {!unidadeEmEdicao && (
                 <input
@@ -1272,12 +933,7 @@ export function MateriaisPage() {
                   value={siglaUnidadeInput}
                   onChange={(e) => setSiglaUnidadeInput(e.target.value.toUpperCase())}
                   placeholder="Sigla (ex: M3)"
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                  }}
+                  className="ob-input font-mono text-sm uppercase"
                 />
               )}
               <input
@@ -1286,27 +942,12 @@ export function MateriaisPage() {
                 value={descricaoUnidadeInput}
                 onChange={(e) => setDescricaoUnidadeInput(e.target.value)}
                 placeholder="Descrição da unidade..."
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.875rem',
-                }}
+                className="ob-input text-sm"
               />
               <button
                 type="submit"
                 disabled={salvarUnidadeMutation.isPending}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#0369a1',
-                  border: 'none',
-                  borderRadius: '6px',
-                  color: '#ffffff',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
+                className="ob-btn ob-btn--primary text-sm font-semibold whitespace-nowrap"
               >
                 {unidadeEmEdicao ? 'Salvar' : 'Adicionar'}
               </button>
@@ -1318,29 +959,21 @@ export function MateriaisPage() {
                     setSiglaUnidadeInput('')
                     setDescricaoUnidadeInput('')
                   }}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#475569',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline text-sm"
                 >
                   Cancelar
                 </button>
               )}
             </form>
 
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+            <div className="border border-outline-variant rounded-xl overflow-hidden">
+              <table className="ob-table w-full text-sm">
                 <thead>
-                  <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569' }}>Sigla</th>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569' }}>Descrição</th>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Materiais</th>
-                    <th style={{ padding: '8px 16px', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Ações</th>
+                  <tr>
+                    <th className="font-semibold text-xs uppercase tracking-wider">Sigla</th>
+                    <th className="font-semibold text-xs uppercase tracking-wider">Descrição</th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-center">Materiais</th>
+                    <th className="font-semibold text-xs uppercase tracking-wider text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1349,44 +982,31 @@ export function MateriaisPage() {
                       (u._count?.materiaisCompra || 0) + (u._count?.materiaisConsumo || 0)
 
                     return (
-                      <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '8px 16px', fontWeight: 600, color: '#0f172a' }}>
+                      <tr key={u.id}>
+                        <td className="font-mono font-bold text-on-surface">
                           {u.sigla}
                         </td>
-                        <td style={{ padding: '8px 16px', color: '#334155' }}>
+                        <td className="text-on-surface">
                           {u.descricao}
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'center' }}>
+                        <td className="text-center">
                           <span
-                            style={{
-                              padding: '8px 8px',
-                              backgroundColor: totalVinculados > 0 ? '#e0f2fe' : '#f1f5f9',
-                              color: totalVinculados > 0 ? '#0369a1' : '#475569',
-                              borderRadius: '999px',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                            }}
+                            className={`ob-badge text-xs ${
+                              totalVinculados > 0 ? 'ob-badge--info' : ''
+                            }`}
                           >
                             {totalVinculados} vinculado(s)
                           </span>
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <td className="text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
                               onClick={() => {
                                 setUnidadeEmEdicao(u)
                                 setDescricaoUnidadeInput(u.descricao)
                               }}
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                fontSize: '0.875rem',
-                                color: '#1e293b',
-                                cursor: 'pointer',
-                              }}
+                              className="ob-btn ob-btn--outline text-xs py-1 px-2.5"
                             >
                               Editar
                             </button>
@@ -1403,15 +1023,11 @@ export function MateriaisPage() {
                                   excluirUnidadeMutation.mutate(u.id)
                                 }
                               }}
-                              style={{
-                                padding: '8px 8px',
-                                backgroundColor: '#ffffff',
-                                border: totalVinculados > 0 ? '1px solid #e2e8f0' : '1px solid #fca5a5',
-                                borderRadius: '4px',
-                                fontSize: '0.875rem',
-                                color: totalVinculados > 0 ? '#475569' : '#b91c1c',
-                                cursor: totalVinculados > 0 ? 'not-allowed' : 'pointer',
-                              }}
+                              className={`ob-btn text-xs py-1 px-2.5 border ${
+                                totalVinculados > 0
+                                  ? 'border-outline text-on-surface-variant opacity-40 cursor-not-allowed'
+                                  : 'border-error text-error hover:bg-error-container'
+                              }`}
                             >
                               Excluir
                             </button>

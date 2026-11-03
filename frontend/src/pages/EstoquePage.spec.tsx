@@ -165,7 +165,7 @@ describe('EstoquePage Component', () => {
       expect(screen.getByText('Silicone Tubo 280g')).toBeInTheDocument()
     })
 
-    const abaKardex = screen.getByRole('button', { name: /Livro-Razao \/ Kardex/i })
+    const abaKardex = screen.getByRole('tab', { name: /Livro-Razao \/ Kardex/i })
     fireEvent.click(abaKardex)
 
     await waitFor(() => {
