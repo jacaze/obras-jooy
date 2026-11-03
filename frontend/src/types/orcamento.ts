@@ -5,6 +5,8 @@ export interface LimiteOrcamentoObra {
   obraId: string
   materialId: string
   quantidadeOrcada: number
+  quantidadeConsumida?: number
+  saldoOrcamento?: number
 }
 
 export interface OrcamentoObraItem {

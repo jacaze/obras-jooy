@@ -148,4 +148,102 @@ describe('FerramentasPage', () => {
     expect(screen.getByRole('heading', { name: /Editar Ferramenta/i })).toBeInTheDocument()
     expect(screen.getByDisplayValue('Martelete Rompedor 800W')).toBeInTheDocument()
   })
+
+  it('deve permitir registrar o emprestimo de uma ferramenta disponivel para um usuario ativo', async () => {
+    vi.mocked(client.registrarEmprestimoFerramenta).mockResolvedValueOnce({
+      ...mockFerramentas[0],
+      status: 'EMPRESTADO',
+      emprestadoParaId: 'usr-mestre',
+      emprestadoPara: mockFerramentas[1].emprestadoPara,
+    })
+
+    renderComponent()
+
+    await waitFor(() => {
+      expect(screen.getByText('Martelete Rompedor 800W')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Emprestar' }))
+
+    expect(
+      screen.getByRole('heading', { name: /Registrar Emprestimo de Ferramenta/i })
+    ).toBeInTheDocument()
+
+    const selectUsuario = screen.getByLabelText(/Usuario Solicitante/i)
+    fireEvent.change(selectUsuario, { target: { value: 'usr-mestre' } })
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar Emprestimo/i }))
+
+    await waitFor(() => {
+      expect(client.registrarEmprestimoFerramenta).toHaveBeenCalledWith('fer-1', 'usr-mestre')
+    })
+  })
+
+  it('deve permitir registrar a devolucao de uma ferramenta emprestada informando se houve defeito', async () => {
+    vi.mocked(client.registrarDevolucaoFerramenta).mockResolvedValueOnce({
+      ...mockFerramentas[1],
+      status: 'COM_DEFEITO',
+      emprestadoParaId: null,
+      emprestadoPara: null,
+    })
+
+    renderComponent()
+
+    await waitFor(() => {
+      expect(screen.getByText('Serra Circular Manual')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Devolver' }))
+
+    expect(
+      screen.getByRole('heading', { name: /Registrar Devolucao de Ferramenta/i })
+    ).toBeInTheDocument()
+
+    const radioComDefeito = screen.getByLabelText(/Devolvida com defeito \/ avaria/i)
+    fireEvent.click(radioComDefeito)
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar Devolucao/i }))
+
+    await waitFor(() => {
+      expect(client.registrarDevolucaoFerramenta).toHaveBeenCalledWith('fer-2', true)
+    })
+  })
+
+  it('deve permitir liberar ferramenta com defeito de volta para disponivel', async () => {
+    vi.mocked(client.getFerramentas).mockResolvedValueOnce([
+      ...mockFerramentas,
+      {
+        id: 'fer-3',
+        codigo: 'BET-01',
+        nome: 'Betoneira 400L',
+        status: 'COM_DEFEITO',
+        emprestadoParaId: null,
+        ativo: true,
+        criadaEm: '2026-10-29T10:00:00Z',
+        emprestadoPara: null,
+      },
+    ])
+    vi.mocked(client.updateFerramenta).mockResolvedValueOnce({
+      id: 'fer-3',
+      codigo: 'BET-01',
+      nome: 'Betoneira 400L',
+      status: 'DISPONIVEL',
+      emprestadoParaId: null,
+      ativo: true,
+      criadaEm: '2026-10-29T10:00:00Z',
+      emprestadoPara: null,
+    })
+
+    renderComponent()
+
+    await waitFor(() => {
+      expect(screen.getByText('Betoneira 400L')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Liberar Conserto/i }))
+
+    await waitFor(() => {
+      expect(client.updateFerramenta).toHaveBeenCalledWith('fer-3', { status: 'DISPONIVEL' })
+    })
+  })
 })
