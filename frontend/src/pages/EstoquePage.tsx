@@ -315,28 +315,28 @@ export function EstoquePage() {
     : locaisAtivos
 
   return (
-    <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
       {/* Cabecalho */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem',
+          marginBottom: '24px',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
         }}
       >
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 style={{ color: '#0f172a', margin: '0 0 8px', fontSize: '2rem' }}>
             Estoque Fisico e Livro-Razao (Kardex)
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ color: '#475569', margin: 0, fontSize: '0.875rem' }}>
             Controle de saldos disponiveis, recebimentos com conversao, locacoes opcionais e trilha imutavel
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           {podeGerenciarLocais && (
             <button
               onClick={abrirModalNovoLocal}
@@ -344,11 +344,11 @@ export function EstoquePage() {
                 backgroundColor: '#f8fafc',
                 color: '#0f172a',
                 border: '1px solid #cbd5e1',
-                padding: '0.6rem 1.1rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
               }}
             >
               + Nova Locacao (Opcional)
@@ -362,14 +362,14 @@ export function EstoquePage() {
                 setModalMovAberto(true)
               }}
               style={{
-                backgroundColor: '#0284c7',
+                backgroundColor: '#0369a1',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.6rem 1.2rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
               }}
             >
               + Lancar Movimentacao
@@ -379,19 +379,19 @@ export function EstoquePage() {
       </div>
 
       {/* Navegacao por Abas */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid #e2e8f0', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #e2e8f0', marginBottom: '24px' }}>
         <button
           onClick={() => setAbaAtiva('saldos')}
           style={{
-            padding: '0.75rem 1.25rem',
+            padding: '16px 24px',
             background: 'none',
             border: 'none',
-            borderBottom: abaAtiva === 'saldos' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'saldos' ? '#0284c7' : '#64748b',
+            borderBottom: abaAtiva === 'saldos' ? '3px solid #0369a1' : '3px solid transparent',
+            color: abaAtiva === 'saldos' ? '#0369a1' : '#475569',
             fontWeight: abaAtiva === 'saldos' ? 700 : 500,
             cursor: 'pointer',
-            fontSize: '0.95rem',
-            marginBottom: '-2px',
+            fontSize: '1rem',
+            marginBottom: '8px',
           }}
         >
           Saldos em Estoque ({saldos.length})
@@ -400,15 +400,15 @@ export function EstoquePage() {
         <button
           onClick={() => setAbaAtiva('kardex')}
           style={{
-            padding: '0.75rem 1.25rem',
+            padding: '16px 24px',
             background: 'none',
             border: 'none',
-            borderBottom: abaAtiva === 'kardex' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'kardex' ? '#0284c7' : '#64748b',
+            borderBottom: abaAtiva === 'kardex' ? '3px solid #0369a1' : '3px solid transparent',
+            color: abaAtiva === 'kardex' ? '#0369a1' : '#475569',
             fontWeight: abaAtiva === 'kardex' ? 700 : 500,
             cursor: 'pointer',
-            fontSize: '0.95rem',
-            marginBottom: '-2px',
+            fontSize: '1rem',
+            marginBottom: '8px',
           }}
         >
           Livro-Razao / Kardex ({movimentacoes.length})
@@ -417,15 +417,15 @@ export function EstoquePage() {
         <button
           onClick={() => setAbaAtiva('locais')}
           style={{
-            padding: '0.75rem 1.25rem',
+            padding: '16px 24px',
             background: 'none',
             border: 'none',
-            borderBottom: abaAtiva === 'locais' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'locais' ? '#0284c7' : '#64748b',
+            borderBottom: abaAtiva === 'locais' ? '3px solid #0369a1' : '3px solid transparent',
+            color: abaAtiva === 'locais' ? '#0369a1' : '#475569',
             fontWeight: abaAtiva === 'locais' ? 700 : 500,
             cursor: 'pointer',
-            fontSize: '0.95rem',
-            marginBottom: '-2px',
+            fontSize: '1rem',
+            marginBottom: '8px',
           }}
         >
           Locacoes de Estoque ({todosOsLocais.length})
@@ -436,8 +436,8 @@ export function EstoquePage() {
       <div
         style={{
           display: 'flex',
-          gap: '0.75rem',
-          marginBottom: '1.5rem',
+          gap: '16px',
+          marginBottom: '24px',
           flexWrap: 'wrap',
           alignItems: 'center',
         }}
@@ -450,12 +450,12 @@ export function EstoquePage() {
             setFiltroLocalId('')
           }}
           style={{
-            padding: '0.55rem 0.85rem',
+            padding: '8px 16px',
             borderRadius: '6px',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
             color: '#0f172a',
-            fontSize: '0.85rem',
+            fontSize: '0.875rem',
           }}
         >
           <option value="">Todas as Obras</option>
@@ -472,12 +472,12 @@ export function EstoquePage() {
             value={filtroLocalId}
             onChange={(e) => setFiltroLocalId(e.target.value)}
             style={{
-              padding: '0.55rem 0.85rem',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
               color: '#0f172a',
-              fontSize: '0.85rem',
+              fontSize: '0.875rem',
             }}
           >
             <option value="">Todas as Locacoes de Estoque</option>
@@ -498,12 +498,12 @@ export function EstoquePage() {
             style={{
               flex: '1',
               minWidth: '240px',
-              padding: '0.55rem 0.85rem',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
               color: '#0f172a',
-              fontSize: '0.85rem',
+              fontSize: '0.875rem',
             }}
           />
         )}
@@ -514,12 +514,12 @@ export function EstoquePage() {
             value={filtroTipoMov}
             onChange={(e) => setFiltroTipoMov(e.target.value)}
             style={{
-              padding: '0.55rem 0.85rem',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
               color: '#0f172a',
-              fontSize: '0.85rem',
+              fontSize: '0.875rem',
             }}
           >
             <option value="">Todos os Tipos de Operacao</option>
@@ -536,7 +536,7 @@ export function EstoquePage() {
       {abaAtiva === 'saldos' && (
         <>
           {carregandoSaldos ? (
-            <p style={{ color: '#64748b' }}>Carregando saldos de estoque...</p>
+            <p style={{ color: '#475569' }}>Carregando saldos de estoque...</p>
           ) : (
             <div
               style={{
@@ -547,47 +547,47 @@ export function EstoquePage() {
                 overflowX: 'auto',
               }}
             >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Codigo</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Material</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Obra / Locacao</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Saldo Fisico</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Reservado</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Disponivel</th>
+                    <th style={{ padding: '16px 16px' }}>Codigo</th>
+                    <th style={{ padding: '16px 16px' }}>Material</th>
+                    <th style={{ padding: '16px 16px' }}>Obra / Locacao</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Saldo Fisico</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Reservado</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Disponivel</th>
                   </tr>
                 </thead>
                 <tbody>
                   {saldos.map((s) => (
                     <tr key={`${s.localId}-${s.materialId}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#0369a1' }}>
+                      <td style={{ padding: '16px 16px', fontFamily: 'monospace', fontWeight: 600, color: '#0369a1' }}>
                         {s.material.codigo}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#0f172a' }}>
+                      <td style={{ padding: '16px 16px', fontWeight: 400, color: '#0f172a' }}>
                         {s.material.descricao}
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        <div style={{ fontSize: '0.875rem', color: '#475569' }}>
                           Categoria: {s.material.categoria?.nome || 'Geral'}
                         </div>
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#334155' }}>
+                      <td style={{ padding: '16px 16px', color: '#334155' }}>
                         <strong>{s.local.obra.codigo}</strong> &bull; {s.local.nome}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#334155', fontWeight: 500 }}>
+                      <td style={{ padding: '16px 16px', textAlign: 'right', color: '#334155', fontWeight: 400 }}>
                         {s.quantidade} {s.material.unidadeConsumo.sigla}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#b45309' }}>
+                      <td style={{ padding: '16px 16px', textAlign: 'right', color: '#b45309' }}>
                         {s.reservado} {s.material.unidadeConsumo.sigla}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                      <td style={{ padding: '16px 16px', textAlign: 'right' }}>
                         <span
                           style={{
                             backgroundColor: s.disponivel > 0 ? '#dcfce7' : '#fee2e2',
                             color: s.disponivel > 0 ? '#166534' : '#991b1b',
-                            padding: '0.25rem 0.6rem',
+                            padding: '8px 8px',
                             borderRadius: '4px',
-                            fontWeight: 700,
-                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
                           }}
                         >
                           {s.disponivel} {s.material.unidadeConsumo.sigla}
@@ -597,7 +597,7 @@ export function EstoquePage() {
                   ))}
                   {saldos.length === 0 && (
                     <tr>
-                      <td colSpan={6} style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
                         Nenhum saldo de estoque registrado para os filtros atuais.
                       </td>
                     </tr>
@@ -613,7 +613,7 @@ export function EstoquePage() {
       {abaAtiva === 'kardex' && (
         <>
           {carregandoKardex ? (
-            <p style={{ color: '#64748b' }}>Carregando historico do Livro-Razao...</p>
+            <p style={{ color: '#475569' }}>Carregando historico do Livro-Razao...</p>
           ) : (
             <div
               style={{
@@ -624,16 +624,16 @@ export function EstoquePage() {
                 overflowX: 'auto',
               }}
             >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Data / Hora</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Operacao</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Material</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Qtd</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Obra / Locacao</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Responsavel</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Observacao</th>
+                    <th style={{ padding: '16px 16px' }}>Data / Hora</th>
+                    <th style={{ padding: '16px 16px' }}>Operacao</th>
+                    <th style={{ padding: '16px 16px' }}>Material</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Qtd</th>
+                    <th style={{ padding: '16px 16px' }}>Obra / Locacao</th>
+                    <th style={{ padding: '16px 16px' }}>Responsavel</th>
+                    <th style={{ padding: '16px 16px' }}>Observacao</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -641,53 +641,53 @@ export function EstoquePage() {
                     const ehEnt = m.natureza === 'ENTRADA'
                     return (
                       <tr key={m.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569', whiteSpace: 'nowrap' }}>
                           {new Date(m.registradaEm).toLocaleString('pt-BR')}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td style={{ padding: '16px 16px' }}>
                           <span
                             style={{
                               backgroundColor: ehEnt ? '#dcfce7' : '#fee2e2',
                               color: ehEnt ? '#166534' : '#991b1b',
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              marginRight: '0.4rem',
+                              fontSize: '0.875rem',
+                              fontWeight: 600,
+                              marginRight: '8px',
                             }}
                           >
                             {ehEnt ? '+ ENTRADA' : '- SAIDA'}
                           </span>
-                          <span style={{ color: '#334155', fontSize: '0.8rem' }}>
+                          <span style={{ color: '#334155', fontSize: '0.875rem' }}>
                             {LABELS_TIPO_MOVIMENTACAO[m.tipo] || m.tipo}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#0f172a' }}>
+                        <td style={{ padding: '16px 16px', fontWeight: 400, color: '#0f172a' }}>
                           {m.material.codigo} - {m.material.descricao}
                         </td>
                         <td
                           style={{
-                            padding: '0.75rem 1rem',
+                            padding: '16px 16px',
                             textAlign: 'right',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             color: ehEnt ? '#15803d' : '#b91c1c',
                           }}
                         >
                           {ehEnt ? '+' : '-'}
                           {m.quantidade} {m.material.unidadeConsumo.sigla}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#334155' }}>
+                        <td style={{ padding: '16px 16px', color: '#334155' }}>
                           <strong>{m.local.obra.codigo}</strong> &bull; {m.local.nome}
                           {m.area && (
-                            <div style={{ fontSize: '0.75rem', color: '#0369a1' }}>
+                            <div style={{ fontSize: '0.875rem', color: '#0369a1' }}>
                               Destino: {m.area.nome}
                             </div>
                           )}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569' }}>
                           {m.usuario.nome}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569' }}>
                           {m.observacao || '-'}
                         </td>
                       </tr>
@@ -695,7 +695,7 @@ export function EstoquePage() {
                   })}
                   {movimentacoes.length === 0 && (
                     <tr>
-                      <td colSpan={7} style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
                         Nenhuma movimentacao registrada no Livro-Razao.
                       </td>
                     </tr>
@@ -714,10 +714,10 @@ export function EstoquePage() {
             style={{
               backgroundColor: '#f0f9ff',
               border: '1px solid #bae6fd',
-              padding: '0.75rem 1rem',
+              padding: '16px 16px',
               borderRadius: '6px',
-              marginBottom: '1rem',
-              fontSize: '0.85rem',
+              marginBottom: '16px',
+              fontSize: '0.875rem',
               color: '#0369a1',
             }}
           >
@@ -729,10 +729,10 @@ export function EstoquePage() {
               style={{
                 backgroundColor: '#fef2f2',
                 color: '#b91c1c',
-                padding: '0.75rem 1rem',
+                padding: '16px 16px',
                 borderRadius: '6px',
-                marginBottom: '1rem',
-                fontSize: '0.85rem',
+                marginBottom: '16px',
+                fontSize: '0.875rem',
                 border: '1px solid #fecaca',
               }}
             >
@@ -741,7 +741,7 @@ export function EstoquePage() {
           )}
 
           {carregandoLocais ? (
-            <p style={{ color: '#64748b' }}>Carregando locacoes de estoque...</p>
+            <p style={{ color: '#475569' }}>Carregando locacoes de estoque...</p>
           ) : (
             <div
               style={{
@@ -752,14 +752,14 @@ export function EstoquePage() {
                 overflowX: 'auto',
               }}
             >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Obra</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome da Locacao / Almoxarifado</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Itens / Movimentacoes</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>
+                    <th style={{ padding: '16px 16px' }}>Obra</th>
+                    <th style={{ padding: '16px 16px' }}>Nome da Locacao / Almoxarifado</th>
+                    <th style={{ padding: '16px 16px' }}>Itens / Movimentacoes</th>
+                    <th style={{ padding: '16px 16px' }}>Situacao</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -768,42 +768,42 @@ export function EstoquePage() {
                       (loc._count?.saldos ?? 0) === 0 && (loc._count?.movimentacoes ?? 0) === 0
                     return (
                       <tr key={loc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#0369a1' }}>
+                        <td style={{ padding: '16px 16px', fontWeight: 600, color: '#0369a1' }}>
                           {loc.obra?.codigo} - {loc.obra?.nome}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#0f172a' }}>
+                        <td style={{ padding: '16px 16px', fontWeight: 400, color: '#0f172a' }}>
                           {loc.nome}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.85rem' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569', fontSize: '0.875rem' }}>
                           {loc._count?.saldos ?? 0} materiais &bull; {loc._count?.movimentacoes ?? 0} lancamentos
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td style={{ padding: '16px 16px' }}>
                           <span
                             style={{
                               backgroundColor: loc.ativo ? '#dcfce7' : '#fee2e2',
                               color: loc.ativo ? '#166534' : '#991b1b',
-                              padding: '0.2rem 0.55rem',
+                              padding: '8px 8px',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
                             {loc.ativo ? 'Ativo' : 'Inativo'}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
                           {podeGerenciarLocais && (
-                            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                            <div style={{ display: 'inline-flex', gap: '8px' }}>
                               <button
                                 onClick={() => abrirModalEditarLocal(loc)}
                                 style={{
                                   backgroundColor: '#f8fafc',
                                   color: '#334155',
                                   border: '1px solid #cbd5e1',
-                                  padding: '0.3rem 0.65rem',
+                                  padding: '8px 8px',
                                   borderRadius: '4px',
                                   cursor: 'pointer',
-                                  fontSize: '0.8rem',
+                                  fontSize: '0.875rem',
                                 }}
                               >
                                 Editar
@@ -815,10 +815,10 @@ export function EstoquePage() {
                                   backgroundColor: loc.ativo ? '#fef2f2' : '#f0fdf4',
                                   color: loc.ativo ? '#b91c1c' : '#15803d',
                                   border: `1px solid ${loc.ativo ? '#fecaca' : '#bbf7d0'}`,
-                                  padding: '0.3rem 0.65rem',
+                                  padding: '8px 8px',
                                   borderRadius: '4px',
                                   cursor: 'pointer',
-                                  fontSize: '0.8rem',
+                                  fontSize: '0.875rem',
                                 }}
                               >
                                 {loc.ativo ? 'Desativar' : 'Ativar'}
@@ -831,10 +831,10 @@ export function EstoquePage() {
                                     backgroundColor: '#ffffff',
                                     color: '#991b1b',
                                     border: '1px solid #fca5a5',
-                                    padding: '0.3rem 0.65rem',
+                                    padding: '8px 8px',
                                     borderRadius: '4px',
                                     cursor: 'pointer',
-                                    fontSize: '0.8rem',
+                                    fontSize: '0.875rem',
                                   }}
                                 >
                                   Excluir
@@ -848,7 +848,7 @@ export function EstoquePage() {
                   })}
                   {todosOsLocais.length === 0 && (
                     <tr>
-                      <td colSpan={5} style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
                         Nenhuma locacao de estoque cadastrada.
                       </td>
                     </tr>
@@ -870,7 +870,7 @@ export function EstoquePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -878,7 +878,7 @@ export function EstoquePage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '560px',
               width: '100%',
               maxHeight: '90vh',
@@ -886,10 +886,10 @@ export function EstoquePage() {
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.35rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Lancar Movimentacao de Estoque
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
               Toda movimentacao grava um registro imutavel no Livro-Razao e atualiza o saldo atomicamente.
             </p>
 
@@ -898,10 +898,10 @@ export function EstoquePage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -909,9 +909,9 @@ export function EstoquePage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmeterMovimentacao} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmeterMovimentacao} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Tipo de Operacao
                 </label>
                 <select
@@ -922,7 +922,7 @@ export function EstoquePage() {
                   }}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -937,9 +937,9 @@ export function EstoquePage() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                     Obra
                   </label>
                   <select
@@ -952,7 +952,7 @@ export function EstoquePage() {
                     required
                     style={{
                       width: '100%',
-                      padding: '0.55rem',
+                      padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: '#ffffff',
@@ -969,7 +969,7 @@ export function EstoquePage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                     Locacao do Estoque (opcional)
                   </label>
                   <select
@@ -987,7 +987,7 @@ export function EstoquePage() {
                     }}
                     style={{
                       width: '100%',
-                      padding: '0.55rem',
+                      padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: '#ffffff',
@@ -1005,7 +1005,7 @@ export function EstoquePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Material
                 </label>
                 <select
@@ -1017,7 +1017,7 @@ export function EstoquePage() {
                   required
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -1038,11 +1038,11 @@ export function EstoquePage() {
                   style={{
                     backgroundColor: '#f0f9ff',
                     border: '1px solid #bae6fd',
-                    padding: '0.75rem',
+                    padding: '16px',
                     borderRadius: '6px',
                   }}
                 >
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#0369a1' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: '#0369a1' }}>
                     <input
                       type="checkbox"
                       checked={movUsarUnidadeCompra}
@@ -1050,11 +1050,11 @@ export function EstoquePage() {
                     />
                     Converter entrada pela Unidade de Compra ({materialSelecionadoNoModal.unidadeCompra?.sigla})
                   </label>
-                  <div style={{ fontSize: '0.78rem', color: '#0284c7', marginTop: '0.3rem' }}>
+                  <div style={{ fontSize: '0.875rem', color: '#0369a1', marginTop: '8px' }}>
                     Fator configurado: 1 {materialSelecionadoNoModal.unidadeCompra?.sigla} ={' '}
                     {Number(materialSelecionadoNoModal.fatorConversao)} {materialSelecionadoNoModal.unidadeConsumo.sigla}.
                     {movUsarUnidadeCompra && (
-                      <strong style={{ display: 'block', marginTop: '0.2rem' }}>
+                      <strong style={{ display: 'block', marginTop: '8px' }}>
                         Total que entrara no estoque:{' '}
                         {(
                           (parseFloat(movQuantidade) || 0) *
@@ -1067,9 +1067,9 @@ export function EstoquePage() {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                     Quantidade{' '}
                     {materialSelecionadoNoModal
                       ? `(${
@@ -1088,7 +1088,7 @@ export function EstoquePage() {
                     onChange={(e) => setMovQuantidade(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.55rem',
+                      padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: '#ffffff',
@@ -1099,7 +1099,7 @@ export function EstoquePage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                     Area / Pavimento (opcional)
                   </label>
                   <select
@@ -1108,7 +1108,7 @@ export function EstoquePage() {
                     disabled={!movObraId}
                     style={{
                       width: '100%',
-                      padding: '0.55rem',
+                      padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: !movObraId ? '#f1f5f9' : '#ffffff',
@@ -1126,7 +1126,7 @@ export function EstoquePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Observacao / Documento (opcional)
                 </label>
                 <input
@@ -1137,7 +1137,7 @@ export function EstoquePage() {
                   onChange={(e) => setMovObservacao(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -1147,18 +1147,18 @@ export function EstoquePage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setModalMovAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
+                    fontWeight: 400,
                   }}
                 >
                   Cancelar
@@ -1167,10 +1167,10 @@ export function EstoquePage() {
                   type="submit"
                   disabled={registrarMovMutation.isPending}
                   style={{
-                    padding: '0.55rem 1.2rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -1194,7 +1194,7 @@ export function EstoquePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -1202,13 +1202,13 @@ export function EstoquePage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '450px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
             }}
           >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.2rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 16px', fontSize: '1rem', color: '#0f172a' }}>
               {localEditando ? 'Editar Locacao de Estoque' : 'Cadastrar Nova Locacao de Estoque'}
             </h2>
 
@@ -1217,10 +1217,10 @@ export function EstoquePage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -1228,9 +1228,9 @@ export function EstoquePage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmeterLocal} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmeterLocal} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Obra Vinculada
                 </label>
                 <select
@@ -1240,7 +1240,7 @@ export function EstoquePage() {
                   disabled={!!localEditando}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: localEditando ? '#f1f5f9' : '#ffffff',
@@ -1257,7 +1257,7 @@ export function EstoquePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome da Locacao / Prateleira / Container
                 </label>
                 <input
@@ -1268,7 +1268,7 @@ export function EstoquePage() {
                   onChange={(e) => setLocalNome(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -1278,7 +1278,7 @@ export function EstoquePage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => {
@@ -1286,13 +1286,13 @@ export function EstoquePage() {
                     setLocalEditando(null)
                   }}
                   style={{
-                    padding: '0.5rem 0.95rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
+                    fontWeight: 400,
                   }}
                 >
                   Cancelar
@@ -1301,10 +1301,10 @@ export function EstoquePage() {
                   type="submit"
                   disabled={criarLocalMutation.isPending || editarLocalMutation.isPending}
                   style={{
-                    padding: '0.5rem 1.1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',

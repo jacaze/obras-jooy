@@ -209,28 +209,28 @@ export function ObrasPage() {
   )
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
       {/* Cabecalho da Pagina */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem',
+          marginBottom: '24px',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
         }}
       >
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 style={{ color: '#0f172a', margin: '0 0 8px', fontSize: '2rem' }}>
             Obras e Pavimentos
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ color: '#475569', margin: 0, fontSize: '0.875rem' }}>
             Estrutura da obra e organizacao por setores/pavimentos para controle de materiais
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '16px' }}>
           {podeGerenciarObras && (
             <button
               onClick={() => {
@@ -242,9 +242,9 @@ export function ObrasPage() {
               }}
               style={{
                 backgroundColor: '#ffffff',
-                color: '#0284c7',
-                border: '1px solid #0284c7',
-                padding: '0.6rem 1.1rem',
+                color: '#0369a1',
+                border: '1px solid #0369a1',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -263,10 +263,10 @@ export function ObrasPage() {
                 setModalNovaAreaAberto(true)
               }}
               style={{
-                backgroundColor: '#0284c7',
+                backgroundColor: '#0369a1',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.6rem 1.2rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -283,11 +283,11 @@ export function ObrasPage() {
           style={{
             backgroundColor: '#fef2f2',
             color: '#b91c1c',
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             borderRadius: '6px',
-            marginBottom: '1.5rem',
+            marginBottom: '24px',
             border: '1px solid #fecaca',
-            fontSize: '0.9rem',
+            fontSize: '0.875rem',
           }}
         >
           {erroExclusaoArea}
@@ -295,16 +295,16 @@ export function ObrasPage() {
       )}
 
       {carregandoObras ? (
-        <p style={{ color: '#64748b' }}>Carregando dados das obras...</p>
+        <p style={{ color: '#475569' }}>Carregando dados das obras...</p>
       ) : obras.length === 0 ? (
         <div
           style={{
             backgroundColor: '#ffffff',
             borderRadius: '8px',
-            padding: '3rem',
+            padding: '32px',
             textAlign: 'center',
             border: '1px solid #e2e8f0',
-            color: '#64748b',
+            color: '#475569',
           }}
         >
           Nenhuma obra cadastrada no sistema.
@@ -317,44 +317,44 @@ export function ObrasPage() {
               backgroundColor: '#ffffff',
               borderRadius: '8px',
               border: '1px solid #e2e8f0',
-              padding: '1.5rem',
-              marginBottom: '2rem',
+              padding: '24px',
+              marginBottom: '32px',
               boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
                   <span
                     style={{
-                      backgroundColor: '#0284c7',
+                      backgroundColor: '#0369a1',
                       color: '#ffffff',
-                      fontWeight: 700,
-                      padding: '0.2rem 0.6rem',
+                      fontWeight: 600,
+                      padding: '8px 8px',
                       borderRadius: '4px',
-                      fontSize: '0.85rem',
+                      fontSize: '0.875rem',
                       letterSpacing: '0.5px',
                     }}
                   >
                     {obraAtual.codigo}
                   </span>
-                  <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>
+                  <h2 style={{ margin: 0, fontSize: '2rem', color: '#0f172a' }}>
                     {obraAtual.nome}
                   </h2>
                   <span
                     style={{
                       backgroundColor: obraAtual.ativa ? '#dcfce7' : '#fee2e2',
                       color: obraAtual.ativa ? '#166534' : '#991b1b',
-                      padding: '0.2rem 0.5rem',
+                      padding: '8px 8px',
                       borderRadius: '4px',
-                      fontSize: '0.75rem',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
                     }}
                   >
                     {obraAtual.ativa ? 'Obra Ativa' : 'Obra Inativa'}
                   </span>
                 </div>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+                <p style={{ margin: 0, color: '#475569', fontSize: '0.875rem' }}>
                   Cidade: <strong>{obraAtual.cidade}</strong> | Total de Áreas/Pavimentos: <strong>{areas.length}</strong>
                 </p>
               </div>
@@ -362,19 +362,19 @@ export function ObrasPage() {
               {/* Seletor caso haja mais de uma obra */}
               {obras.length > 1 && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#475569', marginBottom: '8px' }}>
                     Alternar Empreendimento:
                   </label>
                   <select
                     value={obraAtual.id}
                     onChange={(e) => setObraSelecionadaId(e.target.value)}
                     style={{
-                      padding: '0.45rem 0.8rem',
+                      padding: '8px 16px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: '#ffffff',
                       color: '#0f172a',
-                      fontSize: '0.85rem',
+                      fontSize: '0.875rem',
                     }}
                   >
                     {obras.map((o) => (
@@ -394,11 +394,11 @@ export function ObrasPage() {
                     backgroundColor: obraAtual.ativa ? '#fef2f2' : '#f0fdf4',
                     color: obraAtual.ativa ? '#b91c1c' : '#15803d',
                     border: `1px solid ${obraAtual.ativa ? '#fecaca' : '#bbf7d0'}`,
-                    padding: '0.4rem 0.8rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
-                    fontSize: '0.8rem',
+                    fontSize: '0.875rem',
                     cursor: 'pointer',
-                    fontWeight: 500,
+                    fontWeight: 400,
                   }}
                 >
                   {obraAtual.ativa ? 'Desativar Obra' : 'Reativar Obra'}
@@ -408,12 +408,12 @@ export function ObrasPage() {
           </div>
 
           {/* Secao de Gestao de Areas */}
-          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h3 style={{ margin: '0 0 0.25rem', color: '#0f172a', fontSize: '1.15rem' }}>
+              <h3 style={{ margin: '0 0 8px', color: '#0f172a', fontSize: '1rem' }}>
                 Pavimentos e Setores da Obra
               </h3>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
+              <p style={{ margin: 0, color: '#475569', fontSize: '0.875rem' }}>
                 {podeGerenciarAreas
                   ? 'Engenharia e Administracao possuem permissao para cadastrar, editar e gerenciar areas'
                   : 'Visualizacao restrita aos dados cadastrados'}
@@ -428,19 +428,19 @@ export function ObrasPage() {
               style={{
                 width: '100%',
                 maxWidth: '380px',
-                padding: '0.55rem 0.9rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 border: '1px solid #cbd5e1',
                 backgroundColor: '#ffffff',
                 color: '#0f172a',
                 outline: 'none',
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
               }}
             />
           </div>
 
           {carregandoAreas ? (
-            <p style={{ color: '#64748b' }}>Carregando areas da obra...</p>
+            <p style={{ color: '#475569' }}>Carregando areas da obra...</p>
           ) : (
             <div
               style={{
@@ -451,28 +451,28 @@ export function ObrasPage() {
                 overflowX: 'auto',
               }}
             >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem', width: '100px' }}>Ordem</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome da Area / Pavimento</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cadastrada Em</th>
-                    {podeGerenciarAreas && <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>}
+                    <th style={{ padding: '16px 16px', width: '100px' }}>Ordem</th>
+                    <th style={{ padding: '16px 16px' }}>Nome da Area / Pavimento</th>
+                    <th style={{ padding: '16px 16px' }}>Situacao</th>
+                    <th style={{ padding: '16px 16px' }}>Cadastrada Em</th>
+                    {podeGerenciarAreas && <th style={{ padding: '16px 16px', textAlign: 'right' }}>Acoes</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {areasFiltradas.map((a) => (
                     <tr key={a.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '0.75rem 1rem' }}>
+                      <td style={{ padding: '16px 16px' }}>
                         <span
                           style={{
                             backgroundColor: '#f1f5f9',
                             color: '#334155',
-                            padding: '0.2rem 0.5rem',
+                            padding: '8px 8px',
                             borderRadius: '4px',
-                            fontWeight: 700,
-                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
                             display: 'inline-block',
                             minWidth: '24px',
                             textAlign: 'center',
@@ -481,40 +481,40 @@ export function ObrasPage() {
                           {a.ordem}
                         </span>
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#1e293b' }}>
+                      <td style={{ padding: '16px 16px', fontWeight: 600, color: '#1e293b' }}>
                         {a.nome}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
+                      <td style={{ padding: '16px 16px' }}>
                         <span
                           style={{
                             backgroundColor: a.ativa ? '#dcfce7' : '#fee2e2',
                             color: a.ativa ? '#166534' : '#991b1b',
-                            padding: '0.2rem 0.5rem',
+                            padding: '8px 8px',
                             borderRadius: '4px',
-                            fontSize: '0.75rem',
+                            fontSize: '0.875rem',
                             fontWeight: 600,
                           }}
                         >
                           {a.ativa ? 'Ativa' : 'Inativa'}
                         </span>
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
+                      <td style={{ padding: '16px 16px', color: '#475569' }}>
                         {new Date(a.criadaEm).toLocaleDateString('pt-BR')}
                       </td>
                       {podeGerenciarAreas && (
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button
                               onClick={() => abrirModalEditar(a)}
                               style={{
                                 backgroundColor: '#f1f5f9',
                                 color: '#0369a1',
                                 border: '1px solid #bae6fd',
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                fontSize: '0.8rem',
-                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                fontWeight: 400,
                               }}
                             >
                               Editar
@@ -527,10 +527,10 @@ export function ObrasPage() {
                                 backgroundColor: a.ativa ? '#fff7ed' : '#f0fdf4',
                                 color: a.ativa ? '#c2410c' : '#15803d',
                                 border: `1px solid ${a.ativa ? '#ffedd5' : '#bbf7d0'}`,
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                fontSize: '0.8rem',
+                                fontSize: '0.875rem',
                               }}
                             >
                               {a.ativa ? 'Desativar' : 'Ativar'}
@@ -543,10 +543,10 @@ export function ObrasPage() {
                                 backgroundColor: '#fef2f2',
                                 color: '#b91c1c',
                                 border: '1px solid #fecaca',
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                fontSize: '0.8rem',
+                                fontSize: '0.875rem',
                               }}
                             >
                               Excluir
@@ -558,7 +558,7 @@ export function ObrasPage() {
                   ))}
                   {areasFiltradas.length === 0 && (
                     <tr>
-                      <td colSpan={podeGerenciarAreas ? 5 : 4} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <td colSpan={podeGerenciarAreas ? 5 : 4} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
                         Nenhuma area cadastrada ou encontrada para esta obra.
                       </td>
                     </tr>
@@ -580,7 +580,7 @@ export function ObrasPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -588,13 +588,13 @@ export function ObrasPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '2rem',
+              padding: '32px',
               maxWidth: '460px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 16px', fontSize: '1rem', color: '#0f172a' }}>
               Cadastrar Nova Obra
             </h2>
 
@@ -603,10 +603,10 @@ export function ObrasPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -614,9 +614,9 @@ export function ObrasPage() {
               </div>
             )}
 
-            <form onSubmit={handleCriarObra} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarObra} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Codigo Interno (imutavel)
                 </label>
                 <input
@@ -627,7 +627,7 @@ export function ObrasPage() {
                   onChange={(e) => setNovoCodigoObra(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -638,7 +638,7 @@ export function ObrasPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome do Empreendimento / Condominio
                 </label>
                 <input
@@ -649,7 +649,7 @@ export function ObrasPage() {
                   onChange={(e) => setNovoNomeObra(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -660,7 +660,7 @@ export function ObrasPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Cidade
                 </label>
                 <input
@@ -671,7 +671,7 @@ export function ObrasPage() {
                   onChange={(e) => setNovaCidadeObra(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -681,17 +681,17 @@ export function ObrasPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
                 <button
                   type="button"
                   onClick={() => setModalNovaObraAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
-                    fontWeight: 500,
+                    fontWeight: 400,
                     cursor: 'pointer',
                   }}
                 >
@@ -701,10 +701,10 @@ export function ObrasPage() {
                   type="submit"
                   disabled={criarObraMutation.isPending}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -728,7 +728,7 @@ export function ObrasPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -736,16 +736,16 @@ export function ObrasPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '2rem',
+              padding: '32px',
               maxWidth: '440px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Cadastrar Nova Area
             </h2>
-            <p style={{ margin: '0 0 1rem', color: '#64748b', fontSize: '0.85rem' }}>
+            <p style={{ margin: '0 0 16px', color: '#475569', fontSize: '0.875rem' }}>
               Obra: <strong>{obraAtual?.nome}</strong>
             </p>
 
@@ -754,10 +754,10 @@ export function ObrasPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -765,9 +765,9 @@ export function ObrasPage() {
               </div>
             )}
 
-            <form onSubmit={handleCriarArea} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarArea} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome da Area / Pavimento
                 </label>
                 <input
@@ -778,7 +778,7 @@ export function ObrasPage() {
                   onChange={(e) => setNovoNomeArea(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -789,7 +789,7 @@ export function ObrasPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Ordem de Exibicao (Negativo = Subsolo, 0 = Terreo)
                 </label>
                 <input
@@ -799,7 +799,7 @@ export function ObrasPage() {
                   onChange={(e) => setNovaOrdemArea(Number(e.target.value))}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -809,17 +809,17 @@ export function ObrasPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
                 <button
                   type="button"
                   onClick={() => setModalNovaAreaAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
-                    fontWeight: 500,
+                    fontWeight: 400,
                     cursor: 'pointer',
                   }}
                 >
@@ -829,10 +829,10 @@ export function ObrasPage() {
                   type="submit"
                   disabled={criarAreaMutation.isPending}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -856,7 +856,7 @@ export function ObrasPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -864,16 +864,16 @@ export function ObrasPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '2rem',
+              padding: '32px',
               maxWidth: '440px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Editar Area / Pavimento
             </h2>
-            <p style={{ margin: '0 0 1rem', color: '#64748b', fontSize: '0.85rem' }}>
+            <p style={{ margin: '0 0 16px', color: '#475569', fontSize: '0.875rem' }}>
               Obra: <strong>{obraAtual?.nome}</strong>
             </p>
 
@@ -882,10 +882,10 @@ export function ObrasPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -893,9 +893,9 @@ export function ObrasPage() {
               </div>
             )}
 
-            <form onSubmit={handleEditarArea} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleEditarArea} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome da Area / Pavimento
                 </label>
                 <input
@@ -906,7 +906,7 @@ export function ObrasPage() {
                   onChange={(e) => setEditarNomeArea(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -917,7 +917,7 @@ export function ObrasPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Ordem de Exibicao
                 </label>
                 <input
@@ -927,7 +927,7 @@ export function ObrasPage() {
                   onChange={(e) => setEditarOrdemArea(Number(e.target.value))}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -937,7 +937,7 @@ export function ObrasPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
                 <button
                   type="button"
                   onClick={() => {
@@ -945,12 +945,12 @@ export function ObrasPage() {
                     setAreaParaEditar(null)
                   }}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
-                    fontWeight: 500,
+                    fontWeight: 400,
                     cursor: 'pointer',
                   }}
                 >
@@ -960,10 +960,10 @@ export function ObrasPage() {
                   type="submit"
                   disabled={editarAreaMutation.isPending}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',

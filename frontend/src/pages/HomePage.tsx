@@ -70,7 +70,7 @@ export function HomePage() {
   return (
     <div
       style={{
-        padding: '2rem 1rem',
+        padding: '32px 16px',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         maxWidth: '1200px',
         margin: '0 auto',
@@ -83,30 +83,30 @@ export function HomePage() {
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
           borderBottom: '1px solid #e2e8f0',
-          paddingBottom: '1.25rem',
-          marginBottom: '1.75rem',
+          paddingBottom: '24px',
+          marginBottom: '24px',
         }}
       >
         <div>
           <span
             style={{
               display: 'inline-block',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              fontSize: '0.875rem',
+              fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              color: '#0284c7',
-              marginBottom: '0.25rem',
+              color: '#0369a1',
+              marginBottom: '8px',
             }}
           >
             Painel Operacional e Executivo
           </span>
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '1.85rem', fontWeight: 700 }}>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '2rem', fontWeight: 600 }}>
             Obras Jooy - Almoxarifado
           </h1>
-          <p style={{ color: '#64748b', margin: '0.35rem 0 0', fontSize: '0.95rem' }}>
+          <p style={{ color: '#475569', margin: '8px 0 0', fontSize: '1rem', fontWeight: 400 }}>
             Sistema de Gestao e Estoque para Canteiros de Obras
           </p>
         </div>
@@ -116,14 +116,15 @@ export function HomePage() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.45rem 0.85rem',
+            minHeight: '44px',
+            gap: '8px',
+            padding: '8px 16px',
             borderRadius: '999px',
             backgroundColor: isError ? '#fef2f2' : '#f0fdf4',
             border: `1px solid ${isError ? '#fecaca' : '#bbf7d0'}`,
-            fontSize: '0.8rem',
+            fontSize: '0.875rem',
             fontWeight: 600,
-            color: isError ? '#b91c1c' : '#15803d',
+            color: isError ? '#991b1b' : '#166534',
           }}
         >
           <span
@@ -131,7 +132,7 @@ export function HomePage() {
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              backgroundColor: isError ? '#dc2626' : '#16a34a',
+              backgroundColor: isError ? '#b91c1c' : '#15803d',
               display: 'inline-block',
             }}
           />
@@ -148,38 +149,40 @@ export function HomePage() {
         <section
           style={{
             background: '#ffffff',
-            padding: '1.35rem 1.5rem',
+            padding: '24px',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
-            marginBottom: '1.5rem',
+            marginBottom: '24px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '1rem',
-            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
+            gap: '16px',
           }}
         >
           <div>
-            <h2 style={{ fontSize: '1.15rem', color: '#0f172a', margin: '0 0 0.35rem' }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#0f172a', margin: '0 0 8px' }}>
               Bem-vindo(a), {usuario.nome}!
             </h2>
-            <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>
+            <p style={{ color: '#475569', fontSize: '0.875rem', fontWeight: 400, margin: 0 }}>
               Cargo: <strong>{usuario.cargo}</strong> • Perfil: <strong>{usuario.perfil}</strong>
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <Link
               to="/requisicoes"
               style={{
-                display: 'inline-block',
-                backgroundColor: '#0284c7',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '48px',
+                backgroundColor: '#0369a1',
                 color: '#ffffff',
                 textDecoration: 'none',
-                padding: '0.55rem 1rem',
-                borderRadius: '6px',
-                fontSize: '0.85rem',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
                 fontWeight: 600,
               }}
             >
@@ -192,14 +195,17 @@ export function HomePage() {
               <Link
                 to="/estoque"
                 style={{
-                  display: 'inline-block',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '48px',
                   backgroundColor: '#f8fafc',
                   color: '#0f172a',
                   border: '1px solid #cbd5e1',
                   textDecoration: 'none',
-                  padding: '0.55rem 1rem',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
                 }}
               >
@@ -210,14 +216,17 @@ export function HomePage() {
             <Link
               to="/ferramentas"
               style={{
-                display: 'inline-block',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '48px',
                 backgroundColor: '#f8fafc',
                 color: '#0f172a',
                 border: '1px solid #cbd5e1',
                 textDecoration: 'none',
-                padding: '0.55rem 1rem',
-                borderRadius: '6px',
-                fontSize: '0.85rem',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
                 fontWeight: 600,
               }}
             >
@@ -228,14 +237,17 @@ export function HomePage() {
               <Link
                 to="/orcamento-obra"
                 style={{
-                  display: 'inline-block',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '48px',
                   backgroundColor: '#fffbeb',
                   color: '#92400e',
                   border: '1px solid #fde68a',
                   textDecoration: 'none',
-                  padding: '0.55rem 1rem',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
                 }}
               >
@@ -247,13 +259,16 @@ export function HomePage() {
               <Link
                 to="/usuarios"
                 style={{
-                  display: 'inline-block',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '48px',
                   backgroundColor: '#0f172a',
                   color: '#ffffff',
                   textDecoration: 'none',
-                  padding: '0.55rem 1rem',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
                 }}
               >
@@ -271,8 +286,8 @@ export function HomePage() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '1rem',
-              marginBottom: '1.5rem',
+              gap: '16px',
+              marginBottom: '24px',
             }}
           >
             {/* Card 1: Requisicoes Pendentes */}
@@ -281,17 +296,17 @@ export function HomePage() {
                 backgroundColor: requisicoesPendentes.length > 0 ? '#fffbeb' : '#ffffff',
                 border: `1px solid ${requisicoesPendentes.length > 0 ? '#fde68a' : '#e2e8f0'}`,
                 borderRadius: '8px',
-                padding: '1.15rem 1.25rem',
+                padding: '24px',
               }}
             >
               <span
                 style={{
                   display: 'block',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  color: requisicoesPendentes.length > 0 ? '#b45309' : '#64748b',
+                  color: requisicoesPendentes.length > 0 ? '#92400e' : '#475569',
                 }}
               >
                 Requisicoes Pendentes
@@ -299,16 +314,16 @@ export function HomePage() {
               <strong
                 style={{
                   display: 'block',
-                  fontSize: '1.85rem',
-                  fontWeight: 700,
+                  fontSize: '2rem',
+                  fontWeight: 600,
                   color: requisicoesPendentes.length > 0 ? '#92400e' : '#0f172a',
-                  marginTop: '0.25rem',
+                  marginTop: '8px',
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
                 {requisicoesPendentes.length}
               </strong>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#475569' }}>
                 Aguardando separacao e entrega no almoxarifado
               </span>
             </div>
@@ -319,14 +334,14 @@ export function HomePage() {
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                padding: '1.15rem 1.25rem',
+                padding: '24px',
               }}
             >
               <span
                 style={{
                   display: 'block',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                   color: '#0369a1',
@@ -337,16 +352,16 @@ export function HomePage() {
               <strong
                 style={{
                   display: 'block',
-                  fontSize: '1.85rem',
-                  fontWeight: 700,
+                  fontSize: '2rem',
+                  fontWeight: 600,
                   color: '#0f172a',
-                  marginTop: '0.25rem',
+                  marginTop: '8px',
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
                 {pendentesExportacaoSienge.length}
               </strong>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#475569' }}>
                 {requisicoesAtendidas.length} requisicao(oes) atendida(s) no total
               </span>
             </div>
@@ -357,14 +372,14 @@ export function HomePage() {
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                padding: '1.15rem 1.25rem',
+                padding: '24px',
               }}
             >
               <span
                 style={{
                   display: 'block',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                   color: '#475569',
@@ -375,16 +390,16 @@ export function HomePage() {
               <strong
                 style={{
                   display: 'block',
-                  fontSize: '1.85rem',
-                  fontWeight: 700,
+                  fontSize: '2rem',
+                  fontWeight: 600,
                   color: '#0f172a',
-                  marginTop: '0.25rem',
+                  marginTop: '8px',
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
                 {ferramentasEmprestadas.length}
               </strong>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#475569' }}>
                 {ferramentasDisponiveis.length} disponiveis • {ferramentasComDefeito.length} em
                 manutencao
               </span>
@@ -396,17 +411,17 @@ export function HomePage() {
                 backgroundColor: itensComEstouroOrcamento.length > 0 ? '#fef2f2' : '#ffffff',
                 border: `1px solid ${itensComEstouroOrcamento.length > 0 ? '#fecaca' : '#e2e8f0'}`,
                 borderRadius: '8px',
-                padding: '1.15rem 1.25rem',
+                padding: '24px',
               }}
             >
               <span
                 style={{
                   display: 'block',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  color: itensComEstouroOrcamento.length > 0 ? '#b91c1c' : '#15803d',
+                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#166534',
                 }}
               >
                 Controle de Orcamento ({totalObrasAtivas} Obra(s))
@@ -414,10 +429,10 @@ export function HomePage() {
               <strong
                 style={{
                   display: 'block',
-                  fontSize: '1.85rem',
-                  fontWeight: 700,
-                  color: itensComEstouroOrcamento.length > 0 ? '#b91c1c' : '#15803d',
-                  marginTop: '0.25rem',
+                  fontSize: '2rem',
+                  fontWeight: 600,
+                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#166534',
+                  marginTop: '8px',
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
@@ -425,8 +440,9 @@ export function HomePage() {
               </strong>
               <span
                 style={{
-                  fontSize: '0.8rem',
-                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#64748b',
+                  fontSize: '0.875rem',
+                  fontWeight: 400,
+                  color: itensComEstouroOrcamento.length > 0 ? '#991b1b' : '#475569',
                 }}
               >
                 {itensComEstouroOrcamento.length > 0
@@ -441,8 +457,8 @@ export function HomePage() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-              gap: '1.25rem',
-              marginBottom: '1.75rem',
+              gap: '24px',
+              marginBottom: '24px',
             }}
           >
             {/* Coluna 1: Requisicoes Aguardando Atendimento */}
@@ -451,7 +467,7 @@ export function HomePage() {
                 backgroundColor: '#ffffff',
                 borderRadius: '8px',
                 border: '1px solid #e2e8f0',
-                padding: '1.25rem',
+                padding: '24px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -463,18 +479,22 @@ export function HomePage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '0.85rem',
+                    marginBottom: '16px',
                   }}
                 >
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
                     Fila de Requisicoes Pendentes
                   </h3>
                   <Link
                     to="/requisicoes"
                     style={{
-                      fontSize: '0.8rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      minHeight: '44px',
+                      padding: '8px',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
-                      color: '#0284c7',
+                      color: '#0369a1',
                       textDecoration: 'none',
                     }}
                   >
@@ -485,25 +505,26 @@ export function HomePage() {
                 {requisicoesPendentes.length === 0 ? (
                   <p
                     style={{
-                      margin: '1.25rem 0',
-                      color: '#64748b',
-                      fontSize: '0.88rem',
+                      margin: '24px 0',
+                      color: '#475569',
+                      fontSize: '0.875rem',
+                      fontWeight: 400,
                       textAlign: 'center',
                     }}
                   >
                     Nenhuma requisicao pendente de atendimento no momento.
                   </p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {requisicoesPendentes.slice(0, 4).map((req) => (
                       <div
                         key={req.id}
                         style={{
-                          padding: '0.75rem',
-                          borderRadius: '6px',
+                          padding: '16px',
+                          borderRadius: '8px',
                           backgroundColor: '#f8fafc',
                           border: '1px solid #e2e8f0',
-                          fontSize: '0.85rem',
+                          fontSize: '0.875rem',
                         }}
                       >
                         <div
@@ -511,28 +532,37 @@ export function HomePage() {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            marginBottom: '0.25rem',
+                            marginBottom: '8px',
                           }}
                         >
-                          <strong style={{ color: '#0f172a' }}>#{req.numeroSequencial}</strong>
+                          <strong style={{ color: '#0f172a', fontWeight: 600 }}>
+                            #{req.numeroSequencial}
+                          </strong>
                           <span
                             style={{
                               backgroundColor: '#fef3c7',
                               color: '#92400e',
-                              padding: '0.1rem 0.45rem',
-                              borderRadius: '4px',
-                              fontSize: '0.72rem',
+                              padding: '8px',
+                              borderRadius: '8px',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
                             Aguardando Entrega
                           </span>
                         </div>
-                        <div style={{ color: '#334155' }}>
+                        <div style={{ color: '#334155', fontWeight: 400 }}>
                           {req.area?.obra?.codigo} - {req.area?.nome} • Solicitante:{' '}
-                          <strong>{req.requisitante?.nome}</strong>
+                          <strong style={{ fontWeight: 600 }}>{req.requisitante?.nome}</strong>
                         </div>
-                        <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                        <div
+                          style={{
+                            color: '#475569',
+                            fontSize: '0.875rem',
+                            fontWeight: 400,
+                            marginTop: '8px',
+                          }}
+                        >
                           {req.itens.length} item(ns) solicitado(s)
                         </div>
                       </div>
@@ -548,7 +578,7 @@ export function HomePage() {
                 backgroundColor: '#ffffff',
                 borderRadius: '8px',
                 border: '1px solid #e2e8f0',
-                padding: '1.25rem',
+                padding: '24px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -560,18 +590,22 @@ export function HomePage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '0.85rem',
+                    marginBottom: '16px',
                   }}
                 >
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
                     Ferramentas Emprestadas e em Manutencao
                   </h3>
                   <Link
                     to="/ferramentas"
                     style={{
-                      fontSize: '0.8rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      minHeight: '44px',
+                      padding: '8px',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
-                      color: '#0284c7',
+                      color: '#0369a1',
                       textDecoration: 'none',
                     }}
                   >
@@ -582,41 +616,49 @@ export function HomePage() {
                 {ferramentasEmprestadas.length === 0 && ferramentasComDefeito.length === 0 ? (
                   <p
                     style={{
-                      margin: '1.25rem 0',
-                      color: '#64748b',
-                      fontSize: '0.88rem',
+                      margin: '24px 0',
+                      color: '#475569',
+                      fontSize: '0.875rem',
+                      fontWeight: 400,
                       textAlign: 'center',
                     }}
                   >
                     Todas as ferramentas ativas estao disponiveis no almoxarifado.
                   </p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {[...ferramentasEmprestadas, ...ferramentasComDefeito]
                       .slice(0, 4)
                       .map((fer) => (
                         <div
                           key={fer.id}
                           style={{
-                            padding: '0.75rem',
-                            borderRadius: '6px',
+                            padding: '16px',
+                            borderRadius: '8px',
                             backgroundColor: '#f8fafc',
                             border: '1px solid #e2e8f0',
-                            fontSize: '0.85rem',
+                            fontSize: '0.875rem',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            gap: '0.5rem',
+                            gap: '8px',
                           }}
                         >
                           <div>
                             <div style={{ fontWeight: 600, color: '#0f172a' }}>
-                              <span style={{ fontFamily: 'monospace', marginRight: '0.4rem' }}>
+                              <span style={{ fontFamily: 'monospace', marginRight: '8px' }}>
                                 {fer.codigo}
                               </span>
                               {fer.nome}
                             </div>
-                            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>
+                            <div
+                              style={{
+                                fontSize: '0.875rem',
+                                fontWeight: 400,
+                                color: '#475569',
+                                marginTop: '8px',
+                              }}
+                            >
                               {fer.status === 'EMPRESTADO' && fer.emprestadoPara
                                 ? `Responsavel: ${fer.emprestadoPara.nome} (@${fer.emprestadoPara.login})`
                                 : 'Equipamento bloqueado aguardando reparo'}
@@ -625,13 +667,13 @@ export function HomePage() {
 
                           <span
                             style={{
-                              padding: '0.15rem 0.5rem',
-                              borderRadius: '4px',
-                              fontSize: '0.72rem',
+                              padding: '8px',
+                              borderRadius: '8px',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                               backgroundColor:
                                 fer.status === 'EMPRESTADO' ? '#fef3c7' : '#fee2e2',
-                              color: fer.status === 'EMPRESTADO' ? '#b45309' : '#b91c1c',
+                              color: fer.status === 'EMPRESTADO' ? '#92400e' : '#991b1b',
                               whiteSpace: 'nowrap',
                             }}
                           >
@@ -651,27 +693,38 @@ export function HomePage() {
       <section
         style={{
           background: '#f8fafc',
-          padding: '1.25rem 1.5rem',
+          padding: '24px',
           borderRadius: '8px',
           border: '1px solid #cbd5e1',
         }}
       >
-        <h2 style={{ fontSize: '1rem', color: '#334155', marginTop: 0, marginBottom: '0.75rem' }}>
+        <h2
+          style={{
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: '#334155',
+            marginTop: 0,
+            marginBottom: '16px',
+          }}
+        >
           Status de Integracao com a API
         </h2>
 
         {isLoading && (
-          <p style={{ color: '#0284c7', margin: 0 }}>Verificando comunicacao com o servidor...</p>
+          <p style={{ color: '#0369a1', fontSize: '0.875rem', margin: 0 }}>
+            Verificando comunicacao com o servidor...
+          </p>
         )}
 
         {isError && (
           <div
             style={{
-              color: '#b91c1c',
+              color: '#991b1b',
               background: '#fef2f2',
-              padding: '0.75rem',
-              borderRadius: '4px',
+              padding: '16px',
+              borderRadius: '8px',
               border: '1px solid #fecaca',
+              fontSize: '0.875rem',
             }}
           >
             <strong>Falha na conexao com a API:</strong>{' '}
@@ -682,16 +735,16 @@ export function HomePage() {
         {data && (
           <div
             style={{
-              color: '#15803d',
+              color: '#166534',
               background: '#f0fdf4',
-              padding: '0.85rem 1rem',
-              borderRadius: '4px',
+              padding: '16px',
+              borderRadius: '8px',
               border: '1px solid #bbf7d0',
               display: 'flex',
               flexWrap: 'wrap',
-              gap: '1.5rem',
+              gap: '24px',
               alignItems: 'center',
-              fontSize: '0.88rem',
+              fontSize: '0.875rem',
             }}
           >
             <p style={{ margin: 0 }}>

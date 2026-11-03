@@ -549,30 +549,30 @@ export function RequisicoesPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
       {/* Cabecalho */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem',
+          marginBottom: '24px',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
         }}
       >
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 style={{ color: '#0f172a', margin: '0 0 8px', fontSize: '2rem' }}>
             {ehEncarregado ? 'Minhas Requisicoes de Obra' : 'Painel de Requisicoes de Obra'}
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ color: '#475569', margin: 0, fontSize: '0.875rem' }}>
             {ehEncarregado
               ? 'Solicite materiais e ferramentas disponiveis no estoque da obra e acompanhe seus pedidos'
               : 'Atenda requisicoes com baixa automatica no estoque e exporte os registros atendidos para o SIENGE'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           {podeAtenderEExportar && (
             <button
               type="button"
@@ -587,11 +587,11 @@ export function RequisicoesPage() {
                 backgroundColor: '#0f766e',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.65rem 1.15rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                fontSize: '0.88rem',
+                fontSize: '0.875rem',
               }}
             >
               {exportarSiengeMutation.isPending
@@ -604,14 +604,14 @@ export function RequisicoesPage() {
             type="button"
             onClick={handleAbrirModal}
             style={{
-              backgroundColor: '#0284c7',
+              backgroundColor: '#0369a1',
               color: '#ffffff',
               border: 'none',
-              padding: '0.65rem 1.25rem',
+              padding: '8px 24px',
               borderRadius: '6px',
               fontWeight: 600,
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: '0.875rem',
             }}
           >
             + Nova Requisicao
@@ -626,10 +626,10 @@ export function RequisicoesPage() {
             backgroundColor: '#f0fdf4',
             color: '#166534',
             border: '1px solid #bbf7d0',
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             borderRadius: '6px',
-            marginBottom: '1rem',
-            fontSize: '0.88rem',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -639,7 +639,7 @@ export function RequisicoesPage() {
           <button
             type="button"
             onClick={() => setMensagemFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 700 }}
+            style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 600 }}
           >
             &times;
           </button>
@@ -652,10 +652,10 @@ export function RequisicoesPage() {
             backgroundColor: '#fef2f2',
             color: '#b91c1c',
             border: '1px solid #fecaca',
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             borderRadius: '6px',
-            marginBottom: '1rem',
-            fontSize: '0.88rem',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -665,7 +665,7 @@ export function RequisicoesPage() {
           <button
             type="button"
             onClick={() => setErroFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontWeight: 700 }}
+            style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontWeight: 600 }}
           >
             &times;
           </button>
@@ -676,8 +676,8 @@ export function RequisicoesPage() {
       <div
         style={{
           display: 'flex',
-          gap: '0.85rem',
-          marginBottom: '1.5rem',
+          gap: '16px',
+          marginBottom: '24px',
           flexWrap: 'wrap',
           alignItems: 'center',
         }}
@@ -690,17 +690,17 @@ export function RequisicoesPage() {
           style={{
             flex: '1',
             minWidth: '250px',
-            padding: '0.6rem 1rem',
+            padding: '8px 16px',
             borderRadius: '6px',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
             color: '#0f172a',
-            fontSize: '0.88rem',
+            fontSize: '0.875rem',
           }}
         />
 
         {/* Botoes dos 3 Status Principais + Todas */}
-        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
             { id: 'TODAS', label: 'Todas' },
             { id: 'SOLICITADA', label: 'Pendentes' },
@@ -712,14 +712,14 @@ export function RequisicoesPage() {
               type="button"
               onClick={() => setFiltroStatus(st.id)}
               style={{
-                padding: '0.45rem 0.85rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 border: '1px solid',
-                borderColor: filtroStatus === st.id ? '#0284c7' : '#cbd5e1',
-                backgroundColor: filtroStatus === st.id ? '#0284c7' : '#ffffff',
+                borderColor: filtroStatus === st.id ? '#0369a1' : '#cbd5e1',
+                backgroundColor: filtroStatus === st.id ? '#0369a1' : '#ffffff',
                 color: filtroStatus === st.id ? '#ffffff' : '#475569',
                 cursor: 'pointer',
-                fontSize: '0.84rem',
+                fontSize: '0.875rem',
                 fontWeight: filtroStatus === st.id ? 600 : 400,
               }}
             >
@@ -733,12 +733,12 @@ export function RequisicoesPage() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            fontSize: '0.84rem',
+            gap: '8px',
+            fontSize: '0.875rem',
             color: '#334155',
             cursor: 'pointer',
             backgroundColor: '#f8fafc',
-            padding: '0.45rem 0.75rem',
+            padding: '8px 16px',
             borderRadius: '6px',
             border: '1px solid #cbd5e1',
           }}
@@ -758,12 +758,12 @@ export function RequisicoesPage() {
             value={filtroSienge}
             onChange={(e) => setFiltroSienge(e.target.value as any)}
             style={{
-              padding: '0.48rem 0.75rem',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
               color: '#0f172a',
-              fontSize: '0.84rem',
+              fontSize: '0.875rem',
             }}
           >
             <option value="TODAS">SIENGE: Todas</option>
@@ -775,22 +775,22 @@ export function RequisicoesPage() {
 
       {/* Lista de Requisicoes */}
       {carregandoRequisicoes ? (
-        <p style={{ color: '#64748b' }}>Carregando requisicoes...</p>
+        <p style={{ color: '#475569' }}>Carregando requisicoes...</p>
       ) : requisicoesFiltradas.length === 0 ? (
         <div
           style={{
             backgroundColor: '#ffffff',
-            padding: '3rem',
+            padding: '32px',
             borderRadius: '8px',
             textAlign: 'center',
-            color: '#94a3b8',
+            color: '#475569',
             border: '1px dashed #cbd5e1',
           }}
         >
           Nenhuma requisicao encontrada para os filtros selecionados.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {requisicoesFiltradas.map((r) => {
             const statusConfig = badgeStatus(r.status)
             const podeCancelar =
@@ -807,19 +807,19 @@ export function RequisicoesPage() {
                   borderRadius: '8px',
                   border: '1px solid #e2e8f0',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                  padding: '1.25rem',
+                  padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
+                  gap: '16px',
                 }}
               >
                 {/* Linha Superior */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <span
                       style={{
-                        fontSize: '1.1rem',
-                        fontWeight: 700,
+                        fontSize: '1rem',
+                        fontWeight: 600,
                         color: '#0f172a',
                       }}
                     >
@@ -829,9 +829,9 @@ export function RequisicoesPage() {
                       style={{
                         backgroundColor: statusConfig.bg,
                         color: statusConfig.cor,
-                        padding: '0.2rem 0.6rem',
+                        padding: '8px 8px',
                         borderRadius: '4px',
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         fontWeight: 600,
                       }}
                     >
@@ -845,9 +845,9 @@ export function RequisicoesPage() {
                           backgroundColor: r.exportadaSienge ? '#e0f2fe' : '#f1f5f9',
                           color: r.exportadaSienge ? '#0369a1' : '#475569',
                           border: `1px solid ${r.exportadaSienge ? '#bae6fd' : '#cbd5e1'}`,
-                          padding: '0.18rem 0.55rem',
+                          padding: '8px 8px',
                           borderRadius: '4px',
-                          fontSize: '0.75rem',
+                          fontSize: '0.875rem',
                           fontWeight: 600,
                         }}
                       >
@@ -858,39 +858,39 @@ export function RequisicoesPage() {
                     )}
                   </div>
 
-                  <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.875rem', color: '#475569' }}>
                     Solicitado em: {new Date(r.solicitadaEm).toLocaleString('pt-BR')}
                   </div>
                 </div>
 
                 {/* Localizacao, Solicitante e Quem Retirou */}
-                <div style={{ display: 'flex', gap: '1.75rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', fontSize: '0.875rem' }}>
                   <div>
-                    <span style={{ color: '#64748b' }}>Obra / Destino: </span>
+                    <span style={{ color: '#475569' }}>Obra / Destino: </span>
                     <strong style={{ color: '#1e293b' }}>
                       {r.area?.obra?.codigo} - {r.area?.obra?.nome} &bull; {r.area?.nome}
                     </strong>
                   </div>
                   <div>
-                    <span style={{ color: '#64748b' }}>Solicitante: </span>
+                    <span style={{ color: '#475569' }}>Solicitante: </span>
                     <strong style={{ color: '#1e293b' }}>
                       {r.requisitante?.nome} ({r.requisitante?.cargo?.nome || 'Encarregado'})
                     </strong>
                   </div>
                   {r.status === 'ATENDIDA' && r.retiradoPor && (
                     <div>
-                      <span style={{ color: '#64748b' }}>Retirado na obra por: </span>
+                      <span style={{ color: '#475569' }}>Retirado na obra por: </span>
                       <strong style={{ color: '#15803d' }}>{r.retiradoPor}</strong>
                     </div>
                   )}
                 </div>
 
                 {/* Itens da Requisicao (com historico Solicitado vs Entregue) */}
-                <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.4rem' }}>
+                <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
                     Itens da Requisicao ({r.itens.length}):
                   </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', color: '#334155' }}>
+                  <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.875rem', color: '#334155' }}>
                     {r.itens.map((it) => {
                       const qtdSol = Number(it.quantidade)
                       const temEntregue =
@@ -910,7 +910,7 @@ export function RequisicoesPage() {
                       )
 
                       return (
-                        <li key={it.id} style={{ marginBottom: '0.25rem' }}>
+                        <li key={it.id} style={{ marginBottom: '8px' }}>
                           {it.material ? (
                             <>
                               {r.status === 'ATENDIDA' && qtdEnt !== null ? (
@@ -920,7 +920,7 @@ export function RequisicoesPage() {
                                     {qtdEnt} {it.material.unidadeConsumo.sigla}
                                   </strong>{' '}
                                   &mdash; {it.material.descricao}{' '}
-                                  <span style={{ color: '#64748b' }}>({it.material.codigo})</span>
+                                  <span style={{ color: '#475569' }}>({it.material.codigo})</span>
                                 </span>
                               ) : (
                                 <>
@@ -928,20 +928,20 @@ export function RequisicoesPage() {
                                     {qtdSol} {it.material.unidadeConsumo.sigla}
                                   </strong>{' '}
                                   &mdash; {it.material.descricao}{' '}
-                                  <span style={{ color: '#64748b' }}>({it.material.codigo})</span>
+                                  <span style={{ color: '#475569' }}>({it.material.codigo})</span>
                                 </>
                               )}
                               {excedeLimiteCard && infoOrcCard && (
                                 <span
                                   style={{
-                                    marginLeft: '0.5rem',
+                                    marginLeft: '8px',
                                     backgroundColor: '#fef3c7',
                                     color: '#92400e',
                                     border: '1px solid #fde68a',
-                                    padding: '0.1rem 0.45rem',
+                                    padding: '8px 8px',
                                     borderRadius: '4px',
-                                    fontSize: '0.72rem',
-                                    fontWeight: 700,
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
                                   }}
                                 >
                                   Excede Limite Orcado ({infoOrcCard.quantidadeOrcada}{' '}
@@ -952,7 +952,7 @@ export function RequisicoesPage() {
                           ) : it.ferramenta ? (
                             <>
                               <strong>1 un</strong> &mdash; {it.ferramenta.nome}{' '}
-                              <span style={{ color: '#64748b' }}>[Ferramenta cod: {it.ferramenta.codigo}]</span>
+                              <span style={{ color: '#475569' }}>[Ferramenta cod: {it.ferramenta.codigo}]</span>
                             </>
                           ) : (
                             <span>Item nao especificado</span>
@@ -964,29 +964,29 @@ export function RequisicoesPage() {
                 </div>
 
                 {/* Observacao e Acoes */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: r.observacao ? 'normal' : 'italic' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                  <div style={{ fontSize: '0.875rem', color: '#475569', fontStyle: r.observacao ? 'normal' : 'italic' }}>
                     {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
                     {r.status === 'ATENDIDA' && r.atendidoPor && (
-                      <span style={{ marginLeft: '0.75rem', fontStyle: 'normal', color: '#475569' }}>
+                      <span style={{ marginLeft: '16px', fontStyle: 'normal', color: '#475569' }}>
                         &bull; Atendido por: <strong>{r.atendidoPor.nome}</strong>
                       </span>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {podeAtender && (
                       <button
                         type="button"
                         onClick={() => handleAbrirModalAtendimento(r)}
                         style={{
-                          backgroundColor: '#16a34a',
+                          backgroundColor: '#15803d',
                           color: '#ffffff',
                           border: 'none',
-                          padding: '0.4rem 0.9rem',
+                          padding: '8px 16px',
                           borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '0.82rem',
+                          fontSize: '0.875rem',
                           fontWeight: 600,
                         }}
                       >
@@ -1005,13 +1005,13 @@ export function RequisicoesPage() {
                         }}
                         style={{
                           backgroundColor: '#fff1f2',
-                          color: '#e11d48',
+                          color: '#be123c',
                           border: '1px solid #fecdd3',
-                          padding: '0.35rem 0.75rem',
+                          padding: '8px 16px',
                           borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '0.8rem',
-                          fontWeight: 500,
+                          fontSize: '0.875rem',
+                          fontWeight: 400,
                         }}
                       >
                         Cancelar Requisicao
@@ -1035,7 +1035,7 @@ export function RequisicoesPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -1043,7 +1043,7 @@ export function RequisicoesPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '620px',
               width: '100%',
               maxHeight: '90vh',
@@ -1051,10 +1051,10 @@ export function RequisicoesPage() {
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.35rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Atender Requisicao #{requisicaoEmAtendimento.numeroSequencial}
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
               Confirme ou ajuste as quantidades entregues e informe o nome de quem esta retirando o material na obra.
             </p>
 
@@ -1063,9 +1063,9 @@ export function RequisicoesPage() {
                 backgroundColor: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '6px',
-                padding: '0.75rem',
-                marginBottom: '1rem',
-                fontSize: '0.84rem',
+                padding: '16px',
+                marginBottom: '16px',
+                fontSize: '0.875rem',
                 color: '#334155',
               }}
             >
@@ -1073,7 +1073,7 @@ export function RequisicoesPage() {
                 <strong>Obra / Area:</strong> {requisicaoEmAtendimento.area?.obra?.codigo} -{' '}
                 {requisicaoEmAtendimento.area?.obra?.nome} &bull; {requisicaoEmAtendimento.area?.nome}
               </div>
-              <div style={{ marginTop: '0.25rem' }}>
+              <div style={{ marginTop: '8px' }}>
                 <strong>Solicitante:</strong> {requisicaoEmAtendimento.requisitante?.nome}
               </div>
             </div>
@@ -1083,10 +1083,10 @@ export function RequisicoesPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -1094,13 +1094,13 @@ export function RequisicoesPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmeterAtendimento} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmeterAtendimento} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.35rem', fontWeight: 600 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
                   Itens e Quantidades Entregues
                 </label>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {requisicaoEmAtendimento.itens.map((it) => {
                     const sigla = it.material?.unidadeConsumo?.sigla || 'UN'
                     return (
@@ -1109,27 +1109,27 @@ export function RequisicoesPage() {
                         style={{
                           display: 'grid',
                           gridTemplateColumns: '1fr 140px',
-                          gap: '0.75rem',
+                          gap: '16px',
                           alignItems: 'center',
                           backgroundColor: '#f8fafc',
-                          padding: '0.65rem 0.75rem',
+                          padding: '8px 16px',
                           borderRadius: '6px',
                           border: '1px solid #e2e8f0',
                         }}
                       >
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a' }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#0f172a' }}>
                             {it.material
                               ? `${it.material.codigo} - ${it.material.descricao}`
                               : `${it.ferramenta?.codigo} - ${it.ferramenta?.nome}`}
                           </div>
-                          <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          <div style={{ fontSize: '0.875rem', color: '#475569' }}>
                             Quantidade solicitada: <strong>{Number(it.quantidade)} {sigla}</strong>
                           </div>
                         </div>
 
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', color: '#475569', marginBottom: '0.2rem' }}>
+                          <label style={{ display: 'block', fontSize: '0.875rem', color: '#475569', marginBottom: '8px' }}>
                             Qtd Entregue ({sigla})
                           </label>
                           <input
@@ -1148,11 +1148,11 @@ export function RequisicoesPage() {
                             }
                             style={{
                               width: '100%',
-                              padding: '0.45rem',
+                              padding: '8px',
                               borderRadius: '4px',
                               border: '1px solid #cbd5e1',
                               backgroundColor: it.ferramenta ? '#f1f5f9' : '#ffffff',
-                              fontSize: '0.85rem',
+                              fontSize: '0.875rem',
                               color: '#0f172a',
                               boxSizing: 'border-box',
                             }}
@@ -1165,7 +1165,7 @@ export function RequisicoesPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 600 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
                   Retirado por (Responsavel pelo recebimento na obra)
                 </label>
                 <input
@@ -1177,29 +1177,29 @@ export function RequisicoesPage() {
                   onChange={(e) => setRetiradoPor(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.88rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setRequisicaoEmAtendimento(null)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
+                    fontWeight: 400,
                   }}
                 >
                   Cancelar
@@ -1208,10 +1208,10 @@ export function RequisicoesPage() {
                   type="submit"
                   disabled={atenderRequisicaoMutation.isPending}
                   style={{
-                    padding: '0.55rem 1.2rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#16a34a',
+                    backgroundColor: '#15803d',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -1237,7 +1237,7 @@ export function RequisicoesPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -1245,7 +1245,7 @@ export function RequisicoesPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '720px',
               width: '100%',
               maxHeight: '90vh',
@@ -1253,10 +1253,10 @@ export function RequisicoesPage() {
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Nova Requisicao de Obra
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
               Informe o destino da aplicacao e adicione os materiais (limitados ao saldo disponivel no estoque da obra) ou ferramentas.
             </p>
 
@@ -1265,10 +1265,10 @@ export function RequisicoesPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -1276,11 +1276,11 @@ export function RequisicoesPage() {
               </div>
             )}
 
-            <form onSubmit={handleCriarRequisicao} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarRequisicao} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Selecao da Obra e Area */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                     Obra
                   </label>
                   <select
@@ -1292,12 +1292,12 @@ export function RequisicoesPage() {
                     required
                     style={{
                       width: '100%',
-                      padding: '0.55rem',
+                      padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: '#ffffff',
                       color: '#0f172a',
-                      fontSize: '0.85rem',
+                      fontSize: '0.875rem',
                     }}
                   >
                     <option value="">Selecione a obra...</option>
@@ -1310,7 +1310,7 @@ export function RequisicoesPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                     Area / Pavimento de Destino
                   </label>
                   <select
@@ -1320,12 +1320,12 @@ export function RequisicoesPage() {
                     disabled={!obraIdSelecionada}
                     style={{
                       width: '100%',
-                      padding: '0.55rem',
+                      padding: '8px',
                       borderRadius: '4px',
                       border: '1px solid #cbd5e1',
                       backgroundColor: !obraIdSelecionada ? '#f1f5f9' : '#ffffff',
                       color: '#0f172a',
-                      fontSize: '0.85rem',
+                      fontSize: '0.875rem',
                     }}
                   >
                     <option value="">
@@ -1342,8 +1342,8 @@ export function RequisicoesPage() {
 
               {/* Itens do Pedido */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 600 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 600 }}>
                     Itens Solicitados
                   </label>
                   <button
@@ -1352,8 +1352,8 @@ export function RequisicoesPage() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#0284c7',
-                      fontSize: '0.8rem',
+                      color: '#0369a1',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
                       cursor: 'pointer',
                       padding: 0,
@@ -1363,7 +1363,7 @@ export function RequisicoesPage() {
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {itensForm.map((linha, idx) => (
                     <div
                       key={idx}
@@ -1373,10 +1373,10 @@ export function RequisicoesPage() {
                           itensForm.length > 1
                             ? '105px minmax(0, 1fr) 88px 28px'
                             : '105px minmax(0, 1fr) 88px',
-                        gap: '0.5rem',
+                        gap: '8px',
                         alignItems: 'center',
                         backgroundColor: '#f8fafc',
-                        padding: '0.5rem',
+                        padding: '8px',
                         borderRadius: '4px',
                         border: '1px solid #e2e8f0',
                         boxSizing: 'border-box',
@@ -1387,11 +1387,11 @@ export function RequisicoesPage() {
                         value={linha.tipo}
                         onChange={(e) => handleAtualizarItem(idx, 'tipo', e.target.value)}
                         style={{
-                          padding: '0.45rem',
+                          padding: '8px',
                           borderRadius: '4px',
                           border: '1px solid #cbd5e1',
                           backgroundColor: '#ffffff',
-                          fontSize: '0.8rem',
+                          fontSize: '0.875rem',
                           color: '#0f172a',
                         }}
                       >
@@ -1453,17 +1453,17 @@ export function RequisicoesPage() {
                             onChange={(e) => handleAtualizarItem(idx, 'quantidade', parseFloat(e.target.value) || 0)}
                             style={{
                               width: '100%',
-                              padding: '0.45rem',
+                              padding: '8px',
                               borderRadius: '4px',
                               border: '1px solid #cbd5e1',
                               backgroundColor: '#ffffff',
-                              fontSize: '0.8rem',
+                              fontSize: '0.875rem',
                               color: '#0f172a',
                               boxSizing: 'border-box',
                             }}
                           />
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'center', display: 'block' }}>
+                          <span style={{ fontSize: '0.875rem', color: '#475569', textAlign: 'center', display: 'block' }}>
                             1 unidade
                           </span>
                         )}
@@ -1478,9 +1478,9 @@ export function RequisicoesPage() {
                             style={{
                               background: 'none',
                               border: 'none',
-                              color: '#ef4444',
+                              color: '#b91c1c',
                               cursor: 'pointer',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               fontSize: '1rem',
                               padding: 0,
                             }}
@@ -1498,19 +1498,19 @@ export function RequisicoesPage() {
                   <div
                     role="alert"
                     style={{
-                      marginTop: '0.75rem',
+                      marginTop: '16px',
                       backgroundColor: '#fef2f2',
                       border: '1px solid #fecaca',
                       borderRadius: '6px',
-                      padding: '0.75rem 0.9rem',
+                      padding: '16px 16px',
                       color: '#991b1b',
-                      fontSize: '0.82rem',
+                      fontSize: '0.875rem',
                     }}
                   >
-                    <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
+                    <strong style={{ display: 'block', marginBottom: '8px' }}>
                       Saldo fisico insuficiente no estoque da obra (Bloqueio de emissao):
                     </strong>
-                    <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
                       {alertasModalPorMaterial.listaFaltaEstoque.map((al) => (
                         <li key={al.materialId}>
                           <strong>
@@ -1531,24 +1531,24 @@ export function RequisicoesPage() {
                   <div
                     role="status"
                     style={{
-                      marginTop: '0.75rem',
+                      marginTop: '16px',
                       backgroundColor: '#fffbeb',
                       border: '1px solid #fde68a',
                       borderRadius: '6px',
-                      padding: '0.75rem 0.9rem',
+                      padding: '16px 16px',
                       color: '#92400e',
-                      fontSize: '0.82rem',
+                      fontSize: '0.875rem',
                     }}
                   >
-                    <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
+                    <strong style={{ display: 'block', marginBottom: '8px' }}>
                       Alerta da Engenharia: Estouro de Orcamento Previsto na Obra
                     </strong>
-                    <p style={{ margin: '0 0 0.35rem', color: '#b45309' }}>
+                    <p style={{ margin: '0 0 8px', color: '#b45309' }}>
                       A quantidade solicitada ultrapassa o teto orcado pela Engenharia. O pedido
                       podera ser enviado se houver saldo fisico, mas ficara destacado no Painel de
                       Estouro de Orcamento:
                     </p>
-                    <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
                       {alertasModalPorMaterial.listaEstouroOrcamento.map((al) => (
                         <li key={al.materialId}>
                           <strong>
@@ -1567,7 +1567,7 @@ export function RequisicoesPage() {
 
               {/* Observacao */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Observacao (opcional)
                 </label>
                 <input
@@ -1578,31 +1578,31 @@ export function RequisicoesPage() {
                   placeholder="ex: Urgente para a concretagem do bloco norte"
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
               </div>
 
               {/* Botoes do Modal */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setModalNovaRequisicaoAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
+                    fontWeight: 400,
+                    fontSize: '0.875rem',
                   }}
                 >
                   Cancelar
@@ -1611,14 +1611,14 @@ export function RequisicoesPage() {
                   type="submit"
                   disabled={criarRequisicaoMutation.isPending}
                   style={{
-                    padding: '0.55rem 1.2rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                   }}
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}

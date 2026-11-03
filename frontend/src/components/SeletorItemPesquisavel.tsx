@@ -69,15 +69,16 @@ export function SeletorItemPesquisavel({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '0.4rem',
-            padding: '0.45rem 0.65rem',
-            borderRadius: '4px',
-            border: '1px solid #0284c7',
+            gap: '8px',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: '1px solid #0369a1',
             backgroundColor: '#f0f9ff',
             cursor: desabilitado ? 'not-allowed' : 'pointer',
-            fontSize: '0.82rem',
+            fontSize: '0.875rem',
+            fontWeight: 400,
             color: '#0f172a',
-            minHeight: '36px',
+            minHeight: '44px',
             boxSizing: 'border-box',
             width: '100%',
             minWidth: 0,
@@ -92,18 +93,20 @@ export function SeletorItemPesquisavel({
               flex: 1,
             }}
           >
-            <strong style={{ color: '#0369a1', marginRight: '0.35rem' }}>{itemSelecionado.codigo}</strong>
+            <strong style={{ color: '#0369a1', fontWeight: 600, marginRight: '8px' }}>
+              {itemSelecionado.codigo}
+            </strong>
             <span>{itemSelecionado.descricao}</span>
             {itemSelecionado.unidade && (
-              <span style={{ color: '#64748b', marginLeft: '0.3rem' }}>({itemSelecionado.unidade})</span>
+              <span style={{ color: '#475569', marginLeft: '8px' }}>({itemSelecionado.unidade})</span>
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             {itemSelecionado.saldoDisponivel !== undefined && (
               <span
                 style={{
-                  fontSize: '0.75rem',
+                  fontSize: '0.875rem',
                   color: itemSelecionado.saldoDisponivel > 0 ? '#15803d' : '#b91c1c',
                   fontWeight: 600,
                   whiteSpace: 'nowrap',
@@ -128,13 +131,15 @@ export function SeletorItemPesquisavel({
                   setAberto(true)
                 }}
                 style={{
+                  minWidth: '44px',
+                  minHeight: '44px',
                   background: 'none',
                   border: 'none',
-                  color: '#64748b',
+                  color: '#475569',
                   cursor: 'pointer',
                   fontSize: '1rem',
-                  padding: '0 0.2rem',
-                  fontWeight: 700,
+                  padding: '8px',
+                  fontWeight: 600,
                   lineHeight: 1,
                 }}
               >
@@ -153,7 +158,11 @@ export function SeletorItemPesquisavel({
             aria-expanded={aberto}
             disabled={desabilitado}
             required={obrigatorio && !valorSelecionadoId}
-            placeholder={itemSelecionado ? `${itemSelecionado.codigo} - ${itemSelecionado.descricao}` : placeholder}
+            placeholder={
+              itemSelecionado
+                ? `${itemSelecionado.codigo} - ${itemSelecionado.descricao}`
+                : placeholder
+            }
             value={termoBusca}
             onChange={(e) => {
               setTermoBusca(e.target.value)
@@ -162,14 +171,15 @@ export function SeletorItemPesquisavel({
             onFocus={() => setAberto(true)}
             style={{
               width: '100%',
-              padding: '0.45rem 0.65rem',
-              borderRadius: '4px',
+              padding: '8px 16px',
+              borderRadius: '8px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
-              fontSize: '0.82rem',
+              fontSize: '0.875rem',
+              fontWeight: 400,
               color: '#0f172a',
               boxSizing: 'border-box',
-              minHeight: '36px',
+              minHeight: '44px',
             }}
           />
 
@@ -180,18 +190,26 @@ export function SeletorItemPesquisavel({
                 top: '100%',
                 left: 0,
                 right: 0,
-                marginTop: '0.2rem',
+                marginTop: '8px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                maxHeight: '220px',
+                borderRadius: '8px',
+                boxShadow: '0 8px 16px rgba(15, 23, 42, 0.08)',
+                maxHeight: '240px',
                 overflowY: 'auto',
                 zIndex: 9999,
               }}
             >
               {itensFiltrados.length === 0 ? (
-                <div style={{ padding: '0.75rem', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
+                <div
+                  style={{
+                    padding: '16px',
+                    fontSize: '0.875rem',
+                    fontWeight: 400,
+                    color: '#475569',
+                    textAlign: 'center',
+                  }}
+                >
                   Nenhum item encontrado para "{termoBusca}".
                 </div>
               ) : (
@@ -208,14 +226,17 @@ export function SeletorItemPesquisavel({
                         setTermoBusca('')
                       }}
                       style={{
-                        padding: '0.5rem 0.75rem',
+                        minHeight: '44px',
+                        padding: '8px 16px',
                         borderBottom: '1px solid #f1f5f9',
                         cursor: 'pointer',
-                        fontSize: '0.82rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 400,
                         backgroundColor: ehOSelecionado ? '#f0f9ff' : '#ffffff',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        gap: '8px',
                       }}
                       onMouseEnter={(e) => {
                         if (!ehOSelecionado) e.currentTarget.style.backgroundColor = '#f8fafc'
@@ -225,11 +246,15 @@ export function SeletorItemPesquisavel({
                       }}
                     >
                       <div>
-                        <strong style={{ color: '#0369a1', marginRight: '0.35rem' }}>{it.codigo}</strong>
+                        <strong style={{ color: '#0369a1', fontWeight: 600, marginRight: '8px' }}>
+                          {it.codigo}
+                        </strong>
                         <span style={{ color: '#0f172a' }}>{it.descricao}</span>
-                        {it.unidade && <span style={{ color: '#64748b', marginLeft: '0.3rem' }}>({it.unidade})</span>}
+                        {it.unidade && (
+                          <span style={{ color: '#475569', marginLeft: '8px' }}>({it.unidade})</span>
+                        )}
                         {it.detalheExtra && (
-                          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '0.1rem' }}>
+                          <div style={{ fontSize: '0.875rem', color: '#475569', marginTop: '8px' }}>
                             {it.detalheExtra}
                           </div>
                         )}
@@ -238,14 +263,14 @@ export function SeletorItemPesquisavel({
                       {it.saldoDisponivel !== undefined && (
                         <div
                           style={{
-                            fontSize: '0.76rem',
+                            fontSize: '0.875rem',
                             fontWeight: 600,
-                            color: it.saldoDisponivel > 0 ? '#15803d' : '#b91c1c',
+                            color: it.saldoDisponivel > 0 ? '#166534' : '#991b1b',
                             backgroundColor: it.saldoDisponivel > 0 ? '#dcfce7' : '#fee2e2',
-                            padding: '0.15rem 0.45rem',
-                            borderRadius: '4px',
+                            padding: '8px',
+                            borderRadius: '8px',
                             whiteSpace: 'nowrap',
-                            marginLeft: '0.5rem',
+                            marginLeft: '8px',
                           }}
                         >
                           Disp: {it.saldoDisponivel}
@@ -263,3 +288,4 @@ export function SeletorItemPesquisavel({
     </div>
   )
 }
+export default SeletorItemPesquisavel

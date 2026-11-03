@@ -297,23 +297,23 @@ export function UsuariosPage() {
   })
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
       {/* Cabecalho Principal */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem',
+          marginBottom: '24px',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
         }}
       >
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 style={{ color: '#0f172a', margin: '0 0 8px', fontSize: '2rem' }}>
             Painel Administrativo
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ color: '#475569', margin: 0, fontSize: '0.875rem' }}>
             Controle de acessos de usuarios e cadastro de cargos do canteiro de obras
           </p>
         </div>
@@ -326,10 +326,10 @@ export function UsuariosPage() {
                 setModalNovoUsuarioAberto(true)
               }}
               style={{
-                backgroundColor: '#0284c7',
+                backgroundColor: '#0369a1',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.6rem 1.2rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -345,10 +345,10 @@ export function UsuariosPage() {
                 setModalNovoCargoAberto(true)
               }}
               style={{
-                backgroundColor: '#0284c7',
+                backgroundColor: '#0369a1',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.6rem 1.2rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -361,19 +361,19 @@ export function UsuariosPage() {
       </div>
 
       {/* Navegacao por Abas */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid #e2e8f0', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #e2e8f0', marginBottom: '24px' }}>
         <button
           onClick={() => setAbaAtiva('usuarios')}
           style={{
-            padding: '0.75rem 1.25rem',
+            padding: '16px 24px',
             background: 'none',
             border: 'none',
-            borderBottom: abaAtiva === 'usuarios' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'usuarios' ? '#0284c7' : '#64748b',
+            borderBottom: abaAtiva === 'usuarios' ? '3px solid #0369a1' : '3px solid transparent',
+            color: abaAtiva === 'usuarios' ? '#0369a1' : '#475569',
             fontWeight: abaAtiva === 'usuarios' ? 700 : 500,
             cursor: 'pointer',
             fontSize: '1rem',
-            marginBottom: '-2px',
+            marginBottom: '8px',
           }}
         >
           Gestao de Usuarios ({usuarios.length})
@@ -382,15 +382,15 @@ export function UsuariosPage() {
         <button
           onClick={() => setAbaAtiva('cargos')}
           style={{
-            padding: '0.75rem 1.25rem',
+            padding: '16px 24px',
             background: 'none',
             border: 'none',
-            borderBottom: abaAtiva === 'cargos' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'cargos' ? '#0284c7' : '#64748b',
+            borderBottom: abaAtiva === 'cargos' ? '3px solid #0369a1' : '3px solid transparent',
+            color: abaAtiva === 'cargos' ? '#0369a1' : '#475569',
             fontWeight: abaAtiva === 'cargos' ? 700 : 500,
             cursor: 'pointer',
             fontSize: '1rem',
-            marginBottom: '-2px',
+            marginBottom: '8px',
           }}
         >
           Gerenciamento de Cargos ({todosOsCargos.length})
@@ -400,7 +400,7 @@ export function UsuariosPage() {
       {/* ABA 1: USUARIOS */}
       {abaAtiva === 'usuarios' && (
         <>
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '24px' }}>
             <input
               type="text"
               placeholder="Buscar por nome, login, cargo ou perfil..."
@@ -409,19 +409,19 @@ export function UsuariosPage() {
               style={{
                 width: '100%',
                 maxWidth: '450px',
-                padding: '0.6rem 1rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 border: '1px solid #cbd5e1',
                 backgroundColor: '#ffffff',
                 color: '#0f172a',
                 outline: 'none',
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
               }}
             />
           </div>
 
           {carregandoUsuarios ? (
-            <p style={{ color: '#64748b' }}>Carregando usuarios...</p>
+            <p style={{ color: '#475569' }}>Carregando usuarios...</p>
           ) : (
             <div
               style={{
@@ -432,15 +432,15 @@ export function UsuariosPage() {
                 overflowX: 'auto',
               }}
             >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Login</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cargo</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Perfil</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>
+                    <th style={{ padding: '16px 16px' }}>Nome</th>
+                    <th style={{ padding: '16px 16px' }}>Login</th>
+                    <th style={{ padding: '16px 16px' }}>Cargo</th>
+                    <th style={{ padding: '16px 16px' }}>Perfil</th>
+                    <th style={{ padding: '16px 16px' }}>Situacao</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -449,52 +449,52 @@ export function UsuariosPage() {
 
                     return (
                       <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#1e293b' }}>
-                          {u.nome} {ehOUsuarioLogado && <span style={{ color: '#0284c7', fontSize: '0.75rem' }}>(Voce)</span>}
+                        <td style={{ padding: '16px 16px', fontWeight: 400, color: '#1e293b' }}>
+                          {u.nome} {ehOUsuarioLogado && <span style={{ color: '#0369a1', fontSize: '0.875rem' }}>(Voce)</span>}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{u.login}</td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#334155' }}>{u.cargo.nome}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569' }}>{u.login}</td>
+                        <td style={{ padding: '16px 16px', color: '#334155' }}>{u.cargo.nome}</td>
+                        <td style={{ padding: '16px 16px' }}>
                           <span
                             style={{
                               backgroundColor: u.perfil === 'ADMIN' ? '#fef3c7' : '#e0f2fe',
                               color: u.perfil === 'ADMIN' ? '#92400e' : '#0369a1',
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
                             {u.perfil}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td style={{ padding: '16px 16px' }}>
                           <span
                             style={{
                               backgroundColor: u.ativo ? '#dcfce7' : '#fee2e2',
                               color: u.ativo ? '#166534' : '#991b1b',
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
                             {u.ativo ? 'Ativo' : 'Inativo'}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '8px' }}>
                             <button
                               onClick={() => abrirModalEdicao(u)}
                               style={{
                                 backgroundColor: '#f0f9ff',
                                 color: '#0369a1',
                                 border: '1px solid #bae6fd',
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                fontSize: '0.8rem',
-                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                fontWeight: 400,
                               }}
                             >
                               Editar
@@ -510,10 +510,10 @@ export function UsuariosPage() {
                                 backgroundColor: '#f1f5f9',
                                 color: '#475569',
                                 border: '1px solid #cbd5e1',
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                fontSize: '0.8rem',
+                                fontSize: '0.875rem',
                               }}
                             >
                               Resetar Senha
@@ -526,10 +526,10 @@ export function UsuariosPage() {
                                 backgroundColor: u.ativo ? '#fef2f2' : '#f0fdf4',
                                 color: u.ativo ? '#b91c1c' : '#15803d',
                                 border: `1px solid ${u.ativo ? '#fecaca' : '#bbf7d0'}`,
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: ehOUsuarioLogado ? 'not-allowed' : 'pointer',
-                                fontSize: '0.8rem',
+                                fontSize: '0.875rem',
                                 opacity: ehOUsuarioLogado ? 0.4 : 1,
                               }}
                             >
@@ -541,12 +541,12 @@ export function UsuariosPage() {
                               onClick={() => abrirModalExclusao(u)}
                               style={{
                                 backgroundColor: '#fff1f2',
-                                color: '#e11d48',
+                                color: '#be123c',
                                 border: '1px solid #fecdd3',
-                                padding: '0.3rem 0.6rem',
+                                padding: '8px 8px',
                                 borderRadius: '4px',
                                 cursor: ehOUsuarioLogado ? 'not-allowed' : 'pointer',
-                                fontSize: '0.8rem',
+                                fontSize: '0.875rem',
                                 opacity: ehOUsuarioLogado ? 0.4 : 1,
                               }}
                             >
@@ -559,7 +559,7 @@ export function UsuariosPage() {
                   })}
                   {usuariosFiltrados.length === 0 && (
                     <tr>
-                      <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
                         Nenhum usuario encontrado.
                       </td>
                     </tr>
@@ -574,7 +574,7 @@ export function UsuariosPage() {
       {/* ABA 2: CARGOS */}
       {abaAtiva === 'cargos' && (
         <>
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '24px' }}>
             <input
               type="text"
               placeholder="Buscar por nome do cargo..."
@@ -583,19 +583,19 @@ export function UsuariosPage() {
               style={{
                 width: '100%',
                 maxWidth: '450px',
-                padding: '0.6rem 1rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 border: '1px solid #cbd5e1',
                 backgroundColor: '#ffffff',
                 color: '#0f172a',
                 outline: 'none',
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
               }}
             />
           </div>
 
           {carregandoCargos ? (
-            <p style={{ color: '#64748b' }}>Carregando cargos...</p>
+            <p style={{ color: '#475569' }}>Carregando cargos...</p>
           ) : (
             <div
               style={{
@@ -606,14 +606,14 @@ export function UsuariosPage() {
                 overflowX: 'auto',
               }}
             >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome da Funcao / Cargo</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Usuarios Vinculados</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cadastrado Em</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>
+                    <th style={{ padding: '16px 16px' }}>Nome da Funcao / Cargo</th>
+                    <th style={{ padding: '16px 16px' }}>Usuarios Vinculados</th>
+                    <th style={{ padding: '16px 16px' }}>Situacao</th>
+                    <th style={{ padding: '16px 16px' }}>Cadastrado Em</th>
+                    <th style={{ padding: '16px 16px', textAlign: 'right' }}>Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -622,41 +622,41 @@ export function UsuariosPage() {
 
                     return (
                       <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#1e293b' }}>
+                        <td style={{ padding: '16px 16px', fontWeight: 400, color: '#1e293b' }}>
                           {c.nome}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569' }}>
                           <span
                             style={{
                               backgroundColor: qtdUsuarios > 0 ? '#e0f2fe' : '#f1f5f9',
-                              color: qtdUsuarios > 0 ? '#0369a1' : '#64748b',
-                              padding: '0.2rem 0.5rem',
+                              color: qtdUsuarios > 0 ? '#0369a1' : '#475569',
+                              padding: '8px 8px',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
                             {qtdUsuarios} {qtdUsuarios === 1 ? 'usuario' : 'usuarios'}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td style={{ padding: '16px 16px' }}>
                           <span
                             style={{
                               backgroundColor: c.ativo ? '#dcfce7' : '#fee2e2',
                               color: c.ativo ? '#166534' : '#991b1b',
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
                             {c.ativo ? 'Ativo' : 'Inativo'}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
+                        <td style={{ padding: '16px 16px', color: '#475569' }}>
                           {new Date(c.criadoEm).toLocaleDateString('pt-BR')}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
                           <button
                             disabled={toggleCargoMutation.isPending}
                             onClick={() => toggleCargoMutation.mutate({ id: c.id, ativo: !c.ativo })}
@@ -664,10 +664,10 @@ export function UsuariosPage() {
                               backgroundColor: c.ativo ? '#fef2f2' : '#f0fdf4',
                               color: c.ativo ? '#b91c1c' : '#15803d',
                               border: `1px solid ${c.ativo ? '#fecaca' : '#bbf7d0'}`,
-                              padding: '0.3rem 0.6rem',
+                              padding: '8px 8px',
                               borderRadius: '4px',
                               cursor: 'pointer',
-                              fontSize: '0.8rem',
+                              fontSize: '0.875rem',
                             }}
                           >
                             {c.ativo ? 'Desativar Cargo' : 'Ativar Cargo'}
@@ -678,7 +678,7 @@ export function UsuariosPage() {
                   })}
                   {cargosFiltrados.length === 0 && (
                     <tr>
-                      <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: '#475569' }}>
                         Nenhum cargo encontrado.
                       </td>
                     </tr>
@@ -700,7 +700,7 @@ export function UsuariosPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -708,23 +708,23 @@ export function UsuariosPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '2rem',
+              padding: '32px',
               maxWidth: '500px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>Cadastrar Novo Usuario</h2>
+            <h2 style={{ margin: '0 0 16px', fontSize: '1rem', color: '#0f172a' }}>Cadastrar Novo Usuario</h2>
 
             {erroForm && (
               <div
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -732,9 +732,9 @@ export function UsuariosPage() {
               </div>
             )}
 
-            <form onSubmit={handleCriarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome Completo
                 </label>
                 <input
@@ -745,7 +745,7 @@ export function UsuariosPage() {
                   placeholder="ex: Carlos Alberto de Souza"
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -756,7 +756,7 @@ export function UsuariosPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Login
                 </label>
                 <input
@@ -767,7 +767,7 @@ export function UsuariosPage() {
                   placeholder="ex: carlos.souza"
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -778,7 +778,7 @@ export function UsuariosPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Senha Inicial (min. 6 caracteres)
                 </label>
                 <input
@@ -789,7 +789,7 @@ export function UsuariosPage() {
                   placeholder="Defina a senha inicial"
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -800,7 +800,7 @@ export function UsuariosPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Perfil de Acesso
                 </label>
                 <select
@@ -808,7 +808,7 @@ export function UsuariosPage() {
                   onChange={(e) => setNovoPerfil(e.target.value as PerfilUsuario)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     boxSizing: 'border-box',
@@ -825,8 +825,8 @@ export function UsuariosPage() {
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>Cargo Exercido</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 400 }}>Cargo Exercido</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -837,9 +837,9 @@ export function UsuariosPage() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#0284c7',
+                      color: '#0369a1',
                       cursor: 'pointer',
-                      fontSize: '0.8rem',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
                       padding: 0,
                     }}
@@ -853,7 +853,7 @@ export function UsuariosPage() {
                   required
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     boxSizing: 'border-box',
@@ -870,17 +870,17 @@ export function UsuariosPage() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
                 <button
                   type="button"
                   onClick={() => setModalNovoUsuarioAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
-                    fontWeight: 500,
+                    fontWeight: 400,
                     cursor: 'pointer',
                   }}
                 >
@@ -890,10 +890,10 @@ export function UsuariosPage() {
                   type="submit"
                   disabled={criarUsuarioMutation.isPending}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -917,7 +917,7 @@ export function UsuariosPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 60,
           }}
         >
@@ -925,23 +925,23 @@ export function UsuariosPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.5rem',
+              padding: '24px',
               maxWidth: '400px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#0f172a' }}>Cadastrar Novo Cargo</h3>
+            <h3 style={{ margin: '0 0 16px', fontSize: '1rem', color: '#0f172a' }}>Cadastrar Novo Cargo</h3>
 
             {erroCargo && (
               <div
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.5rem',
+                  padding: '8px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.8rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -950,8 +950,8 @@ export function UsuariosPage() {
             )}
 
             <form onSubmit={handleCriarCargoRapido}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome da Funcao / Cargo
                 </label>
                 <input
@@ -962,7 +962,7 @@ export function UsuariosPage() {
                   onChange={(e) => setNomeNovoCargo(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -972,19 +972,19 @@ export function UsuariosPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setModalNovoCargoAberto(false)}
                   style={{
-                    padding: '0.45rem 0.8rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: 500,
+                    fontSize: '0.875rem',
+                    fontWeight: 400,
                   }}
                 >
                   Cancelar
@@ -993,14 +993,14 @@ export function UsuariosPage() {
                   type="submit"
                   disabled={criarCargoMutation.isPending}
                   style={{
-                    padding: '0.45rem 0.8rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                   }}
                 >
                   {criarCargoMutation.isPending ? 'Cadastrando...' : 'Cadastrar Cargo'}
@@ -1021,7 +1021,7 @@ export function UsuariosPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -1029,14 +1029,14 @@ export function UsuariosPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '420px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h3 style={{ margin: '0 0 0.5rem', color: '#0f172a' }}>Resetar Senha de Acesso</h3>
-            <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 1rem' }}>
+            <h3 style={{ margin: '0 0 8px', color: '#0f172a' }}>Resetar Senha de Acesso</h3>
+            <p style={{ color: '#475569', fontSize: '0.875rem', margin: '0 0 16px' }}>
               Defina a nova senha para o usuario: <strong>{usuarioAlvoReset.nome}</strong>
             </p>
 
@@ -1045,10 +1045,10 @@ export function UsuariosPage() {
                 style={{
                   backgroundColor: '#f0fdf4',
                   color: '#15803d',
-                  padding: '0.6rem',
+                  padding: '8px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #bbf7d0',
                 }}
               >
@@ -1057,8 +1057,8 @@ export function UsuariosPage() {
             )}
 
             <form onSubmit={handleResetarSenha}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nova Senha (min. 6 caracteres)
                 </label>
                 <input
@@ -1069,7 +1069,7 @@ export function UsuariosPage() {
                   onChange={(e) => setSenhaResetVal(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -1079,18 +1079,18 @@ export function UsuariosPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setModalResetSenhaAberto(false)}
                   style={{
-                    padding: '0.5rem 0.9rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
+                    fontWeight: 400,
                   }}
                 >
                   Cancelar
@@ -1099,10 +1099,10 @@ export function UsuariosPage() {
                   type="submit"
                   disabled={resetarSenhaMutation.isPending}
                   style={{
-                    padding: '0.5rem 0.9rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -1126,7 +1126,7 @@ export function UsuariosPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -1134,23 +1134,23 @@ export function UsuariosPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '2rem',
+              padding: '32px',
               maxWidth: '500px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>Editar Dados do Usuario</h2>
+            <h2 style={{ margin: '0 0 16px', fontSize: '1rem', color: '#0f172a' }}>Editar Dados do Usuario</h2>
 
             {erroEditForm && (
               <div
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -1158,9 +1158,9 @@ export function UsuariosPage() {
               </div>
             )}
 
-            <form onSubmit={handleAtualizarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleAtualizarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Nome Completo
                 </label>
                 <input
@@ -1171,7 +1171,7 @@ export function UsuariosPage() {
                   placeholder="ex: Carlos Alberto de Souza"
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -1182,7 +1182,7 @@ export function UsuariosPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Login
                 </label>
                 <input
@@ -1193,7 +1193,7 @@ export function UsuariosPage() {
                   placeholder="ex: carlos.souza"
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
@@ -1204,7 +1204,7 @@ export function UsuariosPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Perfil de Acesso
                 </label>
                 <select
@@ -1213,7 +1213,7 @@ export function UsuariosPage() {
                   disabled={usuarioLogado?.id === usuarioEditando.id}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     boxSizing: 'border-box',
@@ -1228,15 +1228,15 @@ export function UsuariosPage() {
                   <option value="ADMIN" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMIN (Controle total de usuarios e cadastros)</option>
                 </select>
                 {usuarioLogado?.id === usuarioEditando.id && (
-                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+                  <p style={{ margin: '8px 0 0', fontSize: '0.875rem', color: '#475569' }}>
                     O perfil do proprio administrador logado nao pode ser alterado.
                   </p>
                 )}
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>Cargo Exercido</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 400 }}>Cargo Exercido</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -1247,9 +1247,9 @@ export function UsuariosPage() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#0284c7',
+                      color: '#0369a1',
                       cursor: 'pointer',
-                      fontSize: '0.8rem',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
                       padding: 0,
                     }}
@@ -1263,7 +1263,7 @@ export function UsuariosPage() {
                   required
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     boxSizing: 'border-box',
@@ -1280,17 +1280,17 @@ export function UsuariosPage() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
                 <button
                   type="button"
                   onClick={() => setModalEditarUsuarioAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
-                    fontWeight: 500,
+                    fontWeight: 400,
                     cursor: 'pointer',
                   }}
                 >
@@ -1300,10 +1300,10 @@ export function UsuariosPage() {
                   type="submit"
                   disabled={editarUsuarioMutation.isPending}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -1327,7 +1327,7 @@ export function UsuariosPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 60,
           }}
         >
@@ -1335,16 +1335,16 @@ export function UsuariosPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '460px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <h3 style={{ margin: '0 0 0.75rem', color: '#b91c1c', fontSize: '1.15rem' }}>
+            <h3 style={{ margin: '0 0 16px', color: '#b91c1c', fontSize: '1rem' }}>
               Confirmar Exclusao de Usuario
             </h3>
-            <p style={{ color: '#334155', fontSize: '0.9rem', margin: '0 0 0.75rem', lineHeight: '1.4' }}>
+            <p style={{ color: '#334155', fontSize: '0.875rem', margin: '0 0 16px', lineHeight: '1.4' }}>
               Deseja realmente excluir permanentemente o usuario{' '}
               <strong>{usuarioExcluindo.nome}</strong> (login: <em>{usuarioExcluindo.login}</em>)?
             </p>
@@ -1354,10 +1354,10 @@ export function UsuariosPage() {
                 backgroundColor: '#fffbeb',
                 color: '#92400e',
                 border: '1px solid #fef3c7',
-                padding: '0.75rem',
+                padding: '16px',
                 borderRadius: '4px',
-                fontSize: '0.8rem',
-                marginBottom: '1rem',
+                fontSize: '0.875rem',
+                marginBottom: '16px',
                 lineHeight: '1.4',
               }}
             >
@@ -1369,10 +1369,10 @@ export function UsuariosPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -1380,7 +1380,7 @@ export function UsuariosPage() {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -1389,13 +1389,13 @@ export function UsuariosPage() {
                   setErroExcluir(null)
                 }}
                 style={{
-                  padding: '0.5rem 0.9rem',
+                  padding: '8px 16px',
                   borderRadius: '4px',
                   border: '1px solid #cbd5e1',
                   backgroundColor: '#ffffff',
                   color: '#334155',
                   cursor: 'pointer',
-                  fontWeight: 500,
+                  fontWeight: 400,
                 }}
               >
                 Cancelar
@@ -1405,10 +1405,10 @@ export function UsuariosPage() {
                 disabled={excluirUsuarioMutation.isPending}
                 onClick={handleConfirmarExclusao}
                 style={{
-                  padding: '0.5rem 0.9rem',
+                  padding: '8px 16px',
                   borderRadius: '4px',
                   border: 'none',
-                  backgroundColor: '#dc2626',
+                  backgroundColor: '#b91c1c',
                   color: '#ffffff',
                   fontWeight: 600,
                   cursor: 'pointer',
