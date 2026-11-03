@@ -37,7 +37,7 @@ function badgeStatusOrcamento(status: StatusOrcamentoMaterial) {
         bg: '#fee2e2',
         cor: '#991b1b',
         borda: '#fecaca',
-        barra: '#dc2626',
+        barra: '#b91c1c',
         texto: 'Orcamento Ultrapassado',
       }
     case 'ATENCAO':
@@ -45,7 +45,7 @@ function badgeStatusOrcamento(status: StatusOrcamentoMaterial) {
         bg: '#fef3c7',
         cor: '#92400e',
         borda: '#fde68a',
-        barra: '#d97706',
+        barra: '#b45309',
         texto: 'Em Atencao (>= 80%)',
       }
     case 'DENTRO_DO_LIMITE':
@@ -53,7 +53,7 @@ function badgeStatusOrcamento(status: StatusOrcamentoMaterial) {
         bg: '#dcfce7',
         cor: '#166534',
         borda: '#bbf7d0',
-        barra: '#16a34a',
+        barra: '#15803d',
         texto: 'Dentro do Limite',
       }
   }
@@ -248,23 +248,23 @@ export function OrcamentoObraPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
       {/* Cabecalho */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem',
+          marginBottom: '24px',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
         }}
       >
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 style={{ color: '#0f172a', margin: '0 0 8px', fontSize: '2rem' }}>
             Controle de Orcamento por Obra
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ color: '#475569', margin: 0, fontSize: '0.875rem' }}>
             Painel da Engenharia e Administracao para definir limites de materiais por obra e monitorar estouros de consumo
           </p>
         </div>
@@ -273,14 +273,14 @@ export function OrcamentoObraPage() {
           type="button"
           onClick={handleAbrirModalNovo}
           style={{
-            backgroundColor: '#0284c7',
+            backgroundColor: '#0369a1',
             color: '#ffffff',
             border: 'none',
-            padding: '0.65rem 1.25rem',
+            padding: '8px 24px',
             borderRadius: '6px',
             fontWeight: 600,
             cursor: 'pointer',
-            fontSize: '0.9rem',
+            fontSize: '0.875rem',
           }}
         >
           + Definir Limite de Material
@@ -294,10 +294,10 @@ export function OrcamentoObraPage() {
             backgroundColor: '#f0fdf4',
             color: '#166534',
             border: '1px solid #bbf7d0',
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             borderRadius: '6px',
-            marginBottom: '1rem',
-            fontSize: '0.88rem',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -307,7 +307,7 @@ export function OrcamentoObraPage() {
           <button
             type="button"
             onClick={() => setMensagemFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 700 }}
+            style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 600 }}
           >
             &times;
           </button>
@@ -320,10 +320,10 @@ export function OrcamentoObraPage() {
             backgroundColor: '#fef2f2',
             color: '#b91c1c',
             border: '1px solid #fecaca',
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             borderRadius: '6px',
-            marginBottom: '1rem',
-            fontSize: '0.88rem',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -333,7 +333,7 @@ export function OrcamentoObraPage() {
           <button
             type="button"
             onClick={() => setErroFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontWeight: 700 }}
+            style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontWeight: 600 }}
           >
             &times;
           </button>
@@ -345,8 +345,8 @@ export function OrcamentoObraPage() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
-          marginBottom: '1.5rem',
+          gap: '16px',
+          marginBottom: '24px',
         }}
       >
         <div
@@ -354,15 +354,15 @@ export function OrcamentoObraPage() {
             backgroundColor: '#ffffff',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
-            padding: '1.15rem',
+            padding: '16px',
             boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
           }}
         >
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>MATERIAIS ORCADOS</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0f172a', marginTop: '0.3rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 600 }}>MATERIAIS ORCADOS</div>
+          <div style={{ fontSize: '2rem', fontWeight: 600, color: '#0f172a', marginTop: '8px' }}>
             {resumo.totalItensOrcados}
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.2rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#475569', marginTop: '8px' }}>
             Limites configurados por obra
           </div>
         </div>
@@ -372,15 +372,15 @@ export function OrcamentoObraPage() {
             backgroundColor: '#ffffff',
             borderRadius: '8px',
             border: '1px solid #bbf7d0',
-            padding: '1.15rem',
+            padding: '16px',
             boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
           }}
         >
-          <div style={{ fontSize: '0.8rem', color: '#166534', fontWeight: 600 }}>DENTRO DO LIMITE</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#15803d', marginTop: '0.3rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: 600 }}>DENTRO DO LIMITE</div>
+          <div style={{ fontSize: '2rem', fontWeight: 600, color: '#15803d', marginTop: '8px' }}>
             {resumo.totalDentroDoLimite}
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.2rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#475569', marginTop: '8px' }}>
             Consumo abaixo de 80% do orcado
           </div>
         </div>
@@ -390,15 +390,15 @@ export function OrcamentoObraPage() {
             backgroundColor: '#ffffff',
             borderRadius: '8px',
             border: '1px solid #fde68a',
-            padding: '1.15rem',
+            padding: '16px',
             boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
           }}
         >
-          <div style={{ fontSize: '0.8rem', color: '#92400e', fontWeight: 600 }}>EM ATENCAO (80% A 100%)</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#d97706', marginTop: '0.3rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#92400e', fontWeight: 600 }}>EM ATENCAO (80% A 100%)</div>
+          <div style={{ fontSize: '2rem', fontWeight: 600, color: '#b45309', marginTop: '8px' }}>
             {resumo.totalEmAtencao}
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.2rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#475569', marginTop: '8px' }}>
             Proximos de atingir o teto da obra
           </div>
         </div>
@@ -408,17 +408,17 @@ export function OrcamentoObraPage() {
             backgroundColor: resumo.totalUltrapassados > 0 ? '#fef2f2' : '#ffffff',
             borderRadius: '8px',
             border: `1px solid ${resumo.totalUltrapassados > 0 ? '#f87171' : '#e2e8f0'}`,
-            padding: '1.15rem',
+            padding: '16px',
             boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
           }}
         >
-          <div style={{ fontSize: '0.8rem', color: '#991b1b', fontWeight: 700 }}>
+          <div style={{ fontSize: '0.875rem', color: '#991b1b', fontWeight: 600 }}>
             ORCAMENTO ULTRAPASSADO
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#dc2626', marginTop: '0.3rem' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 600, color: '#b91c1c', marginTop: '8px' }}>
             {resumo.totalUltrapassados}
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#7f1d1d', marginTop: '0.2rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#7f1d1d', marginTop: '8px' }}>
             Materiais que excederam o limite
           </div>
         </div>
@@ -431,8 +431,8 @@ export function OrcamentoObraPage() {
             backgroundColor: '#fff1f2',
             border: '1px solid #fda4af',
             borderRadius: '8px',
-            padding: '1.15rem 1.25rem',
-            marginBottom: '1.5rem',
+            padding: '16px 24px',
+            marginBottom: '24px',
           }}
         >
           <div
@@ -441,15 +441,15 @@ export function OrcamentoObraPage() {
               justifyContent: 'space-between',
               alignItems: 'center',
               flexWrap: 'wrap',
-              gap: '0.5rem',
-              marginBottom: '0.65rem',
+              gap: '8px',
+              marginBottom: '8px',
             }}
           >
             <div>
               <h2 style={{ margin: 0, fontSize: '1rem', color: '#9f1239' }}>
                 Controle da Engenharia: Materiais com Limite Ultrapassado ({itensUltrapassados.length})
               </h2>
-              <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: '#881337' }}>
+              <p style={{ margin: '8px 0 0', fontSize: '0.875rem', color: '#881337' }}>
                 Estes materiais tiveram requisicoes que superaram a quantidade orcada para a obra. Avalie a necessidade de aditivo orcamentario ou auditoria de aplicacao.
               </p>
             </div>
@@ -460,9 +460,9 @@ export function OrcamentoObraPage() {
                 backgroundColor: '#be123c',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.4rem 0.85rem',
+                padding: '8px 16px',
                 borderRadius: '4px',
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
@@ -471,7 +471,7 @@ export function OrcamentoObraPage() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.65rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
             {itensUltrapassados.map((item) => (
               <div
                 key={item.id}
@@ -479,22 +479,22 @@ export function OrcamentoObraPage() {
                   backgroundColor: '#ffffff',
                   border: '1px solid #fecdd3',
                   borderRadius: '6px',
-                  padding: '0.75rem',
-                  fontSize: '0.83rem',
+                  padding: '16px',
+                  fontSize: '0.875rem',
                 }}
               >
-                <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ fontWeight: 600, color: '#0f172a' }}>
                   {item.material.codigo} - {item.material.descricao}
                 </div>
-                <div style={{ color: '#475569', fontSize: '0.78rem', marginTop: '0.15rem' }}>
+                <div style={{ color: '#475569', fontSize: '0.875rem', marginTop: '8px' }}>
                   Obra: <strong>{item.obra.codigo} - {item.obra.nome}</strong>
                 </div>
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    marginTop: '0.45rem',
-                    paddingTop: '0.45rem',
+                    marginTop: '8px',
+                    paddingTop: '8px',
                     borderTop: '1px solid #f1f5f9',
                   }}
                 >
@@ -504,7 +504,7 @@ export function OrcamentoObraPage() {
                   <span>
                     Consumido: <strong>{item.quantidadeConsumida} {item.material.unidadeConsumo.sigla}</strong>
                   </span>
-                  <span style={{ color: '#dc2626', fontWeight: 700 }}>
+                  <span style={{ color: '#b91c1c', fontWeight: 600 }}>
                     +{item.excedente} {item.material.unidadeConsumo.sigla} ({item.percentualConsumido}%)
                   </span>
                 </div>
@@ -518,8 +518,8 @@ export function OrcamentoObraPage() {
       <div
         style={{
           display: 'flex',
-          gap: '0.85rem',
-          marginBottom: '1.5rem',
+          gap: '16px',
+          marginBottom: '24px',
           flexWrap: 'wrap',
           alignItems: 'center',
         }}
@@ -529,12 +529,12 @@ export function OrcamentoObraPage() {
           value={obraIdFiltro}
           onChange={(e) => setObraIdFiltro(e.target.value)}
           style={{
-            padding: '0.6rem 0.85rem',
+            padding: '8px 16px',
             borderRadius: '6px',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
             color: '#0f172a',
-            fontSize: '0.88rem',
+            fontSize: '0.875rem',
             minWidth: '220px',
           }}
         >
@@ -554,16 +554,16 @@ export function OrcamentoObraPage() {
           style={{
             flex: '1',
             minWidth: '240px',
-            padding: '0.6rem 1rem',
+            padding: '8px 16px',
             borderRadius: '6px',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
             color: '#0f172a',
-            fontSize: '0.88rem',
+            fontSize: '0.875rem',
           }}
         />
 
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
             { id: 'TODOS', label: 'Todos' },
             { id: 'ULTRAPASSADO', label: 'Ultrapassados' },
@@ -575,14 +575,14 @@ export function OrcamentoObraPage() {
               type="button"
               onClick={() => setStatusFiltro(st.id as any)}
               style={{
-                padding: '0.48rem 0.85rem',
+                padding: '8px 16px',
                 borderRadius: '6px',
                 border: '1px solid',
-                borderColor: statusFiltro === st.id ? '#0284c7' : '#cbd5e1',
-                backgroundColor: statusFiltro === st.id ? '#0284c7' : '#ffffff',
+                borderColor: statusFiltro === st.id ? '#0369a1' : '#cbd5e1',
+                backgroundColor: statusFiltro === st.id ? '#0369a1' : '#ffffff',
                 color: statusFiltro === st.id ? '#ffffff' : '#475569',
                 cursor: 'pointer',
-                fontSize: '0.83rem',
+                fontSize: '0.875rem',
                 fontWeight: statusFiltro === st.id ? 600 : 400,
               }}
             >
@@ -599,68 +599,68 @@ export function OrcamentoObraPage() {
             backgroundColor: '#ffffff',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
-            padding: '1.25rem',
-            marginBottom: '1.5rem',
+            padding: '24px',
+            marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.05rem', color: '#0f172a' }}>
+              <h2 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>
                 Grafico Comparativo: Limite Orcado vs. Consumo Realizado
               </h2>
-              <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+              <p style={{ margin: '8px 0 0', fontSize: '0.875rem', color: '#475569' }}>
                 Acompanhamento visual de cada material em relacao ao teto definido pela Engenharia (100% = limite orcado)
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: '#475569' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#16a34a', display: 'inline-block' }} />
+            <div style={{ display: 'flex', gap: '16px', fontSize: '0.875rem', color: '#475569' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#15803d', display: 'inline-block' }} />
                 Dentro do Limite (&lt; 80%)
               </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#d97706', display: 'inline-block' }} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#b45309', display: 'inline-block' }} />
                 Em Atencao (80% - 100%)
               </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#dc2626', display: 'inline-block' }} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#b91c1c', display: 'inline-block' }} />
                 Ultrapassado (&gt; 100%)
               </span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {itensFiltrados.map((it) => {
               const cfg = badgeStatusOrcamento(it.statusOrcamento)
               const sigla = it.material.unidadeConsumo.sigla
               const larguraBarra = Math.min(100, Math.max(2, it.percentualConsumido))
 
               return (
-                <div key={`grafico-${it.id}`} style={{ fontSize: '0.83rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <div key={`grafico-${it.id}`} style={{ fontSize: '0.875rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '8px', flexWrap: 'wrap' }}>
                     <div>
                       <strong style={{ color: '#0f172a' }}>
                         {it.material.codigo} - {it.material.descricao}
                       </strong>{' '}
-                      <span style={{ color: '#64748b', fontSize: '0.78rem' }}>
+                      <span style={{ color: '#475569', fontSize: '0.875rem' }}>
                         [{it.obra.codigo} - {it.obra.nome}]
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                       <span style={{ color: '#334155' }}>
                         Consumido: <strong>{it.quantidadeConsumida} {sigla}</strong> / Limite:{' '}
                         <strong>{it.quantidadeOrcada} {sigla}</strong>
                       </span>
                       <span
                         style={{
-                          fontWeight: 700,
+                          fontWeight: 600,
                           color: cfg.cor,
                           backgroundColor: cfg.bg,
-                          padding: '0.1rem 0.45rem',
+                          padding: '8px 8px',
                           borderRadius: '4px',
-                          fontSize: '0.76rem',
+                          fontSize: '0.875rem',
                         }}
                       >
                         {it.percentualConsumido}%
@@ -698,15 +698,15 @@ export function OrcamentoObraPage() {
 
       {/* Tabela Detalhada de Orcamento por Obra */}
       {carregandoOrcamentos ? (
-        <p style={{ color: '#64748b' }}>Carregando limites orcamentarios...</p>
+        <p style={{ color: '#475569' }}>Carregando limites orcamentarios...</p>
       ) : itensFiltrados.length === 0 ? (
         <div
           style={{
             backgroundColor: '#ffffff',
-            padding: '3rem',
+            padding: '32px',
             borderRadius: '8px',
             textAlign: 'center',
-            color: '#94a3b8',
+            color: '#475569',
             border: '1px dashed #cbd5e1',
           }}
         >
@@ -722,17 +722,17 @@ export function OrcamentoObraPage() {
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           }}
         >
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#475569' }}>
-                <th style={{ padding: '0.85rem 1rem' }}>Obra</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Material</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Limite Orcado</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Entregue / Pendente</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Total Consumido</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Saldo / Excedente</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Status</th>
-                <th style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>Acoes</th>
+                <th style={{ padding: '16px 16px' }}>Obra</th>
+                <th style={{ padding: '16px 16px' }}>Material</th>
+                <th style={{ padding: '16px 16px' }}>Limite Orcado</th>
+                <th style={{ padding: '16px 16px' }}>Entregue / Pendente</th>
+                <th style={{ padding: '16px 16px' }}>Total Consumido</th>
+                <th style={{ padding: '16px 16px' }}>Saldo / Excedente</th>
+                <th style={{ padding: '16px 16px' }}>Status</th>
+                <th style={{ padding: '16px 16px', textAlign: 'right' }}>Acoes</th>
               </tr>
             </thead>
             <tbody>
@@ -748,33 +748,33 @@ export function OrcamentoObraPage() {
                       backgroundColor: it.statusOrcamento === 'ULTRAPASSADO' ? '#fffafb' : '#ffffff',
                     }}
                   >
-                    <td style={{ padding: '0.85rem 1rem', color: '#0f172a' }}>
+                    <td style={{ padding: '16px 16px', color: '#0f172a' }}>
                       <div style={{ fontWeight: 600 }}>{it.obra.codigo}</div>
-                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{it.obra.nome}</div>
+                      <div style={{ fontSize: '0.875rem', color: '#475569' }}>{it.obra.nome}</div>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', color: '#0f172a' }}>
+                    <td style={{ padding: '16px 16px', color: '#0f172a' }}>
                       <div style={{ fontWeight: 600 }}>
                         {it.material.codigo} - {it.material.descricao}
                       </div>
                       {it.observacao && (
-                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '0.15rem' }}>
+                        <div style={{ fontSize: '0.875rem', color: '#475569', marginTop: '8px' }}>
                           Obs: {it.observacao}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#0369a1' }}>
+                    <td style={{ padding: '16px 16px', fontWeight: 600, color: '#0369a1' }}>
                       {it.quantidadeOrcada} {sigla}
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', color: '#475569', fontSize: '0.8rem' }}>
+                    <td style={{ padding: '16px 16px', color: '#475569', fontSize: '0.875rem' }}>
                       <div>Entregue: <strong>{it.quantidadeEntregue} {sigla}</strong></div>
                       <div>Pendente: <strong>{it.quantidadePendente} {sigla}</strong></div>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#0f172a' }}>
+                    <td style={{ padding: '16px 16px', fontWeight: 600, color: '#0f172a' }}>
                       {it.quantidadeConsumida} {sigla} ({it.percentualConsumido}%)
                     </td>
-                    <td style={{ padding: '0.85rem 1rem' }}>
+                    <td style={{ padding: '16px 16px' }}>
                       {it.excedente > 0 ? (
-                        <span style={{ color: '#dc2626', fontWeight: 700 }}>
+                        <span style={{ color: '#b91c1c', fontWeight: 600 }}>
                           Excedeu +{it.excedente} {sigla}
                         </span>
                       ) : (
@@ -783,15 +783,15 @@ export function OrcamentoObraPage() {
                         </span>
                       )}
                     </td>
-                    <td style={{ padding: '0.85rem 1rem' }}>
+                    <td style={{ padding: '16px 16px' }}>
                       <span
                         style={{
                           backgroundColor: cfg.bg,
                           color: cfg.cor,
                           border: `1px solid ${cfg.borda}`,
-                          padding: '0.2rem 0.55rem',
+                          padding: '8px 8px',
                           borderRadius: '4px',
-                          fontSize: '0.76rem',
+                          fontSize: '0.875rem',
                           fontWeight: 600,
                           whiteSpace: 'nowrap',
                         }}
@@ -799,7 +799,7 @@ export function OrcamentoObraPage() {
                         {cfg.texto}
                       </span>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '16px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <button
                         type="button"
                         onClick={() => handleAbrirEdicao(it)}
@@ -807,12 +807,12 @@ export function OrcamentoObraPage() {
                           backgroundColor: '#f1f5f9',
                           color: '#0f172a',
                           border: '1px solid #cbd5e1',
-                          padding: '0.32rem 0.65rem',
+                          padding: '8px 8px',
                           borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '0.78rem',
+                          fontSize: '0.875rem',
                           fontWeight: 600,
-                          marginRight: '0.4rem',
+                          marginRight: '8px',
                         }}
                       >
                         Editar Limite
@@ -830,13 +830,13 @@ export function OrcamentoObraPage() {
                         }}
                         style={{
                           backgroundColor: '#fff1f2',
-                          color: '#e11d48',
+                          color: '#be123c',
                           border: '1px solid #fecdd3',
-                          padding: '0.32rem 0.65rem',
+                          padding: '8px 8px',
                           borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '0.78rem',
-                          fontWeight: 500,
+                          fontSize: '0.875rem',
+                          fontWeight: 400,
                         }}
                       >
                         Remover
@@ -860,7 +860,7 @@ export function OrcamentoObraPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -868,16 +868,16 @@ export function OrcamentoObraPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '540px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.35rem', fontSize: '1.25rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Definir Limite de Material por Obra
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
               Configure a quantidade maxima orcada para o material na obra selecionada.
             </p>
 
@@ -886,10 +886,10 @@ export function OrcamentoObraPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -897,9 +897,9 @@ export function OrcamentoObraPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmeterNovo} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmeterNovo} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 600 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
                   Obra
                 </label>
                 <select
@@ -909,12 +909,12 @@ export function OrcamentoObraPage() {
                   required
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                   }}
                 >
                   <option value="">Selecione a obra...</option>
@@ -927,7 +927,7 @@ export function OrcamentoObraPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 600 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
                   Material
                 </label>
                 <SeletorItemPesquisavel
@@ -947,7 +947,7 @@ export function OrcamentoObraPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 600 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
                   Quantidade Limite Orcada
                 </label>
                 <input
@@ -961,19 +961,19 @@ export function OrcamentoObraPage() {
                   onChange={(e) => setQuantidadeOrcadaForm(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Observacao (opcional)
                 </label>
                 <input
@@ -984,30 +984,30 @@ export function OrcamentoObraPage() {
                   onChange={(e) => setObservacaoForm(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setModalNovoAberto(false)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
+                    fontWeight: 400,
+                    fontSize: '0.875rem',
                   }}
                 >
                   Cancelar
@@ -1016,14 +1016,14 @@ export function OrcamentoObraPage() {
                   type="submit"
                   disabled={criarMutation.isPending}
                   style={{
-                    padding: '0.55rem 1.2rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                   }}
                 >
                   {criarMutation.isPending ? 'Salvando...' : 'Salvar Limite'}
@@ -1044,7 +1044,7 @@ export function OrcamentoObraPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 50,
           }}
         >
@@ -1052,16 +1052,16 @@ export function OrcamentoObraPage() {
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '8px',
-              padding: '1.75rem',
+              padding: '32px',
               maxWidth: '480px',
               width: '100%',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
             }}
           >
-            <h2 style={{ margin: '0 0 0.35rem', fontSize: '1.2rem', color: '#0f172a' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1rem', color: '#0f172a' }}>
               Editar Limite Orcamentario
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.84rem', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: '#475569' }}>
               {orcamentoEmEdicao.obra.codigo} - {orcamentoEmEdicao.obra.nome} &bull;{' '}
               <strong>{orcamentoEmEdicao.material.descricao}</strong>
             </p>
@@ -1071,10 +1071,10 @@ export function OrcamentoObraPage() {
                 style={{
                   backgroundColor: '#fef2f2',
                   color: '#b91c1c',
-                  padding: '0.75rem',
+                  padding: '16px',
                   borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
+                  marginBottom: '16px',
+                  fontSize: '0.875rem',
                   border: '1px solid #fecaca',
                 }}
               >
@@ -1082,9 +1082,9 @@ export function OrcamentoObraPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmeterEdicao} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmeterEdicao} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 600 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 600 }}>
                   Nova Quantidade Limite ({orcamentoEmEdicao.material.unidadeConsumo.sigla})
                 </label>
                 <input
@@ -1097,19 +1097,19 @@ export function OrcamentoObraPage() {
                   onChange={(e) => setNovaQuantidadeEdicao(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', color: '#334155', marginBottom: '8px', fontWeight: 400 }}>
                   Observacao
                 </label>
                 <input
@@ -1119,30 +1119,30 @@ export function OrcamentoObraPage() {
                   onChange={(e) => setNovaObservacaoEdicao(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem',
+                    padding: '8px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setOrcamentoEmEdicao(null)}
                   style={{
-                    padding: '0.55rem 1rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     cursor: 'pointer',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
+                    fontWeight: 400,
+                    fontSize: '0.875rem',
                   }}
                 >
                   Cancelar
@@ -1151,14 +1151,14 @@ export function OrcamentoObraPage() {
                   type="submit"
                   disabled={atualizarMutation.isPending}
                   style={{
-                    padding: '0.55rem 1.2rem',
+                    padding: '8px 16px',
                     borderRadius: '4px',
                     border: 'none',
-                    backgroundColor: '#0284c7',
+                    backgroundColor: '#0369a1',
                     color: '#ffffff',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                   }}
                 >
                   {atualizarMutation.isPending ? 'Atualizando...' : 'Salvar Alteracoes'}

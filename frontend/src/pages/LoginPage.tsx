@@ -78,42 +78,41 @@ export function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#0f172a',
-        padding: '1.25rem',
+        padding: '24px 16px',
         fontFamily: 'system-ui, -apple-system, sans-serif',
       }}
     >
       <div
         style={{
           width: '100%',
-          maxWidth: '460px',
+          maxWidth: '480px',
           backgroundColor: '#1e293b',
-          borderRadius: '10px',
-          padding: '2rem',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.35)',
+          borderRadius: '8px',
+          padding: '32px',
           border: '1px solid #334155',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <span
             style={{
               display: 'inline-block',
-              fontSize: '0.72rem',
-              fontWeight: 700,
+              fontSize: '0.875rem',
+              fontWeight: 600,
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.06em',
               color: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.12)',
-              padding: '0.2rem 0.6rem',
+              backgroundColor: 'rgba(56, 189, 248, 0.14)',
+              padding: '8px 16px',
               borderRadius: '999px',
-              marginBottom: '0.5rem',
+              marginBottom: '8px',
             }}
           >
             JOOY Construtora • MVP Almoxarifado
           </span>
-          <h1 style={{ color: '#f8fafc', margin: 0, fontSize: '1.6rem', fontWeight: 700 }}>
+          <h1 style={{ color: '#f8fafc', margin: 0, fontSize: '2rem', fontWeight: 600 }}>
             Obras Jooy
           </h1>
-          <p style={{ color: '#94a3b8', margin: '0.4rem 0 0', fontSize: '0.9rem' }}>
+          <p style={{ color: '#cbd5e1', margin: '8px 0 0', fontSize: '1rem', fontWeight: 400 }}>
             Acesso ao Sistema de Almoxarifado e Controle de Obras
           </p>
         </div>
@@ -122,11 +121,12 @@ export function LoginPage() {
           <div
             style={{
               backgroundColor: '#7f1d1d',
-              color: '#fecaca',
-              padding: '0.75rem',
-              borderRadius: '6px',
-              marginBottom: '1rem',
-              fontSize: '0.85rem',
+              color: '#fee2e2',
+              padding: '16px',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              fontSize: '0.875rem',
+              fontWeight: 400,
               border: '1px solid #991b1b',
             }}
           >
@@ -134,16 +134,16 @@ export function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <label
               htmlFor="login"
               style={{
                 display: 'block',
                 color: '#cbd5e1',
-                fontSize: '0.85rem',
-                fontWeight: 500,
-                marginBottom: '0.4rem',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                marginBottom: '8px',
               }}
             >
               Login de Usuario
@@ -157,11 +157,14 @@ export function LoginPage() {
               placeholder="ex: admin"
               style={{
                 width: '100%',
-                padding: '0.65rem 0.75rem',
-                borderRadius: '6px',
+                minHeight: '48px',
+                padding: '8px 16px',
+                borderRadius: '8px',
                 border: '1px solid #475569',
                 backgroundColor: '#0f172a',
                 color: '#f8fafc',
+                fontSize: '1rem',
+                fontWeight: 400,
                 boxSizing: 'border-box',
                 outline: 'none',
               }}
@@ -174,9 +177,9 @@ export function LoginPage() {
               style={{
                 display: 'block',
                 color: '#cbd5e1',
-                fontSize: '0.85rem',
-                fontWeight: 500,
-                marginBottom: '0.4rem',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                marginBottom: '8px',
               }}
             >
               Senha
@@ -190,11 +193,14 @@ export function LoginPage() {
               placeholder="Sua senha de acesso"
               style={{
                 width: '100%',
-                padding: '0.65rem 0.75rem',
-                borderRadius: '6px',
+                minHeight: '48px',
+                padding: '8px 16px',
+                borderRadius: '8px',
                 border: '1px solid #475569',
                 backgroundColor: '#0f172a',
                 color: '#f8fafc',
+                fontSize: '1rem',
+                fontWeight: 400,
                 boxSizing: 'border-box',
                 outline: 'none',
               }}
@@ -205,14 +211,15 @@ export function LoginPage() {
             type="submit"
             disabled={submetendo}
             style={{
-              marginTop: '0.35rem',
-              backgroundColor: '#0284c7',
+              marginTop: '8px',
+              minHeight: '48px',
+              backgroundColor: '#0369a1',
               color: '#ffffff',
-              padding: '0.75rem',
-              borderRadius: '6px',
+              padding: '8px 24px',
+              borderRadius: '8px',
               border: 'none',
               fontWeight: 600,
-              fontSize: '0.92rem',
+              fontSize: '1rem',
               cursor: submetendo ? 'not-allowed' : 'pointer',
               opacity: submetendo ? 0.7 : 1,
             }}
@@ -224,19 +231,19 @@ export function LoginPage() {
         {/* Painel de Acesso Rapido para Apresentacao do MVP */}
         <div
           style={{
-            marginTop: '1.5rem',
-            paddingTop: '1.25rem',
+            marginTop: '24px',
+            paddingTop: '24px',
             borderTop: '1px solid #334155',
           }}
         >
           <div
             style={{
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              color: '#94a3b8',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: '#cbd5e1',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              marginBottom: '0.65rem',
+              marginBottom: '16px',
             }}
           >
             Acesso Rapido de Demonstracao (1 Clique por Perfil)
@@ -246,7 +253,7 @@ export function LoginPage() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '0.5rem',
+              gap: '8px',
             }}
           >
             {CONTAS_DEMO_MVP.map((conta) => (
@@ -256,19 +263,24 @@ export function LoginPage() {
                 disabled={submetendo}
                 onClick={() => handleAcessoRapidoDemo(conta)}
                 style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  justifyContent: 'center',
+                  minHeight: '48px',
                   textAlign: 'left',
-                  padding: '0.55rem 0.7rem',
-                  borderRadius: '6px',
-                  border: '1px solid #334155',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #475569',
                   backgroundColor: '#0f172a',
                   color: '#f8fafc',
                   cursor: submetendo ? 'not-allowed' : 'pointer',
                 }}
               >
-                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#38bdf8' }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#38bdf8' }}>
                   {conta.rotulo}
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.1rem' }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 400, color: '#cbd5e1' }}>
                   {conta.papel}
                 </div>
               </button>

@@ -8,34 +8,49 @@ export function SemPermissaoPage() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '4rem 1rem',
+        padding: '32px 16px',
         textAlign: 'center',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
       <div
         style={{
-          fontSize: '3rem',
-          fontWeight: 'bold',
-          color: '#e11d48',
-          marginBottom: '0.5rem',
+          fontSize: '2rem',
+          fontWeight: 600,
+          color: '#b91c1c',
+          marginBottom: '8px',
         }}
       >
         403
       </div>
-      <h1 style={{ color: '#1e293b', margin: '0 0 1rem' }}>Acesso Nao Autorizado</h1>
-      <p style={{ color: '#64748b', maxWidth: '400px', marginBottom: '2rem' }}>
+      <h1 style={{ color: '#0f172a', fontSize: '2rem', fontWeight: 600, margin: '0 0 16px' }}>
+        Acesso Nao Autorizado
+      </h1>
+      <p
+        style={{
+          color: '#475569',
+          fontSize: '1rem',
+          fontWeight: 400,
+          maxWidth: '400px',
+          margin: '0 0 32px',
+        }}
+      >
         Seu perfil de usuario nao possui permissao para acessar esta area do sistema.
       </p>
       <Link
         to="/"
         style={{
-          backgroundColor: '#0284c7',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '48px',
+          backgroundColor: '#0369a1',
           color: '#ffffff',
           textDecoration: 'none',
-          padding: '0.6rem 1.2rem',
-          borderRadius: '4px',
-          fontWeight: 500,
+          padding: '8px 24px',
+          borderRadius: '8px',
+          fontSize: '1rem',
+          fontWeight: 600,
         }}
       >
         Voltar para a Pagina Inicial
@@ -43,3 +58,4 @@ export function SemPermissaoPage() {
     </div>
   )
 }
+export default SemPermissaoPage

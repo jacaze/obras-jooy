@@ -169,7 +169,7 @@ export function FerramentasPage() {
   })
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem' }}>
+    <div style={{ maxWidth: '1200px', margin: '32px auto', padding: '0 16px' }}>
       {/* Cabecalho */}
       <div
         style={{
@@ -177,15 +177,15 @@ export function FerramentasPage() {
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '1.5rem',
+          gap: '16px',
+          marginBottom: '24px',
         }}
       >
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
             Controle de Ferramentas e Ativos
           </h1>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.95rem' }}>
+          <p style={{ margin: '8px 0 0 0', color: '#475569', fontSize: '1rem' }}>
             Itens devolutivos individuais com rastreamento de emprestimo, devolucao e manutencao em obra.
           </p>
         </div>
@@ -201,8 +201,8 @@ export function FerramentasPage() {
               setModalFerramentaAberto(true)
             }}
             style={{
-              padding: '0.6rem 1.25rem',
-              backgroundColor: '#0284c7',
+              padding: '8px 24px',
+              backgroundColor: '#0369a1',
               border: 'none',
               borderRadius: '6px',
               color: '#ffffff',
@@ -221,8 +221,8 @@ export function FerramentasPage() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: '1rem',
-          marginBottom: '1.5rem',
+          gap: '16px',
+          marginBottom: '24px',
         }}
       >
         <div
@@ -230,15 +230,15 @@ export function FerramentasPage() {
             backgroundColor: '#ffffff',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
-            padding: '1rem 1.25rem',
+            padding: '16px 24px',
           }}
         >
           <span
             style={{
               display: 'block',
-              fontSize: '0.75rem',
+              fontSize: '0.875rem',
               fontWeight: 600,
-              color: '#64748b',
+              color: '#475569',
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
             }}
@@ -248,16 +248,16 @@ export function FerramentasPage() {
           <strong
             style={{
               display: 'block',
-              fontSize: '1.65rem',
-              fontWeight: 700,
+              fontSize: '2rem',
+              fontWeight: 600,
               color: '#0f172a',
-              marginTop: '0.25rem',
+              marginTop: '8px',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
             {totalFerramentas}
           </strong>
-          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+          <span style={{ fontSize: '0.875rem', color: '#475569' }}>
             Ativos catalogados no almoxarifado
           </span>
         </div>
@@ -267,14 +267,14 @@ export function FerramentasPage() {
             backgroundColor: '#f0fdf4',
             borderRadius: '8px',
             border: '1px solid #bbf7d0',
-            padding: '1rem 1.25rem',
+            padding: '16px 24px',
           }}
         >
           <span
             style={{
               display: 'block',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              fontSize: '0.875rem',
+              fontWeight: 600,
               color: '#166534',
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
@@ -285,16 +285,16 @@ export function FerramentasPage() {
           <strong
             style={{
               display: 'block',
-              fontSize: '1.65rem',
-              fontWeight: 700,
+              fontSize: '2rem',
+              fontWeight: 600,
               color: '#15803d',
-              marginTop: '0.25rem',
+              marginTop: '8px',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
             {totalDisponiveis}
           </strong>
-          <span style={{ fontSize: '0.78rem', color: '#166534' }}>
+          <span style={{ fontSize: '0.875rem', color: '#166534' }}>
             Prontas para retirada imediata
           </span>
         </div>
@@ -304,14 +304,14 @@ export function FerramentasPage() {
             backgroundColor: '#fffbeb',
             borderRadius: '8px',
             border: '1px solid #fde68a',
-            padding: '1rem 1.25rem',
+            padding: '16px 24px',
           }}
         >
           <span
             style={{
               display: 'block',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              fontSize: '0.875rem',
+              fontWeight: 600,
               color: '#b45309',
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
@@ -322,16 +322,16 @@ export function FerramentasPage() {
           <strong
             style={{
               display: 'block',
-              fontSize: '1.65rem',
-              fontWeight: 700,
+              fontSize: '2rem',
+              fontWeight: 600,
               color: '#b45309',
-              marginTop: '0.25rem',
+              marginTop: '8px',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
             {totalEmprestadas}
           </strong>
-          <span style={{ fontSize: '0.78rem', color: '#92400e' }}>
+          <span style={{ fontSize: '0.875rem', color: '#92400e' }}>
             Sob responsabilidade de colaboradores
           </span>
         </div>
@@ -341,14 +341,14 @@ export function FerramentasPage() {
             backgroundColor: '#fef2f2',
             borderRadius: '8px',
             border: '1px solid #fecaca',
-            padding: '1rem 1.25rem',
+            padding: '16px 24px',
           }}
         >
           <span
             style={{
               display: 'block',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              fontSize: '0.875rem',
+              fontWeight: 600,
               color: '#b91c1c',
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
@@ -359,16 +359,16 @@ export function FerramentasPage() {
           <strong
             style={{
               display: 'block',
-              fontSize: '1.65rem',
-              fontWeight: 700,
+              fontSize: '2rem',
+              fontWeight: 600,
               color: '#b91c1c',
-              marginTop: '0.25rem',
+              marginTop: '8px',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
             {totalComDefeito}
           </strong>
-          <span style={{ fontSize: '0.78rem', color: '#991b1b' }}>
+          <span style={{ fontSize: '0.875rem', color: '#991b1b' }}>
             Bloqueadas ate conclusao de conserto
           </span>
         </div>
@@ -379,13 +379,13 @@ export function FerramentasPage() {
         <div
           role="status"
           style={{
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             backgroundColor: '#f0fdf4',
             border: '1px solid #bbf7d0',
             borderRadius: '6px',
             color: '#166534',
-            marginBottom: '1rem',
-            fontSize: '0.9rem',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -400,7 +400,7 @@ export function FerramentasPage() {
               border: 'none',
               color: '#166534',
               cursor: 'pointer',
-              fontWeight: 700,
+              fontWeight: 600,
             }}
           >
             X
@@ -412,13 +412,13 @@ export function FerramentasPage() {
         <div
           role="alert"
           style={{
-            padding: '0.75rem 1rem',
+            padding: '16px 16px',
             backgroundColor: '#fef2f2',
             border: '1px solid #fecaca',
             borderRadius: '6px',
             color: '#991b1b',
-            marginBottom: '1rem',
-            fontSize: '0.9rem',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -433,7 +433,7 @@ export function FerramentasPage() {
               border: 'none',
               color: '#991b1b',
               cursor: 'pointer',
-              fontWeight: 700,
+              fontWeight: 600,
             }}
           >
             X
@@ -446,12 +446,12 @@ export function FerramentasPage() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
+          gap: '16px',
           backgroundColor: '#f8fafc',
-          padding: '1.25rem',
+          padding: '24px',
           borderRadius: '8px',
           border: '1px solid #e2e8f0',
-          marginBottom: '1.5rem',
+          marginBottom: '24px',
           alignItems: 'end',
         }}
       >
@@ -460,10 +460,10 @@ export function FerramentasPage() {
             htmlFor="filtro-ferramenta-busca"
             style={{
               display: 'block',
-              fontSize: '0.85rem',
+              fontSize: '0.875rem',
               fontWeight: 600,
               color: '#475569',
-              marginBottom: '0.25rem',
+              marginBottom: '8px',
             }}
           >
             Buscar Ferramenta
@@ -476,10 +476,10 @@ export function FerramentasPage() {
             onChange={(e) => setBusca(e.target.value)}
             style={{
               width: '100%',
-              padding: '0.5rem 0.75rem',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
-              fontSize: '0.9rem',
+              fontSize: '0.875rem',
               boxSizing: 'border-box',
             }}
           />
@@ -490,10 +490,10 @@ export function FerramentasPage() {
             htmlFor="filtro-ferramenta-status"
             style={{
               display: 'block',
-              fontSize: '0.85rem',
+              fontSize: '0.875rem',
               fontWeight: 600,
               color: '#475569',
-              marginBottom: '0.25rem',
+              marginBottom: '8px',
             }}
           >
             Status Operacional
@@ -504,10 +504,10 @@ export function FerramentasPage() {
             onChange={(e) => setStatusFiltro(e.target.value)}
             style={{
               width: '100%',
-              padding: '0.5rem 0.75rem',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
-              fontSize: '0.9rem',
+              fontSize: '0.875rem',
               backgroundColor: '#ffffff',
               boxSizing: 'border-box',
             }}
@@ -519,7 +519,7 @@ export function FerramentasPage() {
           </select>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '8px' }}>
           <input
             id="filtro-ferramenta-ativas"
             type="checkbox"
@@ -529,7 +529,7 @@ export function FerramentasPage() {
           />
           <label
             htmlFor="filtro-ferramenta-ativas"
-            style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 500, cursor: 'pointer' }}
+            style={{ fontSize: '0.875rem', color: '#334155', fontWeight: 400, cursor: 'pointer' }}
           >
             Exibir somente ativas
           </label>
@@ -552,9 +552,9 @@ export function FerramentasPage() {
               <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }}>
                 <th
                   style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    padding: '16px 16px',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
                     color: '#475569',
                     textTransform: 'uppercase',
                   }}
@@ -563,9 +563,9 @@ export function FerramentasPage() {
                 </th>
                 <th
                   style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    padding: '16px 16px',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
                     color: '#475569',
                     textTransform: 'uppercase',
                   }}
@@ -574,9 +574,9 @@ export function FerramentasPage() {
                 </th>
                 <th
                   style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    padding: '16px 16px',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
                     color: '#475569',
                     textTransform: 'uppercase',
                   }}
@@ -585,9 +585,9 @@ export function FerramentasPage() {
                 </th>
                 <th
                   style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    padding: '16px 16px',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
                     color: '#475569',
                     textTransform: 'uppercase',
                   }}
@@ -597,9 +597,9 @@ export function FerramentasPage() {
                 {podeGerenciar && (
                   <th
                     style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
+                      padding: '16px 16px',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
                       color: '#475569',
                       textTransform: 'uppercase',
                       textAlign: 'right',
@@ -615,7 +615,7 @@ export function FerramentasPage() {
                 <tr>
                   <td
                     colSpan={podeGerenciar ? 5 : 4}
-                    style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}
+                    style={{ padding: '32px', textAlign: 'center', color: '#475569' }}
                   >
                     Carregando ferramentas cadastradas...
                   </td>
@@ -624,7 +624,7 @@ export function FerramentasPage() {
                 <tr>
                   <td
                     colSpan={podeGerenciar ? 5 : 4}
-                    style={{ padding: '2.5rem', textAlign: 'center', color: '#64748b' }}
+                    style={{ padding: '32px', textAlign: 'center', color: '#475569' }}
                   >
                     Nenhuma ferramenta encontrada com os filtros selecionados.
                   </td>
@@ -641,8 +641,8 @@ export function FerramentasPage() {
                     >
                       <td
                         style={{
-                          padding: '0.875rem 1rem',
-                          fontWeight: 700,
+                          padding: '16px 16px',
+                          fontWeight: 600,
                           color: '#0f172a',
                           fontSize: '0.875rem',
                           fontFamily: 'monospace',
@@ -652,12 +652,12 @@ export function FerramentasPage() {
                         {!fer.ativo && (
                           <span
                             style={{
-                              marginLeft: '0.45rem',
-                              padding: '0.1rem 0.4rem',
+                              marginLeft: '8px',
+                              padding: '8px 8px',
                               backgroundColor: '#e2e8f0',
                               color: '#475569',
                               borderRadius: '4px',
-                              fontSize: '0.7rem',
+                              fontSize: '0.875rem',
                               fontFamily: 'system-ui, sans-serif',
                             }}
                           >
@@ -667,23 +667,23 @@ export function FerramentasPage() {
                       </td>
                       <td
                         style={{
-                          padding: '0.875rem 1rem',
+                          padding: '16px 16px',
                           fontWeight: 600,
                           color: '#1e293b',
-                          fontSize: '0.9rem',
+                          fontSize: '0.875rem',
                         }}
                       >
                         {fer.nome}
                       </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
+                      <td style={{ padding: '16px 16px' }}>
                         {fer.status === 'DISPONIVEL' && (
                           <span
                             style={{
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               backgroundColor: '#dcfce7',
                               color: '#15803d',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
@@ -693,11 +693,11 @@ export function FerramentasPage() {
                         {fer.status === 'EMPRESTADO' && (
                           <span
                             style={{
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               backgroundColor: '#fef3c7',
                               color: '#b45309',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
@@ -707,11 +707,11 @@ export function FerramentasPage() {
                         {fer.status === 'COM_DEFEITO' && (
                           <span
                             style={{
-                              padding: '0.2rem 0.5rem',
+                              padding: '8px 8px',
                               backgroundColor: '#fee2e2',
                               color: '#b91c1c',
                               borderRadius: '4px',
-                              fontSize: '0.75rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
@@ -719,28 +719,28 @@ export function FerramentasPage() {
                           </span>
                         )}
                       </td>
-                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.875rem' }}>
+                      <td style={{ padding: '16px 16px', fontSize: '0.875rem' }}>
                         {fer.status === 'EMPRESTADO' && fer.emprestadoPara ? (
                           <div>
                             <span style={{ fontWeight: 600, color: '#0369a1' }}>
                               {fer.emprestadoPara.nome}
                             </span>
                             <span
-                              style={{ color: '#64748b', fontSize: '0.75rem', marginLeft: '0.4rem' }}
+                              style={{ color: '#475569', fontSize: '0.875rem', marginLeft: '8px' }}
                             >
                               (@{fer.emprestadoPara.login})
                             </span>
                           </div>
                         ) : (
-                          <span style={{ color: '#94a3b8' }}>-</span>
+                          <span style={{ color: '#475569' }}>-</span>
                         )}
                       </td>
                       {podeGerenciar && (
-                        <td style={{ padding: '0.875rem 1rem', textAlign: 'right' }}>
+                        <td style={{ padding: '16px 16px', textAlign: 'right' }}>
                           <div
                             style={{
                               display: 'inline-flex',
-                              gap: '0.45rem',
+                              gap: '8px',
                               flexWrap: 'wrap',
                               justifyContent: 'flex-end',
                             }}
@@ -754,12 +754,12 @@ export function FerramentasPage() {
                                   setMensagemErro(null)
                                 }}
                                 style={{
-                                  padding: '0.35rem 0.7rem',
-                                  backgroundColor: '#0284c7',
+                                  padding: '8px 8px',
+                                  backgroundColor: '#0369a1',
                                   border: 'none',
                                   borderRadius: '4px',
                                   color: '#ffffff',
-                                  fontSize: '0.75rem',
+                                  fontSize: '0.875rem',
                                   fontWeight: 600,
                                   cursor: 'pointer',
                                 }}
@@ -777,12 +777,12 @@ export function FerramentasPage() {
                                   setMensagemErro(null)
                                 }}
                                 style={{
-                                  padding: '0.35rem 0.7rem',
-                                  backgroundColor: '#16a34a',
+                                  padding: '8px 8px',
+                                  backgroundColor: '#15803d',
                                   border: 'none',
                                   borderRadius: '4px',
                                   color: '#ffffff',
-                                  fontSize: '0.75rem',
+                                  fontSize: '0.875rem',
                                   fontWeight: 600,
                                   cursor: 'pointer',
                                 }}
@@ -803,12 +803,12 @@ export function FerramentasPage() {
                                   })
                                 }
                                 style={{
-                                  padding: '0.35rem 0.7rem',
+                                  padding: '8px 8px',
                                   backgroundColor: '#0f766e',
                                   border: 'none',
                                   borderRadius: '4px',
                                   color: '#ffffff',
-                                  fontSize: '0.75rem',
+                                  fontSize: '0.875rem',
                                   fontWeight: 600,
                                   cursor: 'pointer',
                                 }}
@@ -826,12 +826,12 @@ export function FerramentasPage() {
                                 setModalFerramentaAberto(true)
                               }}
                               style={{
-                                padding: '0.35rem 0.7rem',
+                                padding: '8px 8px',
                                 backgroundColor: '#ffffff',
                                 border: '1px solid #cbd5e1',
                                 borderRadius: '4px',
                                 color: '#1e293b',
-                                fontSize: '0.75rem',
+                                fontSize: '0.875rem',
                                 fontWeight: 600,
                                 cursor: 'pointer',
                               }}
@@ -853,12 +853,12 @@ export function FerramentasPage() {
                                   })
                                 }
                                 style={{
-                                  padding: '0.35rem 0.65rem',
+                                  padding: '8px 8px',
                                   backgroundColor: fer.ativo ? '#fff1f2' : '#f0fdf4',
                                   border: `1px solid ${fer.ativo ? '#fecdd3' : '#bbf7d0'}`,
                                   borderRadius: '4px',
                                   color: fer.ativo ? '#be123c' : '#15803d',
-                                  fontSize: '0.75rem',
+                                  fontSize: '0.875rem',
                                   fontWeight: 600,
                                   cursor: 'pointer',
                                 }}
@@ -888,7 +888,7 @@ export function FerramentasPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 60,
           }}
         >
@@ -898,7 +898,7 @@ export function FerramentasPage() {
               borderRadius: '8px',
               maxWidth: '480px',
               width: '100%',
-              padding: '1.5rem',
+              padding: '24px',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
@@ -907,10 +907,10 @@ export function FerramentasPage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '0.75rem',
+                marginBottom: '16px',
               }}
             >
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
                 Registrar Emprestimo de Ferramenta
               </h2>
               <button
@@ -919,8 +919,8 @@ export function FerramentasPage() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  fontSize: '1.15rem',
-                  color: '#64748b',
+                  fontSize: '1rem',
+                  color: '#475569',
                   cursor: 'pointer',
                 }}
               >
@@ -933,9 +933,9 @@ export function FerramentasPage() {
                 backgroundColor: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '6px',
-                padding: '0.75rem',
-                marginBottom: '1rem',
-                fontSize: '0.85rem',
+                padding: '16px',
+                marginBottom: '16px',
+                fontSize: '0.875rem',
                 color: '#334155',
               }}
             >
@@ -943,7 +943,7 @@ export function FerramentasPage() {
                 <strong>Ferramenta:</strong> {ferramentaParaEmprestimo.codigo} -{' '}
                 {ferramentaParaEmprestimo.nome}
               </div>
-              <div style={{ marginTop: '0.25rem', color: '#64748b' }}>
+              <div style={{ marginTop: '8px', color: '#475569' }}>
                 Selecione o colaborador responsavel pela retirada e guarda do equipamento.
               </div>
             </div>
@@ -960,17 +960,17 @@ export function FerramentasPage() {
                   usuarioId: usuarioEmprestimoId,
                 })
               }}
-              style={{ display: 'grid', gap: '1rem' }}
+              style={{ display: 'grid', gap: '16px' }}
             >
               <div>
                 <label
                   htmlFor="emprestimo-usuario"
                   style={{
                     display: 'block',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     color: '#334155',
-                    marginBottom: '0.3rem',
+                    marginBottom: '8px',
                   }}
                 >
                   Usuario Solicitante (Responsavel na Obra) *
@@ -982,10 +982,10 @@ export function FerramentasPage() {
                   onChange={(e) => setUsuarioEmprestimoId(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.55rem 0.75rem',
+                    padding: '8px 16px',
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
+                    fontSize: '0.875rem',
                     backgroundColor: '#ffffff',
                     color: '#0f172a',
                     boxSizing: 'border-box',
@@ -1004,20 +1004,20 @@ export function FerramentasPage() {
                 style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  gap: '0.75rem',
-                  marginTop: '0.5rem',
+                  gap: '16px',
+                  marginTop: '8px',
                 }}
               >
                 <button
                   type="button"
                   onClick={() => setFerramentaParaEmprestimo(null)}
                   style={{
-                    padding: '0.5rem 1rem',
+                    padding: '8px 16px',
                     backgroundColor: '#ffffff',
                     border: '1px solid #cbd5e1',
                     borderRadius: '6px',
                     color: '#334155',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
@@ -1028,12 +1028,12 @@ export function FerramentasPage() {
                   type="submit"
                   disabled={emprestarFerramentaMutation.isPending}
                   style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: '#0284c7',
+                    padding: '8px 24px',
+                    backgroundColor: '#0369a1',
                     border: 'none',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
@@ -1058,7 +1058,7 @@ export function FerramentasPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 60,
           }}
         >
@@ -1068,7 +1068,7 @@ export function FerramentasPage() {
               borderRadius: '8px',
               maxWidth: '500px',
               width: '100%',
-              padding: '1.5rem',
+              padding: '24px',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
@@ -1077,10 +1077,10 @@ export function FerramentasPage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '0.75rem',
+                marginBottom: '16px',
               }}
             >
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
                 Registrar Devolucao de Ferramenta
               </h2>
               <button
@@ -1089,8 +1089,8 @@ export function FerramentasPage() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  fontSize: '1.15rem',
-                  color: '#64748b',
+                  fontSize: '1rem',
+                  color: '#475569',
                   cursor: 'pointer',
                 }}
               >
@@ -1103,9 +1103,9 @@ export function FerramentasPage() {
                 backgroundColor: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '6px',
-                padding: '0.75rem',
-                marginBottom: '1rem',
-                fontSize: '0.85rem',
+                padding: '16px',
+                marginBottom: '16px',
+                fontSize: '0.875rem',
                 color: '#334155',
               }}
             >
@@ -1114,7 +1114,7 @@ export function FerramentasPage() {
                 {ferramentaParaDevolucao.nome}
               </div>
               {ferramentaParaDevolucao.emprestadoPara && (
-                <div style={{ marginTop: '0.25rem' }}>
+                <div style={{ marginTop: '8px' }}>
                   <strong>Devolvida por:</strong> {ferramentaParaDevolucao.emprestadoPara.nome} (@
                   {ferramentaParaDevolucao.emprestadoPara.login})
                 </div>
@@ -1129,10 +1129,10 @@ export function FerramentasPage() {
                   comDefeito: devolucaoComDefeito,
                 })
               }}
-              style={{ display: 'grid', gap: '0.85rem' }}
+              style={{ display: 'grid', gap: '16px' }}
             >
-              <div style={{ display: 'grid', gap: '0.6rem' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>
                   Condicao de retorno ao almoxarifado:
                 </span>
 
@@ -1140,10 +1140,10 @@ export function FerramentasPage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.6rem',
-                    padding: '0.65rem 0.85rem',
+                    gap: '8px',
+                    padding: '8px 16px',
                     borderRadius: '6px',
-                    border: `1px solid ${!devolucaoComDefeito ? '#16a34a' : '#cbd5e1'}`,
+                    border: `1px solid ${!devolucaoComDefeito ? '#15803d' : '#cbd5e1'}`,
                     backgroundColor: !devolucaoComDefeito ? '#f0fdf4' : '#ffffff',
                     cursor: 'pointer',
                     fontSize: '0.875rem',
@@ -1165,10 +1165,10 @@ export function FerramentasPage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.6rem',
-                    padding: '0.65rem 0.85rem',
+                    gap: '8px',
+                    padding: '8px 16px',
                     borderRadius: '6px',
-                    border: `1px solid ${devolucaoComDefeito ? '#dc2626' : '#cbd5e1'}`,
+                    border: `1px solid ${devolucaoComDefeito ? '#b91c1c' : '#cbd5e1'}`,
                     backgroundColor: devolucaoComDefeito ? '#fef2f2' : '#ffffff',
                     cursor: 'pointer',
                     fontSize: '0.875rem',
@@ -1191,20 +1191,20 @@ export function FerramentasPage() {
                 style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  gap: '0.75rem',
-                  marginTop: '0.5rem',
+                  gap: '16px',
+                  marginTop: '8px',
                 }}
               >
                 <button
                   type="button"
                   onClick={() => setFerramentaParaDevolucao(null)}
                   style={{
-                    padding: '0.5rem 1rem',
+                    padding: '8px 16px',
                     backgroundColor: '#ffffff',
                     border: '1px solid #cbd5e1',
                     borderRadius: '6px',
                     color: '#334155',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
@@ -1215,12 +1215,12 @@ export function FerramentasPage() {
                   type="submit"
                   disabled={devolverFerramentaMutation.isPending}
                   style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: devolucaoComDefeito ? '#dc2626' : '#16a34a',
+                    padding: '8px 24px',
+                    backgroundColor: devolucaoComDefeito ? '#b91c1c' : '#15803d',
                     border: 'none',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
@@ -1245,7 +1245,7 @@ export function FerramentasPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '16px',
             zIndex: 60,
           }}
         >
@@ -1255,7 +1255,7 @@ export function FerramentasPage() {
               borderRadius: '8px',
               maxWidth: '500px',
               width: '100%',
-              padding: '1.5rem',
+              padding: '24px',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
@@ -1264,10 +1264,10 @@ export function FerramentasPage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '1rem',
+                marginBottom: '16px',
               }}
             >
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#0f172a' }}>
                 {ferramentaEmEdicao
                   ? `Editar Ferramenta (${ferramentaEmEdicao.codigo})`
                   : 'Nova Ferramenta'}
@@ -1278,8 +1278,8 @@ export function FerramentasPage() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  fontSize: '1.25rem',
-                  color: '#64748b',
+                  fontSize: '1rem',
+                  color: '#475569',
                   cursor: 'pointer',
                 }}
               >
@@ -1292,17 +1292,17 @@ export function FerramentasPage() {
                 e.preventDefault()
                 salvarFerramentaMutation.mutate()
               }}
-              style={{ display: 'grid', gap: '1rem' }}
+              style={{ display: 'grid', gap: '16px' }}
             >
               <div>
                 <label
                   htmlFor="ferramenta-codigo"
                   style={{
                     display: 'block',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     color: '#334155',
-                    marginBottom: '0.25rem',
+                    marginBottom: '8px',
                   }}
                 >
                   Código / Identificação da Obra *
@@ -1317,10 +1317,10 @@ export function FerramentasPage() {
                   placeholder="Ex: MART-01 ou TAG-549"
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.75rem',
+                    padding: '8px 16px',
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                     backgroundColor: ferramentaEmEdicao ? '#f1f5f9' : '#ffffff',
                   }}
@@ -1332,10 +1332,10 @@ export function FerramentasPage() {
                   htmlFor="ferramenta-nome"
                   style={{
                     display: 'block',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     color: '#334155',
-                    marginBottom: '0.25rem',
+                    marginBottom: '8px',
                   }}
                 >
                   Nome da Ferramenta *
@@ -1349,10 +1349,10 @@ export function FerramentasPage() {
                   placeholder="Ex: Martelete Perfurador Rompedor 800W"
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.75rem',
+                    padding: '8px 16px',
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
+                    fontSize: '0.875rem',
                     boxSizing: 'border-box',
                   }}
                 />
@@ -1362,20 +1362,20 @@ export function FerramentasPage() {
                 style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  gap: '0.75rem',
-                  marginTop: '0.5rem',
+                  gap: '16px',
+                  marginTop: '8px',
                 }}
               >
                 <button
                   type="button"
                   onClick={() => setModalFerramentaAberto(false)}
                   style={{
-                    padding: '0.5rem 1rem',
+                    padding: '8px 16px',
                     backgroundColor: '#ffffff',
                     border: '1px solid #cbd5e1',
                     borderRadius: '6px',
                     color: '#334155',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
@@ -1386,12 +1386,12 @@ export function FerramentasPage() {
                   type="submit"
                   disabled={salvarFerramentaMutation.isPending}
                   style={{
-                    padding: '0.5rem 1.25rem',
-                    backgroundColor: '#0284c7',
+                    padding: '8px 24px',
+                    backgroundColor: '#0369a1',
                     border: 'none',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
