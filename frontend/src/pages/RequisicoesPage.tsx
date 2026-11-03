@@ -645,24 +645,26 @@ export function RequisicoesPage() {
 
         {/* Barra de Filtros: Tabs + Search */}
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-          <div className="ob-tabs" role="tablist">
-            {[
-              { id: 'TODAS', label: 'Todas' },
-              { id: 'SOLICITADA', label: 'Pendentes' },
-              { id: 'ATENDIDA', label: 'Atendidas' },
-              { id: 'CANCELADA', label: 'Canceladas' },
-            ].map((st) => (
-              <button
-                key={st.id}
-                type="button"
-                role="tab"
-                aria-selected={filtroStatus === st.id}
-                onClick={() => setFiltroStatus(st.id)}
-                className="ob-tab"
-              >
-                {st.label}
-              </button>
-            ))}
+          <div className="overflow-x-auto max-w-full pb-1">
+            <div className="ob-tabs" role="tablist">
+              {[
+                { id: 'TODAS', label: 'Todas' },
+                { id: 'SOLICITADA', label: 'Pendentes' },
+                { id: 'ATENDIDA', label: 'Atendidas' },
+                { id: 'CANCELADA', label: 'Canceladas' },
+              ].map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={filtroStatus === st.id}
+                  onClick={() => setFiltroStatus(st.id)}
+                  className="ob-tab"
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -862,7 +864,7 @@ export function RequisicoesPage() {
                       {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
                     </span>
 
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                       {podeAtender && (
                         <button
                           type="button"
