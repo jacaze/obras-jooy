@@ -209,7 +209,7 @@ export function ObrasPage() {
   )
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <main className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-24 font-body text-on-surface">
       {/* Cabecalho da Pagina */}
       <div
         style={{
@@ -976,6 +976,6 @@ export function ObrasPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }
