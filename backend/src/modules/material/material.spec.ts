@@ -486,6 +486,102 @@ describe('Modulo de Catalogo de Materiais, Categorias e Unidades', () => {
       expect(data.descricao).toBe('Cimento CP-II 50kg Votoran')
     })
 
+    it('deve criar material informando codigoSienge opcional', async () => {
+      vi.spyOn(prisma.material, 'findUnique').mockResolvedValueOnce(null)
+      vi.spyOn(prisma.categoriaMaterial, 'findUnique').mockResolvedValueOnce({ id: categoriaAlvenariaId } as any)
+      vi.spyOn(prisma.unidadeMedida, 'findUnique').mockResolvedValueOnce({ id: unidadeUnId, sigla: 'UN' } as any)
+
+      const createSpy = vi.spyOn(prisma.material, 'create').mockResolvedValueOnce({
+        id: 'mat-sienge-id',
+        codigo: 'MAT-742',
+        codigoSienge: 'SIENGE-74201',
+        descricao: 'Tinta Acrilica Fosca',
+        categoriaId: categoriaAlvenariaId,
+        unidadeCompraId: null,
+        unidadeConsumoId: unidadeUnId,
+        fatorConversao: 1.0 as any,
+        ehKit: false,
+        exigeTesteQualidade: false,
+        ativo: true,
+        criadoEm: new Date(),
+        categoria: { id: categoriaAlvenariaId, nome: 'Pintura' },
+        unidadeCompra: null,
+        unidadeConsumo: { id: unidadeUnId, sigla: 'UN' },
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/materiais',
+        headers: { authorization: `Bearer ${adminToken}` },
+        payload: {
+          codigo: 'MAT-742',
+          codigoSienge: 'SIENGE-74201',
+          descricao: 'Tinta Acrilica Fosca',
+          categoriaId: categoriaAlvenariaId,
+          unidadeConsumoId: unidadeUnId,
+        },
+      })
+
+      expect(response.statusCode).toBe(201)
+      const data = response.json()
+      expect(data.codigo).toBe('MAT-742')
+      expect(data.codigoSienge).toBe('SIENGE-74201')
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            codigo: 'MAT-742',
+            codigoSienge: 'SIENGE-74201',
+          }),
+        })
+      )
+    })
+
+    it('deve permitir atualizar codigo e codigoSienge de um material existente', async () => {
+      vi.spyOn(prisma.material, 'findUnique')
+        .mockResolvedValueOnce({
+          id: materialId,
+          codigo: 'MAT-ANTIGO',
+          codigoSienge: null,
+          descricao: 'Material Existente',
+          categoriaId: categoriaAlvenariaId,
+          unidadeConsumoId: unidadeUnId,
+          unidadeCompraId: null,
+          fatorConversao: 1.0 as any,
+          ativo: true,
+        } as any)
+        .mockResolvedValueOnce(null) // Para verificacao de duplicidade de codigo
+
+      vi.spyOn(prisma.material, 'update').mockResolvedValueOnce({
+        id: materialId,
+        codigo: 'MAT-NOVO',
+        codigoSienge: 'SIENGE-999',
+        descricao: 'Material Existente',
+        categoriaId: categoriaAlvenariaId,
+        unidadeConsumoId: unidadeUnId,
+        unidadeCompraId: null,
+        fatorConversao: 1.0 as any,
+        ativo: true,
+        categoria: { id: categoriaAlvenariaId, nome: 'Geral' },
+        unidadeCompra: null,
+        unidadeConsumo: { id: unidadeUnId, sigla: 'UN' },
+      } as any)
+
+      const response = await app.inject({
+        method: 'PATCH',
+        url: `/api/materiais/${materialId}`,
+        headers: { authorization: `Bearer ${almoxarifeToken}` },
+        payload: {
+          codigo: 'MAT-NOVO',
+          codigoSienge: 'SIENGE-999',
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const data = response.json()
+      expect(data.codigo).toBe('MAT-NOVO')
+      expect(data.codigoSienge).toBe('SIENGE-999')
+    })
+
     it('deve permitir desativar e reativar um material', async () => {
       vi.spyOn(prisma.material, 'findUnique').mockResolvedValue({
         id: materialId,

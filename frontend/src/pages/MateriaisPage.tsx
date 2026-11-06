@@ -52,6 +52,7 @@ export function MateriaisPage() {
 
   // Form de Material
   const [formCodigo, setFormCodigo] = useState('')
+  const [formCodigoSienge, setFormCodigoSienge] = useState('')
   const [formDescricao, setFormDescricao] = useState('')
   const [formCategoriaId, setFormCategoriaId] = useState('')
   const [formUnConsumoId, setFormUnConsumoId] = useState('')
@@ -193,6 +194,7 @@ export function MateriaisPage() {
   function abrirModalCriacao() {
     setMaterialEmEdicao(null)
     setFormCodigo('')
+    setFormCodigoSienge('')
     setFormDescricao('')
     setFormCategoriaId(categorias[0]?.id || '')
     setFormUnConsumoId(unidades[0]?.id || '')
@@ -209,6 +211,7 @@ export function MateriaisPage() {
   function abrirModalEdicao(mat: Material) {
     setMaterialEmEdicao(mat)
     setFormCodigo(mat.codigo)
+    setFormCodigoSienge(mat.codigoSienge || '')
     setFormDescricao(mat.descricao)
     setFormCategoriaId(mat.categoriaId)
     setFormUnConsumoId(mat.unidadeConsumoId)
@@ -249,11 +252,15 @@ export function MateriaisPage() {
       unCompraFinal = formUnCompraId
     }
 
+    const codigoSiengeFormatado = formCodigoSienge.trim() || null
+
     if (materialEmEdicao) {
       atualizarMaterialMutation.mutate({
         id: materialEmEdicao.id,
         dados: {
-          descricao: formDescricao,
+          codigo: formCodigo.trim().toUpperCase(),
+          codigoSienge: codigoSiengeFormatado,
+          descricao: formDescricao.trim(),
           categoriaId: formCategoriaId,
           unidadeConsumoId: formUnConsumoId,
           unidadeCompraId: unCompraFinal,
@@ -264,8 +271,9 @@ export function MateriaisPage() {
       })
     } else {
       criarMaterialMutation.mutate({
-        codigo: formCodigo,
-        descricao: formDescricao,
+        codigo: formCodigo.trim().toUpperCase(),
+        codigoSienge: codigoSiengeFormatado,
+        descricao: formDescricao.trim(),
         categoriaId: formCategoriaId,
         unidadeConsumoId: formUnConsumoId,
         unidadeCompraId: unCompraFinal,
@@ -361,7 +369,7 @@ export function MateriaisPage() {
           <input
             id="filtro-busca"
             type="text"
-            placeholder="Nome ou código..."
+            placeholder="Nome, código interno ou código Sienge..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="ob-input w-full"
@@ -414,7 +422,10 @@ export function MateriaisPage() {
             <thead>
               <tr>
                 <th className="font-semibold text-xs uppercase tracking-wider">
-                  Código
+                  Código Interno
+                </th>
+                <th className="font-semibold text-xs uppercase tracking-wider">
+                  Cód. Sienge
                 </th>
                 <th className="font-semibold text-xs uppercase tracking-wider">
                   Descrição / Insumo
@@ -441,13 +452,13 @@ export function MateriaisPage() {
             <tbody>
               {carregandoMateriais ? (
                 <tr>
-                  <td colSpan={podeGerenciar ? 7 : 6} className="p-8 text-center text-on-surface-variant">
+                  <td colSpan={podeGerenciar ? 8 : 7} className="p-8 text-center text-on-surface-variant">
                     Carregando catálogo de materiais...
                   </td>
                 </tr>
               ) : materiais.length === 0 ? (
                 <tr>
-                  <td colSpan={podeGerenciar ? 7 : 6} className="p-8 text-center text-on-surface-variant">
+                  <td colSpan={podeGerenciar ? 8 : 7} className="p-8 text-center text-on-surface-variant">
                     Nenhum material encontrado com os filtros selecionados.
                   </td>
                 </tr>
@@ -462,8 +473,17 @@ export function MateriaisPage() {
                       key={mat.id}
                       className={mat.ativo ? '' : 'opacity-60'}
                     >
-                      <td className="font-mono font-bold text-on-surface">
+                      <td className="font-mono font-bold text-on-surface whitespace-nowrap">
                         {mat.codigo}
+                      </td>
+                      <td className="font-mono text-xs text-on-surface-variant whitespace-nowrap">
+                        {mat.codigoSienge ? (
+                          <span className="ob-badge ob-badge--info font-mono text-[11px] py-0.5 px-2">
+                            {mat.codigoSienge}
+                          </span>
+                        ) : (
+                          <span className="text-on-surface-variant/50">-</span>
+                        )}
                       </td>
                       <td>
                         <div className="font-semibold text-on-surface">
@@ -561,45 +581,62 @@ export function MateriaisPage() {
             </div>
 
             <form onSubmit={handleSalvarMaterial} className="grid gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="material-codigo"
                     className="ob-label"
                   >
-                    Código (Sienge/ERP) *
+                    Código Interno (Jooy) *
                   </label>
                   <input
                     id="material-codigo"
                     type="text"
                     required
-                    disabled={!!materialEmEdicao}
                     value={formCodigo}
                     onChange={(e) => setFormCodigo(e.target.value.toUpperCase())}
-                    placeholder="Ex: CIM-01"
-                    className={`ob-input w-full font-mono ${
-                      materialEmEdicao ? 'bg-surface-container-high opacity-70 cursor-not-allowed' : ''
-                    }`}
+                    placeholder="Ex: MAT-001 ou CIM-01"
+                    className="ob-input w-full font-mono"
                   />
+                  <p className="text-[11px] text-on-surface-variant mt-1">Identificador padrão da obra e almoxarifado</p>
                 </div>
 
-                <div className="sm:col-span-2">
+                <div>
                   <label
-                    htmlFor="material-descricao"
-                    className="ob-label"
+                    htmlFor="material-codigo-sienge"
+                    className="ob-label flex items-center justify-between"
                   >
-                    Descrição Completa *
+                    <span>Código SIENGE / ERP</span>
+                    <span className="text-xs text-on-surface-variant font-normal">(Opcional)</span>
                   </label>
                   <input
-                    id="material-descricao"
+                    id="material-codigo-sienge"
                     type="text"
-                    required
-                    value={formDescricao}
-                    onChange={(e) => setFormDescricao(e.target.value)}
-                    placeholder="Ex: Cimento CP-II F 32 50kg"
-                    className="ob-input w-full"
+                    value={formCodigoSienge}
+                    onChange={(e) => setFormCodigoSienge(e.target.value)}
+                    placeholder="Ex: 74201 ou em branco"
+                    className="ob-input w-full font-mono"
                   />
+                  <p className="text-[11px] text-on-surface-variant mt-1">Pode ser cadastrado depois quando integrado ao ERP</p>
                 </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="material-descricao"
+                  className="ob-label"
+                >
+                  Descrição Completa *
+                </label>
+                <input
+                  id="material-descricao"
+                  type="text"
+                  required
+                  value={formDescricao}
+                  onChange={(e) => setFormDescricao(e.target.value)}
+                  placeholder="Ex: Cimento CP-II F 32 50kg"
+                  className="ob-input w-full"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

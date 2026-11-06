@@ -44,10 +44,16 @@ export const atualizarUnidadeMedidaSchema = z.object({
 export const criarMaterialSchema = z.object({
   codigo: z
     .string()
-    .min(1, 'O codigo e obrigatorio')
+    .min(1, 'O codigo interno e obrigatorio')
     .max(50, 'O codigo deve ter no maximo 50 caracteres')
     .trim()
     .toUpperCase(),
+  codigoSienge: z
+    .string()
+    .max(50, 'O codigo SIENGE deve ter no maximo 50 caracteres')
+    .trim()
+    .nullable()
+    .optional(),
   descricao: z
     .string()
     .min(3, 'A descricao deve ter no minimo 3 caracteres')
@@ -68,6 +74,19 @@ export const criarMaterialSchema = z.object({
 })
 
 export const atualizarMaterialSchema = z.object({
+  codigo: z
+    .string()
+    .min(1, 'O codigo interno e obrigatorio')
+    .max(50, 'O codigo deve ter no maximo 50 caracteres')
+    .trim()
+    .toUpperCase()
+    .optional(),
+  codigoSienge: z
+    .string()
+    .max(50, 'O codigo SIENGE deve ter no maximo 50 caracteres')
+    .trim()
+    .nullable()
+    .optional(),
   descricao: z
     .string()
     .min(3, 'A descricao deve ter no minimo 3 caracteres')

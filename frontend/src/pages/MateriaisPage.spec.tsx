@@ -12,6 +12,7 @@ const mockMateriais = [
   {
     id: 'mat-1',
     codigo: 'CIM-01',
+    codigoSienge: 'SIENGE-1001',
     descricao: 'Cimento CP-II 50kg',
     categoriaId: 'cat-1',
     unidadeCompraId: 'un-sc',
@@ -28,6 +29,7 @@ const mockMateriais = [
   {
     id: 'mat-2',
     codigo: 'ARE-01',
+    codigoSienge: null,
     descricao: 'Areia Media',
     categoriaId: 'cat-1',
     unidadeCompraId: null,
@@ -99,6 +101,7 @@ describe('MateriaisPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Cimento CP-II 50kg')).toBeInTheDocument()
       expect(screen.getByText('CIM-01')).toBeInTheDocument()
+      expect(screen.getByText('SIENGE-1001')).toBeInTheDocument()
       expect(screen.getByText('1 SC = 50 KG')).toBeInTheDocument()
       expect(screen.getByText('Areia Media')).toBeInTheDocument()
       expect(screen.getByText('Direta (1:1)')).toBeInTheDocument()
@@ -115,7 +118,8 @@ describe('MateriaisPage', () => {
     fireEvent.click(screen.getByText('+ Cadastrar Material'))
 
     expect(screen.getByRole('heading', { name: 'Novo Insumo' })).toBeInTheDocument()
-    expect(screen.getByLabelText(/Código/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Código Interno/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Código SIENGE/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/Descrição Completa/i)).toBeInTheDocument()
   })
 
@@ -124,6 +128,7 @@ describe('MateriaisPage', () => {
       ...mockMateriais[1],
       id: 'mat-novo',
       codigo: 'ARE-01',
+      codigoSienge: '74201',
       descricao: 'Areia Media',
     })
 
@@ -135,7 +140,8 @@ describe('MateriaisPage', () => {
 
     fireEvent.click(screen.getByText('+ Cadastrar Material'))
 
-    fireEvent.change(screen.getByLabelText(/Código/i), { target: { value: 'ARE-01' } })
+    fireEvent.change(screen.getByLabelText(/Código Interno/i), { target: { value: 'ARE-01' } })
+    fireEvent.change(screen.getByLabelText(/Código SIENGE/i), { target: { value: '74201' } })
     fireEvent.change(screen.getByLabelText(/Descrição Completa/i), {
       target: { value: 'Areia Media' },
     })
@@ -150,6 +156,11 @@ describe('MateriaisPage', () => {
 
     await waitFor(() => {
       expect(client.createMaterial).toHaveBeenCalled()
+      expect(vi.mocked(client.createMaterial).mock.calls[0][0]).toMatchObject({
+        codigo: 'ARE-01',
+        codigoSienge: '74201',
+        descricao: 'Areia Media',
+      })
       expect(screen.getByText(/Material cadastrado com sucesso/i)).toBeInTheDocument()
     })
   })

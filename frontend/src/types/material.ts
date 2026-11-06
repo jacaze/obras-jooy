@@ -21,6 +21,7 @@ export interface CategoriaMaterial {
 export interface Material {
   id: string
   codigo: string
+  codigoSienge?: string | null
   descricao: string
   categoriaId: string
   unidadeCompraId?: string | null
@@ -37,6 +38,7 @@ export interface Material {
 
 export interface CriarMaterialInput {
   codigo: string
+  codigoSienge?: string | null
   descricao: string
   categoriaId: string
   unidadeConsumoId: string
@@ -48,6 +50,8 @@ export interface CriarMaterialInput {
 }
 
 export interface AtualizarMaterialInput {
+  codigo?: string
+  codigoSienge?: string | null
   descricao?: string
   categoriaId?: string
   unidadeConsumoId?: string
