@@ -48,4 +48,9 @@ tmp/
 
 # Graphify generated knowledge graph and Obsidian vault
 graphify-out/
+
+# Relatorios executivos e temporarios
+relatorio_executivo_*
+*.pdf
+
 .obsidian/

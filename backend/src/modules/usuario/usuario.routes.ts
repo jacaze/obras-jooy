@@ -22,13 +22,13 @@ export async function usuarioRoutes(app: FastifyInstance) {
   // AUTENTICACAO
   // ----------------------------------------------------
 
-  // Login de usuario (publico com rate limit de 5 req/min)
+  // Login de usuario (publico com rate limit adaptativo: 30 req/min em desenvolvimento)
   app.post(
     '/auth/login',
     {
       config: {
         rateLimit: {
-          max: 5,
+          max: process.env.NODE_ENV === 'production' ? 5 : 30,
           timeWindow: '1 minute',
         },
       },

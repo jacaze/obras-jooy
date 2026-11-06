@@ -73,6 +73,7 @@ export async function seedDatabase() {
       where: { login: usr.login },
       update: {
         nome: usr.nome,
+        senhaHash: senhaHashPadrao,
         perfil: usr.perfil,
         cargoId: usr.cargoId,
         ativo: true,
