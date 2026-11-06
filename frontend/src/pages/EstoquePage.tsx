@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useMemo, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createLocalEstoque,
@@ -52,7 +52,7 @@ export function EstoquePage() {
   const [abaAtiva, setAbaAtiva] = useState<'saldos' | 'kardex' | 'locais'>('saldos')
 
   // Filtros gerais
-  const [filtroObraId, setFiltroObraId] = useState('')
+  const [filtroObraId, setFiltroObraId] = useState(usuario?.obraId || '')
   const [filtroLocalId, setFiltroLocalId] = useState('')
   const [buscaMaterial, setBuscaMaterial] = useState('')
   const [filtroTipoMov, setFiltroTipoMov] = useState<string>('')
@@ -116,6 +116,65 @@ export function EstoquePage() {
         busca: buscaMaterial || undefined,
       }),
   })
+
+  // Agrupamento de saldos por Material para evitar repeticao de codigo de material na tabela
+  const saldosAgrupadosPorMaterial = useMemo(() => {
+    // Se o usuario filtrou especificamente por um Local/Galpao, exibe os registros daquele local individual
+    if (filtroLocalId) {
+      return saldos.map((s) => ({
+        materialId: s.materialId,
+        material: s.material,
+        saldoFisicoTotal: s.quantidade || 0,
+        reservadoTotal: s.reservado || 0,
+        disponivelTotal: s.disponivel || 0,
+        obraCodigo: s.local.obra.codigo,
+        detalheLocacao: s.local.nome,
+        locacoesDetalhadas: [s],
+      }))
+    }
+
+    const mapa = new Map<
+      string,
+      {
+        materialId: string
+        material: any
+        saldoFisicoTotal: number
+        reservadoTotal: number
+        disponivelTotal: number
+        obraCodigo: string
+        detalheLocacao: string
+        locacoesDetalhadas: typeof saldos
+      }
+    >()
+
+    for (const s of saldos) {
+      const chave = s.materialId
+      const existente = mapa.get(chave)
+      const qtd = Number(s.quantidade || 0)
+      const res = Number(s.reservado || 0)
+      const disp = Number(s.disponivel || 0)
+
+      if (existente) {
+        existente.saldoFisicoTotal = Number((existente.saldoFisicoTotal + qtd).toFixed(4))
+        existente.reservadoTotal = Number((existente.reservadoTotal + res).toFixed(4))
+        existente.disponivelTotal = Number((existente.disponivelTotal + disp).toFixed(4))
+        existente.locacoesDetalhadas.push(s)
+      } else {
+        mapa.set(chave, {
+          materialId: s.materialId,
+          material: s.material,
+          saldoFisicoTotal: qtd,
+          reservadoTotal: res,
+          disponivelTotal: disp,
+          obraCodigo: s.local.obra.codigo,
+          detalheLocacao: s.local.nome,
+          locacoesDetalhadas: [s],
+        })
+      }
+    }
+
+    return Array.from(mapa.values())
+  }, [saldos, filtroLocalId])
 
   const { data: movimentacoes = [], isLoading: carregandoKardex } = useQuery({
     queryKey: ['estoque-movimentacoes', filtroObraId, filtroLocalId, filtroTipoMov],
@@ -225,7 +284,8 @@ export function EstoquePage() {
   })
 
   function limparFormMov() {
-    setMovObraId(filtroObraId || '')
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '') || filtroObraId || ''
+    setMovObraId(obraPadrao)
     setMovLocalId('')
     setMovMaterialId('')
     setMovTipo('ENTRADA_RECEB')
@@ -296,7 +356,8 @@ export function EstoquePage() {
 
   function abrirModalNovoLocal() {
     setLocalEditando(null)
-    setLocalObraId(filtroObraId || '')
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '') || filtroObraId || ''
+    setLocalObraId(obraPadrao)
     setLocalNome('')
     setErroLocal(null)
     setModalLocalAberto(true)
@@ -425,22 +486,35 @@ export function EstoquePage() {
 
       {/* Filtros Compartilhados (Obra e Locacao) */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6 items-stretch sm:items-center">
-        <select
-          aria-label="Filtrar por Obra"
-          value={filtroObraId}
-          onChange={(e) => {
-            setFiltroObraId(e.target.value)
-            setFiltroLocalId('')
-          }}
-          className="ob-input w-full sm:w-auto min-w-[200px]"
-        >
-          <option value="">Todas as Obras</option>
-          {obras.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.codigo} - {o.nome}
-            </option>
-          ))}
-        </select>
+        {usuario?.obraId || obras.length === 1 ? (
+          <div className="ob-input w-full sm:w-auto min-w-[200px] bg-surface-container font-semibold text-on-surface flex items-center justify-between">
+            <span>
+              {usuario?.obra
+                ? `${usuario.obra.codigo} - ${usuario.obra.nome}`
+                : obras[0]
+                  ? `${obras[0].codigo} - ${obras[0].nome}`
+                  : 'Obra'}
+            </span>
+            <span className="text-xs text-secondary font-normal ml-2">(Obra Fixa)</span>
+          </div>
+        ) : (
+          <select
+            aria-label="Filtrar por Obra"
+            value={filtroObraId}
+            onChange={(e) => {
+              setFiltroObraId(e.target.value)
+              setFiltroLocalId('')
+            }}
+            className="ob-input w-full sm:w-auto min-w-[200px]"
+          >
+            <option value="">Todas as Obras</option>
+            {obras.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.codigo} - {o.nome}
+              </option>
+            ))}
+          </select>
+        )}
 
         {abaAtiva !== 'locais' && (
           <select
@@ -510,10 +584,10 @@ export function EstoquePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {saldos.map((s) => {
-                      const totalQtd = s.quantidade || 0
-                      const disp = s.disponivel || 0
-                      const res = s.reservado || 0
+                    {saldosAgrupadosPorMaterial.map((item) => {
+                      const totalQtd = item.saldoFisicoTotal
+                      const disp = item.disponivelTotal
+                      const res = item.reservadoTotal
                       const pctDisp = totalQtd > 0 ? `${Math.min(100, Math.round((disp / totalQtd) * 100))}%` : '0%'
                       const pctRes = totalQtd > 0 ? `${Math.min(100, Math.round((res / totalQtd) * 100))}%` : '0%'
                       const statusMeter = disp === 0 ? 'crit' : disp < 10 ? 'low' : 'ok'
@@ -521,29 +595,45 @@ export function EstoquePage() {
                       const statusLabel = disp === 0 ? 'Sem saldo' : disp < 10 ? 'Abaixo do mín.' : 'Em estoque'
 
                       return (
-                        <tr key={`${s.localId}-${s.materialId}`}>
+                        <tr key={item.materialId}>
                           <td>
                             <span className="ob-mono font-semibold text-accent-text">
-                              {s.material.codigo}
+                              {item.material.codigo}
                             </span>
                           </td>
                           <td>
-                            <div className="font-medium text-on-surface">{s.material.descricao}</div>
+                            <div className="font-medium text-on-surface">{item.material.descricao}</div>
                             <div className="text-xs text-on-surface-variant">
-                              Categoria: {s.material.categoria?.nome || 'Geral'}
+                              Categoria: {item.material.categoria?.nome || 'Geral'}
                             </div>
                           </td>
                           <td className="text-on-surface-variant">
-                            <strong className="text-on-surface">{s.local.obra.codigo}</strong> &bull; {s.local.nome}
+                            <strong className="text-on-surface">{item.obraCodigo}</strong>
+                            {filtroLocalId ? (
+                              <span> &bull; {item.detalheLocacao}</span>
+                            ) : item.locacoesDetalhadas.length > 1 ? (
+                              <div className="text-xs text-on-surface-variant mt-0.5">
+                                Distribuido em {item.locacoesDetalhadas.length} locacoes:
+                                <ul className="list-disc list-inside mt-0.5">
+                                  {item.locacoesDetalhadas.map((l) => (
+                                    <li key={l.localId}>
+                                      {l.local.nome}: <strong>{l.disponivel} {item.material.unidadeConsumo.sigla}</strong>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <span> &bull; {item.detalheLocacao}</span>
+                            )}
                           </td>
                           <td className="num">
-                            {s.quantidade} {s.material.unidadeConsumo.sigla}
+                            {item.saldoFisicoTotal} {item.material.unidadeConsumo.sigla}
                           </td>
                           <td className="num text-tertiary">
-                            {s.reservado} {s.material.unidadeConsumo.sigla}
+                            {item.reservadoTotal} {item.material.unidadeConsumo.sigla}
                           </td>
                           <td className="num font-bold text-on-surface">
-                            {s.disponivel} {s.material.unidadeConsumo.sigla}
+                            {item.disponivelTotal} {item.material.unidadeConsumo.sigla}
                           </td>
                           <td>
                             <div
@@ -564,7 +654,7 @@ export function EstoquePage() {
                         </tr>
                       )
                     })}
-                    {saldos.length === 0 && (
+                    {saldosAgrupadosPorMaterial.length === 0 && (
                       <tr>
                         <td colSpan={8} className="p-8 text-center text-on-surface-variant">
                           Nenhum saldo de estoque registrado para os filtros atuais.
@@ -802,23 +892,36 @@ export function EstoquePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="ob-label">Obra</label>
-                  <select
-                    value={movObraId}
-                    onChange={(e) => {
-                      setMovObraId(e.target.value)
-                      setMovLocalId('')
-                      setMovAreaId('')
-                    }}
-                    required
-                    className="ob-input"
-                  >
-                    <option value="">Selecione a obra...</option>
-                    {obras.map((o) => (
-                      <option key={o.id} value={o.id}>
-                        {o.codigo} - {o.nome}
-                      </option>
-                    ))}
-                  </select>
+                  {usuario?.obraId || obras.length === 1 ? (
+                    <div className="ob-input py-2.5 px-3 bg-surface-container text-on-surface font-semibold flex items-center justify-between">
+                      <span>
+                        {usuario?.obra
+                          ? `${usuario.obra.codigo} - ${usuario.obra.nome}`
+                          : obras[0]
+                            ? `${obras[0].codigo} - ${obras[0].nome}`
+                            : 'Obra'}
+                      </span>
+                      <span className="text-xs text-secondary font-normal">(Fixa)</span>
+                    </div>
+                  ) : (
+                    <select
+                      value={movObraId}
+                      onChange={(e) => {
+                        setMovObraId(e.target.value)
+                        setMovLocalId('')
+                        setMovAreaId('')
+                      }}
+                      required
+                      className="ob-input"
+                    >
+                      <option value="">Selecione a obra...</option>
+                      {obras.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.codigo} - {o.nome}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div>
@@ -987,20 +1090,33 @@ export function EstoquePage() {
             <form onSubmit={handleSubmeterLocal} className="flex flex-col gap-4">
               <div>
                 <label className="ob-label">Obra Vinculada</label>
-                <select
-                  value={localObraId}
-                  onChange={(e) => setLocalObraId(e.target.value)}
-                  required
-                  disabled={!!localEditando}
-                  className="ob-input disabled:opacity-50"
-                >
-                  <option value="">Selecione a obra...</option>
-                  {obras.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.codigo} - {o.nome}
-                    </option>
-                  ))}
-                </select>
+                {usuario?.obraId || obras.length === 1 ? (
+                  <div className="ob-input py-2.5 px-3 bg-surface-container text-on-surface font-semibold flex items-center justify-between">
+                    <span>
+                      {usuario?.obra
+                        ? `${usuario.obra.codigo} - ${usuario.obra.nome}`
+                        : obras[0]
+                          ? `${obras[0].codigo} - ${obras[0].nome}`
+                          : 'Obra'}
+                    </span>
+                    <span className="text-xs text-secondary font-normal">(Fixa)</span>
+                  </div>
+                ) : (
+                  <select
+                    value={localObraId}
+                    onChange={(e) => setLocalObraId(e.target.value)}
+                    required
+                    disabled={!!localEditando}
+                    className="ob-input disabled:opacity-50"
+                  >
+                    <option value="">Selecione a obra...</option>
+                    {obras.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.codigo} - {o.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div>

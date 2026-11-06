@@ -30,6 +30,18 @@ export async function seedDatabase() {
     cargosMap[nomeCargo] = cargo.id
   }
 
+  // 3. Seed da Obra Inicial e Pavimentos/Setores (T05)
+  const obraInicial = await prisma.obra.upsert({
+    where: { codigo: 'JOOY-01' },
+    update: {},
+    create: {
+      codigo: 'JOOY-01',
+      nome: 'Residencial Jooy Reserva',
+      cidade: 'Campo Grande',
+      ativa: true,
+    },
+  })
+
   // 2. Seed de Usuarios para Apresentacao do MVP (Todos os 5 Perfis)
   const senhaHashPadrao = await bcrypt.hash(env.ADMIN_PASSWORD, 10)
 
@@ -39,30 +51,35 @@ export async function seedDatabase() {
       nome: env.ADMIN_NOME,
       perfil: PerfilUsuario.ADMIN,
       cargoId: cargosMap['Administrador do Sistema'],
+      obraId: null,
     },
     {
       login: 'almoxarife',
       nome: 'Maria Silva (Almoxarife)',
       perfil: PerfilUsuario.ALMOXARIFE,
       cargoId: cargosMap['Almoxarife'],
+      obraId: obraInicial.id,
     },
     {
       login: 'engenharia',
       nome: 'Carlos Mendes (Engenheiro)',
       perfil: PerfilUsuario.ENGENHARIA,
       cargoId: cargosMap['Engenheiro Residente'],
+      obraId: null,
     },
     {
       login: 'administracao',
       nome: 'Ana Paula (Administracao)',
       perfil: PerfilUsuario.ADMINISTRACAO,
       cargoId: cargosMap['Assistente Administrativo'],
+      obraId: null,
     },
     {
       login: 'encarregado',
       nome: 'Marcos Oliveira (Encarregado)',
       perfil: PerfilUsuario.ENCARREGADO,
       cargoId: cargosMap['Encarregado de Obras'],
+      obraId: obraInicial.id,
     },
   ]
 
@@ -76,6 +93,7 @@ export async function seedDatabase() {
         senhaHash: senhaHashPadrao,
         perfil: usr.perfil,
         cargoId: usr.cargoId,
+        obraId: usr.obraId,
         ativo: true,
       },
       create: {
@@ -84,23 +102,12 @@ export async function seedDatabase() {
         senhaHash: senhaHashPadrao,
         perfil: usr.perfil,
         cargoId: usr.cargoId,
+        obraId: usr.obraId,
         ativo: true,
       },
     })
     usuariosMap[usr.login] = criado.id
   }
-
-  // 3. Seed da Obra Inicial e Pavimentos/Setores (T05)
-  const obraInicial = await prisma.obra.upsert({
-    where: { codigo: 'JOOY-01' },
-    update: {},
-    create: {
-      codigo: 'JOOY-01',
-      nome: 'Residencial Jooy Reserva',
-      cidade: 'Campo Grande',
-      ativa: true,
-    },
-  })
 
   const areasIniciais = [
     { nome: 'Subsolo 02', ordem: -2 },

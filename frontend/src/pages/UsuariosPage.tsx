@@ -5,6 +5,7 @@ import {
   createUsuario,
   deleteUsuario,
   getCargos,
+  getObras,
   getUsuarios,
   resetarSenhaUsuario,
   toggleCargoSituacao,
@@ -52,6 +53,7 @@ export function UsuariosPage() {
   const [novaSenha, setNovaSenha] = useState('')
   const [novoPerfil, setNovoPerfil] = useState<PerfilUsuario>('ALMOXARIFE')
   const [novoCargoId, setNovoCargoId] = useState('')
+  const [novoObraId, setNovoObraId] = useState('')
   const [erroForm, setErroForm] = useState<string | null>(null)
 
   // Estados do formulario de edicao de usuario
@@ -60,6 +62,7 @@ export function UsuariosPage() {
   const [editLogin, setEditLogin] = useState('')
   const [editPerfil, setEditPerfil] = useState<PerfilUsuario>('ALMOXARIFE')
   const [editCargoId, setEditCargoId] = useState('')
+  const [editObraId, setEditObraId] = useState('')
   const [erroEditForm, setErroEditForm] = useState<string | null>(null)
 
   // Estados de exclusao de usuario
@@ -91,6 +94,11 @@ export function UsuariosPage() {
   const { data: todosOsCargos = [], isLoading: carregandoCargos } = useQuery({
     queryKey: ['cargos-todos'],
     queryFn: () => getCargos(false),
+  })
+
+  const { data: obras = [] } = useQuery({
+    queryKey: ['obras-ativas'],
+    queryFn: () => getObras(true),
   })
 
   // Mutations
@@ -162,7 +170,7 @@ export function UsuariosPage() {
       dados,
     }: {
       id: string
-      dados: { nome: string; login: string; perfil: PerfilUsuario; cargoId: string }
+      dados: { nome: string; login: string; perfil: PerfilUsuario; cargoId: string; obraId?: string | null }
     }) => updateUsuario(id, dados),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
@@ -194,6 +202,7 @@ export function UsuariosPage() {
     setEditLogin(u.login)
     setEditPerfil(u.perfil)
     setEditCargoId(u.cargo.id)
+    setEditObraId(u.obraId || '')
     setErroEditForm(null)
     setModalEditarUsuarioAberto(true)
   }
@@ -215,6 +224,7 @@ export function UsuariosPage() {
         login: editLogin.trim(),
         perfil: editPerfil,
         cargoId: editCargoId,
+        obraId: editObraId || null,
       },
     })
   }
@@ -236,6 +246,7 @@ export function UsuariosPage() {
     setNovaSenha('')
     setNovoPerfil('ALMOXARIFE')
     setNovoCargoId('')
+    setNovoObraId('')
     setErroForm(null)
   }
 
@@ -254,6 +265,7 @@ export function UsuariosPage() {
       senha: novaSenha,
       perfil: novoPerfil,
       cargoId: novoCargoId,
+      obraId: novoObraId || null,
     })
   }
 
@@ -384,6 +396,7 @@ export function UsuariosPage() {
                       <th>Login</th>
                       <th>Cargo</th>
                       <th>Perfil</th>
+                      <th>Obra de Lotacao</th>
                       <th>Situacao</th>
                       <th style={{ textAlign: 'right' }}>Acoes</th>
                     </tr>
@@ -407,6 +420,15 @@ export function UsuariosPage() {
                             >
                               {u.perfil}
                             </span>
+                          </td>
+                          <td className="text-on-surface-variant text-xs font-body">
+                            {u.obra ? (
+                              <span>
+                                <strong className="text-on-surface">{u.obra.codigo}</strong> - {u.obra.nome}
+                              </span>
+                            ) : (
+                              <span className="text-on-surface-variant/60 italic">Todas / Global</span>
+                            )}
                           </td>
                           <td>
                             <span
@@ -661,6 +683,27 @@ export function UsuariosPage() {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
+                  Obra de Lotacao (Canteiro Fixo)
+                </label>
+                <select
+                  value={novoObraId}
+                  onChange={(e) => setNovoObraId(e.target.value)}
+                  className="ob-input w-full text-sm font-body"
+                >
+                  <option value="">Sem obra fixa (Acesso Global / Engenharia / Admin)</option>
+                  {obras.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.codigo} - {o.nome} ({o.cidade})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-on-surface-variant font-body">
+                  Para Encarregados e Almoxarifes, vincule a obra para travar o canteiro e evitar selecao manual.
+                </p>
+              </div>
+
               <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
@@ -873,6 +916,27 @@ export function UsuariosPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
+                  Obra de Lotacao (Canteiro Fixo)
+                </label>
+                <select
+                  value={editObraId}
+                  onChange={(e) => setEditObraId(e.target.value)}
+                  className="ob-input w-full text-sm font-body"
+                >
+                  <option value="">Sem obra fixa (Acesso Global / Engenharia / Admin)</option>
+                  {obras.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.codigo} - {o.nome} ({o.cidade})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-on-surface-variant font-body">
+                  Para Encarregados e Almoxarifes, vincule a obra para travar o canteiro e evitar selecao manual.
+                </p>
               </div>
 
               <div className="flex justify-end gap-3 pt-3">

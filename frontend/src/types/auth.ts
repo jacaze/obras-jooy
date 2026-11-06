@@ -11,6 +11,12 @@ export interface UsuarioAuth {
   login: string
   perfil: PerfilUsuario
   cargo: string
+  obraId?: string | null
+  obra?: {
+    id: string
+    codigo: string
+    nome: string
+  } | null
 }
 
 export interface Cargo {
@@ -30,6 +36,12 @@ export interface UsuarioListagem {
   perfil: PerfilUsuario
   ativo: boolean
   criadoEm: string
+  obraId?: string | null
+  obra?: {
+    id: string
+    codigo: string
+    nome: string
+  } | null
   cargo: {
     id: string
     nome: string

@@ -69,6 +69,13 @@ export async function usuarioRoutes(app: FastifyInstance) {
         },
         include: {
           cargo: true,
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+            },
+          },
         },
       })
 
@@ -94,6 +101,7 @@ export async function usuarioRoutes(app: FastifyInstance) {
           login: usuario.login,
           nome: usuario.nome,
           perfil: usuario.perfil,
+          obraId: usuario.obraId,
         },
         { expiresIn: '8h' }
       )
@@ -108,6 +116,14 @@ export async function usuarioRoutes(app: FastifyInstance) {
           login: usuario.login,
           perfil: usuario.perfil,
           cargo: usuario.cargo.nome,
+          obraId: usuario.obraId,
+          obra: usuario.obra
+            ? {
+                id: usuario.obra.id,
+                codigo: usuario.obra.codigo,
+                nome: usuario.obra.nome,
+              }
+            : null,
         },
       })
     }
@@ -127,7 +143,16 @@ export async function usuarioRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const usuario = await prisma.usuario.findUnique({
         where: { id: request.user.sub },
-        include: { cargo: true },
+        include: {
+          cargo: true,
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+            },
+          },
+        },
       })
 
       if (!usuario || !usuario.ativo) {
@@ -140,6 +165,14 @@ export async function usuarioRoutes(app: FastifyInstance) {
         login: usuario.login,
         perfil: usuario.perfil,
         cargo: usuario.cargo.nome,
+        obraId: usuario.obraId,
+        obra: usuario.obra
+          ? {
+              id: usuario.obra.id,
+              codigo: usuario.obra.codigo,
+              nome: usuario.obra.nome,
+            }
+          : null,
         criadoEm: usuario.criadoEm,
       })
     }
@@ -175,6 +208,14 @@ export async function usuarioRoutes(app: FastifyInstance) {
           perfil: true,
           ativo: true,
           criadoEm: true,
+          obraId: true,
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+            },
+          },
           cargo: {
             select: {
               id: true,
@@ -213,6 +254,14 @@ export async function usuarioRoutes(app: FastifyInstance) {
           perfil: true,
           ativo: true,
           criadoEm: true,
+          obraId: true,
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+            },
+          },
           cargo: {
             select: {
               id: true,
@@ -239,7 +288,7 @@ export async function usuarioRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { nome, login, senha, perfil, cargoId } = criarUsuarioSchema.parse(request.body)
+      const { nome, login, senha, perfil, cargoId, obraId } = criarUsuarioSchema.parse(request.body)
 
       // Valida unicidade do login
       const loginExistente = await prisma.usuario.findFirst({
@@ -264,6 +313,16 @@ export async function usuarioRoutes(app: FastifyInstance) {
         throw new BusinessRuleError('Cargo informado nao existe ou esta inativo')
       }
 
+      // Se informou obraId, valida se existe e esta ativa
+      if (obraId) {
+        const obra = await prisma.obra.findUnique({
+          where: { id: obraId },
+        })
+        if (!obra || !obra.ativa) {
+          throw new BusinessRuleError('Obra informada nao existe ou esta inativa')
+        }
+      }
+
       // Hash seguro da senha
       const senhaHash = await bcrypt.hash(senha, 10)
 
@@ -274,6 +333,7 @@ export async function usuarioRoutes(app: FastifyInstance) {
           senhaHash,
           perfil,
           cargoId,
+          obraId: obraId || null,
           ativo: true,
         },
         select: {
@@ -283,6 +343,14 @@ export async function usuarioRoutes(app: FastifyInstance) {
           perfil: true,
           ativo: true,
           criadoEm: true,
+          obraId: true,
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+            },
+          },
           cargo: {
             select: {
               id: true,
@@ -428,6 +496,16 @@ export async function usuarioRoutes(app: FastifyInstance) {
         }
       }
 
+      // Se informou obraId, valida se existe e esta ativa (ou permite remover passando null)
+      if (dados.obraId !== undefined && dados.obraId !== null) {
+        const obra = await prisma.obra.findUnique({
+          where: { id: dados.obraId },
+        })
+        if (!obra || !obra.ativa) {
+          throw new BusinessRuleError('Obra informada nao existe ou esta inativa')
+        }
+      }
+
       // Protecao: impede o admin de retirar a si proprio o perfil ADMIN
       if (
         request.user.sub === id &&
@@ -445,6 +523,7 @@ export async function usuarioRoutes(app: FastifyInstance) {
           login: dados.login,
           perfil: dados.perfil,
           cargoId: dados.cargoId,
+          obraId: dados.obraId !== undefined ? dados.obraId : undefined,
         },
         select: {
           id: true,
@@ -453,6 +532,14 @@ export async function usuarioRoutes(app: FastifyInstance) {
           perfil: true,
           ativo: true,
           criadoEm: true,
+          obraId: true,
+          obra: {
+            select: {
+              id: true,
+              codigo: true,
+              nome: true,
+            },
+          },
           cargo: {
             select: {
               id: true,

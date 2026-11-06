@@ -191,9 +191,8 @@ describe('EstoquePage Component', () => {
 
     expect(screen.getByText('Lancar Movimentacao de Estoque')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
-      target: { value: 'obra-1' },
-    })
+    // Com apenas 1 obra mockada ou obra fixa, o elemento exibe a obra fixada diretamente
+    expect(screen.getAllByText(/OBRA-01 - Residencial Horizonte/i).length).toBeGreaterThan(0)
 
     fireEvent.change(screen.getByDisplayValue('Selecione o material...'), {
       target: { value: 'mat-1' },
@@ -245,10 +244,7 @@ describe('EstoquePage Component', () => {
 
     expect(screen.getByText('Cadastrar Nova Locacao de Estoque')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
-      target: { value: 'obra-1' },
-    })
-
+    // Com apenas 1 obra, ela ja vem selecionada por padrao
     fireEvent.change(screen.getByPlaceholderText('ex: Locacao 01 - Prateleira A'), {
       target: { value: 'Deposito Bloco B' },
     })

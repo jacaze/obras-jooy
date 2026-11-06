@@ -127,6 +127,7 @@ export async function createUsuario(dados: {
   senha: string
   perfil: PerfilUsuario
   cargoId: string
+  obraId?: string | null
 }): Promise<UsuarioListagem> {
   const response = await api.post<UsuarioListagem>('/usuarios', dados)
   return response.data
@@ -137,6 +138,7 @@ export interface AtualizarUsuarioInput {
   login?: string
   perfil?: PerfilUsuario
   cargoId?: string
+  obraId?: string | null
 }
 
 export async function updateUsuario(id: string, dados: AtualizarUsuarioInput): Promise<UsuarioListagem> {

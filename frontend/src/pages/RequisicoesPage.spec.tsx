@@ -221,9 +221,8 @@ describe('RequisicoesPage Component', () => {
 
     expect(screen.getByText('Nova Requisicao de Obra')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
-      target: { value: 'obra-1' },
-    })
+    // Com apenas 1 obra mockada ou obra fixa, o elemento ja fixa a obra
+    expect(screen.getAllByText(/OBRA-01 - Edificio Horizonte/i).length).toBeGreaterThan(0)
 
     await waitFor(() => {
       expect(screen.getByText('Pavimento 02')).toBeInTheDocument()
@@ -375,9 +374,8 @@ describe('RequisicoesPage Component', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /\+ Nova Requisicao/i }))
 
-    fireEvent.change(screen.getByDisplayValue('Selecione a obra...'), {
-      target: { value: 'obra-1' },
-    })
+    // Com apenas 1 obra mockada ou obra fixa, o elemento ja fixa a obra
+    expect(screen.getAllByText(/OBRA-01 - Edificio Horizonte/i).length).toBeGreaterThan(0)
 
     await waitFor(() => {
       expect(screen.getByText('Pavimento 02')).toBeInTheDocument()

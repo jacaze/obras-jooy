@@ -359,7 +359,8 @@ export function RequisicoesPage() {
   })
 
   function limparForm() {
-    setObraIdSelecionada('')
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '')
+    setObraIdSelecionada(obraPadrao)
     setAreaIdSelecionada('')
     setObservacao('')
     setItensForm([{ tipo: 'MATERIAL', materialId: '', ferramentaId: '', quantidade: 1 }])
@@ -369,6 +370,8 @@ export function RequisicoesPage() {
 
   function handleAbrirModal() {
     limparForm()
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '')
+    setObraIdSelecionada(obraPadrao)
     setModalNovaRequisicaoAberto(true)
   }
 
@@ -1043,22 +1046,35 @@ export function RequisicoesPage() {
                   <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                     Obra
                   </label>
-                  <select
-                    value={obraIdSelecionada}
-                    onChange={(e) => {
-                      setObraIdSelecionada(e.target.value)
-                      setAreaIdSelecionada('')
-                    }}
-                    required
-                    className="ob-input w-full text-sm font-body"
-                  >
-                    <option value="">Selecione a obra...</option>
-                    {obras.map((o) => (
-                      <option key={o.id} value={o.id}>
-                        {o.codigo} - {o.nome}
-                      </option>
-                    ))}
-                  </select>
+                  {usuario?.obraId || obras.length === 1 ? (
+                    <div className="ob-input w-full text-sm font-body py-2.5 px-3 bg-surface-container text-on-surface font-semibold flex items-center justify-between">
+                      <span>
+                        {usuario?.obra
+                          ? `${usuario.obra.codigo} - ${usuario.obra.nome}`
+                          : obras[0]
+                            ? `${obras[0].codigo} - ${obras[0].nome}`
+                            : 'Obra'}
+                      </span>
+                      <span className="text-xs text-secondary font-normal">(Fixa)</span>
+                    </div>
+                  ) : (
+                    <select
+                      value={obraIdSelecionada}
+                      onChange={(e) => {
+                        setObraIdSelecionada(e.target.value)
+                        setAreaIdSelecionada('')
+                      }}
+                      required
+                      className="ob-input w-full text-sm font-body"
+                    >
+                      <option value="">Selecione a obra...</option>
+                      {obras.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.codigo} - {o.nome}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div>

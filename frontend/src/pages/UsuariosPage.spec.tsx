@@ -266,6 +266,7 @@ describe('UsuariosPage Component', () => {
         login: 'carlos.silva',
         perfil: 'ALMOXARIFE',
         cargoId: 'cargo-1',
+        obraId: null,
       })
     })
   })
