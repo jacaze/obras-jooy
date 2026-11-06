@@ -334,6 +334,7 @@ export async function materialRoutes(app: FastifyInstance) {
         const buscaTermo = busca.trim()
         where.OR = [
           { codigo: { contains: buscaTermo, mode: 'insensitive' } },
+          { codigoSienge: { contains: buscaTermo, mode: 'insensitive' } },
           { descricao: { contains: buscaTermo, mode: 'insensitive' } },
         ]
       }
@@ -441,6 +442,7 @@ export async function materialRoutes(app: FastifyInstance) {
       const material = await prisma.material.create({
         data: {
           codigo: dados.codigo,
+          codigoSienge: dados.codigoSienge || null,
           descricao: dados.descricao,
           categoriaId: dados.categoriaId,
           unidadeCompraId: unCompraId,
@@ -512,9 +514,20 @@ export async function materialRoutes(app: FastifyInstance) {
         fator = 1.0
       }
 
+      if (dados.codigo && dados.codigo !== materialExistente.codigo) {
+        const existenteComCodigo = await prisma.material.findUnique({
+          where: { codigo: dados.codigo },
+        })
+        if (existenteComCodigo) {
+          throw new ConflictError(`Material com codigo "${dados.codigo}" ja existe`)
+        }
+      }
+
       const atualizado = await prisma.material.update({
         where: { id },
         data: {
+          ...(dados.codigo && { codigo: dados.codigo }),
+          ...(dados.codigoSienge !== undefined && { codigoSienge: dados.codigoSienge || null }),
           ...(dados.descricao && { descricao: dados.descricao }),
           ...(dados.categoriaId && { categoriaId: dados.categoriaId }),
           ...(dados.unidadeCompraId !== undefined && { unidadeCompraId: dados.unidadeCompraId }),

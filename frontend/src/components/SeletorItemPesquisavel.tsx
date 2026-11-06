@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 export interface ItemOpcaoBusca {
   id: string
   codigo: string
+  codigoSienge?: string | null
   descricao: string
   unidade?: string
   saldoDisponivel?: number
@@ -50,8 +51,9 @@ export function SeletorItemPesquisavel({
     if (!termoBusca.trim()) return true
     const busca = termoBusca.toLowerCase()
     const cod = it.codigo.toLowerCase()
+    const codSienge = it.codigoSienge ? it.codigoSienge.toLowerCase() : ''
     const desc = it.descricao.toLowerCase()
-    return cod.includes(busca) || desc.includes(busca)
+    return cod.includes(busca) || codSienge.includes(busca) || desc.includes(busca)
   })
 
   return (
@@ -167,6 +169,11 @@ export function SeletorItemPesquisavel({
                         <strong className="ob-mono font-semibold text-accent-text mr-2">
                           {it.codigo}
                         </strong>
+                        {it.codigoSienge && (
+                          <span className="ob-badge ob-badge--info font-mono text-[10px] py-0 px-1.5 mr-2">
+                            {it.codigoSienge}
+                          </span>
+                        )}
                         <span className="text-on-surface">{it.descricao}</span>
                         {it.unidade && (
                           <span className="text-on-surface-variant ml-1.5 font-mono">

@@ -128,6 +128,7 @@ model CategoriaMaterial {
 model Material {
   id                  String             @id @default(uuid()) @db.Uuid
   codigo              String             @unique @db.VarChar(50)
+  codigoSienge        String?            @map("codigo_sienge") @db.VarChar(50)
   descricao           String             @db.VarChar(180)
   categoriaId         String             @map("categoria_id") @db.Uuid
   unidadeCompraId     String?            @map("unidade_compra_id") @db.Uuid

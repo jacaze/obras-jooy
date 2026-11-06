@@ -190,10 +190,11 @@ export async function seedDatabase() {
     categoriasMap[cat] = criada.id
   }
 
-  // 6. Seed de Materiais Iniciais Demonstrativos (T07)
+  // 6. Seed de Materiais Iniciais Demonstrativos (T07 / F03)
   const materiaisIniciais = [
     {
       codigo: 'MAT-001',
+      codigoSienge: '74201',
       descricao: 'Cimento CP-II F 32 50kg',
       categoriaId: categoriasMap['Alvenaria e Cimento'],
       unidadeCompraId: unidadesMap['SC'],
@@ -205,6 +206,7 @@ export async function seedDatabase() {
     },
     {
       codigo: 'MAT-002',
+      codigoSienge: null,
       descricao: 'Areia Media Lavada',
       categoriaId: categoriasMap['Alvenaria e Cimento'],
       unidadeCompraId: null,
@@ -216,6 +218,7 @@ export async function seedDatabase() {
     },
     {
       codigo: 'MAT-003',
+      codigoSienge: '88340',
       descricao: 'Cabo Flexivel 2,5mm 750V Azul',
       categoriaId: categoriasMap['Eletrica'],
       unidadeCompraId: unidadesMap['RL'],
@@ -227,6 +230,7 @@ export async function seedDatabase() {
     },
     {
       codigo: 'MAT-004',
+      codigoSienge: null,
       descricao: 'Luva de Vaqueta Mista',
       categoriaId: categoriasMap['EPIs e Seguranca'],
       unidadeCompraId: null,
@@ -244,6 +248,7 @@ export async function seedDatabase() {
     const criado = await prisma.material.upsert({
       where: { codigo: mat.codigo },
       update: {
+        codigoSienge: mat.codigoSienge,
         descricao: mat.descricao,
         categoriaId: mat.categoriaId,
         unidadeCompraId: mat.unidadeCompraId,
