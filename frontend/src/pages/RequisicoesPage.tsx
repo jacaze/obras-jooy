@@ -121,10 +121,59 @@ export function RequisicoesPage() {
     enabled: !!obraIdSelecionada,
   })
 
+  const { data: todosLimitesOrcamento = [] } = useQuery({
+    queryKey: ['limites-orcamento-todas-obras'],
+    queryFn: () => getLimitesOrcamentoObra(),
+  })
+
   const mapaLimitesOrcamento = (() => {
     const mapa = new Map<string, number>()
     for (const lim of limitesOrcamentoObra) {
       mapa.set(lim.materialId, Number(lim.quantidadeOrcada))
+    }
+    return mapa
+  })()
+
+  const mapaDetalhesOrcamentoModal = (() => {
+    const mapa = new Map<
+      string,
+      { quantidadeOrcada: number; quantidadeConsumida: number; saldoOrcamento: number }
+    >()
+    for (const lim of limitesOrcamentoObra) {
+      const orcada = Number(lim.quantidadeOrcada)
+      const consumida =
+        lim.quantidadeConsumida !== undefined ? Number(lim.quantidadeConsumida) : 0
+      const saldo =
+        lim.saldoOrcamento !== undefined
+          ? Number(lim.saldoOrcamento)
+          : Number((orcada - consumida).toFixed(4))
+      mapa.set(lim.materialId, {
+        quantidadeOrcada: orcada,
+        quantidadeConsumida: consumida,
+        saldoOrcamento: saldo,
+      })
+    }
+    return mapa
+  })()
+
+  const mapaLimitesPorObraMaterial = (() => {
+    const mapa = new Map<
+      string,
+      { quantidadeOrcada: number; quantidadeConsumida: number; saldoOrcamento: number }
+    >()
+    for (const lim of todosLimitesOrcamento) {
+      const orcada = Number(lim.quantidadeOrcada)
+      const consumida =
+        lim.quantidadeConsumida !== undefined ? Number(lim.quantidadeConsumida) : 0
+      const saldo =
+        lim.saldoOrcamento !== undefined
+          ? Number(lim.saldoOrcamento)
+          : Number((orcada - consumida).toFixed(4))
+      mapa.set(`${lim.obraId}:${lim.materialId}`, {
+        quantidadeOrcada: orcada,
+        quantidadeConsumida: consumida,
+        saldoOrcamento: saldo,
+      })
     }
     return mapa
   })()
@@ -154,6 +203,98 @@ export function RequisicoesPage() {
     }
 
     return Array.from(mapa.values())
+  })()
+
+  // Mapa de saldo disponivel por materialId na obra selecionada
+  const mapaSaldoFisicoModal = (() => {
+    const mapa = new Map<string, { disponivel: number; material: any }>()
+    for (const item of materiaisEmEstoqueNaObra) {
+      mapa.set(item.material.id, item)
+    }
+    return mapa
+  })()
+
+  // Quantidade consolidada solicitada por materialId no formulario atual
+  const mapaQtdSolicitadaModal = (() => {
+    const mapa = new Map<string, number>()
+    for (const linha of itensForm) {
+      if (linha.tipo === 'MATERIAL' && linha.materialId && linha.quantidade > 0) {
+        const atual = mapa.get(linha.materialId) || 0
+        mapa.set(linha.materialId, Number((atual + Number(linha.quantidade)).toFixed(4)))
+      }
+    }
+    return mapa
+  })()
+
+  // Avaliacao em tempo real de estouro de orcamento e saldo fisico no modal
+  const alertasModalPorMaterial = (() => {
+    const listaEstouroOrcamento: Array<{
+      materialId: string
+      codigo: string
+      descricao: string
+      sigla: string
+      solicitado: number
+      orcado: number
+      consumido: number
+      saldoOrcamento: number
+      excedentePrevisto: number
+    }> = []
+
+    const listaFaltaEstoque: Array<{
+      materialId: string
+      codigo: string
+      descricao: string
+      sigla: string
+      solicitado: number
+      disponivel: number
+    }> = []
+
+    for (const [materialId, qtdSolicitada] of mapaQtdSolicitadaModal.entries()) {
+      const infoEstoque = mapaSaldoFisicoModal.get(materialId)
+      const mat = infoEstoque?.material
+      const codigo = mat?.codigo || 'MAT'
+      const descricao = mat?.descricao || 'Material'
+      const sigla = mat?.unidadeConsumo?.sigla || 'UN'
+      const disponivel = infoEstoque ? Number(infoEstoque.disponivel) : 0
+
+      if (infoEstoque && qtdSolicitada > disponivel) {
+        listaFaltaEstoque.push({
+          materialId,
+          codigo,
+          descricao,
+          sigla,
+          solicitado: qtdSolicitada,
+          disponivel,
+        })
+      }
+
+      const infoOrc = mapaDetalhesOrcamentoModal.get(materialId)
+      if (infoOrc) {
+        const totalPosPedido = Number(
+          (infoOrc.quantidadeConsumida + qtdSolicitada).toFixed(4)
+        )
+        if (
+          qtdSolicitada > infoOrc.saldoOrcamento ||
+          totalPosPedido > infoOrc.quantidadeOrcada
+        ) {
+          listaEstouroOrcamento.push({
+            materialId,
+            codigo,
+            descricao,
+            sigla,
+            solicitado: qtdSolicitada,
+            orcado: infoOrc.quantidadeOrcada,
+            consumido: infoOrc.quantidadeConsumida,
+            saldoOrcamento: infoOrc.saldoOrcamento,
+            excedentePrevisto: Number(
+              Math.max(0, totalPosPedido - infoOrc.quantidadeOrcada).toFixed(4)
+            ),
+          })
+        }
+      }
+    }
+
+    return { listaEstouroOrcamento, listaFaltaEstoque }
   })()
 
   // Mutations
@@ -218,7 +359,8 @@ export function RequisicoesPage() {
   })
 
   function limparForm() {
-    setObraIdSelecionada('')
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '')
+    setObraIdSelecionada(obraPadrao)
     setAreaIdSelecionada('')
     setObservacao('')
     setItensForm([{ tipo: 'MATERIAL', materialId: '', ferramentaId: '', quantidade: 1 }])
@@ -228,6 +370,8 @@ export function RequisicoesPage() {
 
   function handleAbrirModal() {
     limparForm()
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '')
+    setObraIdSelecionada(obraPadrao)
     setModalNovaRequisicaoAberto(true)
   }
 
@@ -395,571 +539,426 @@ export function RequisicoesPage() {
   function badgeStatus(status: StatusRequisicao) {
     switch (status) {
       case 'SOLICITADA':
-        return { bg: '#fef3c7', cor: '#92400e', texto: 'Pendente (Aguardando Almoxarifado)' }
+        return { badgeClass: 'ob-badge--low', texto: 'Pendente (Aguardando Almoxarifado)' }
       case 'EM_SEPARACAO':
-        return { bg: '#e0f2fe', cor: '#0369a1', texto: 'Em Separacao' }
+        return { badgeClass: 'ob-badge--info', texto: 'Em Separacao' }
       case 'PRONTA':
-        return { bg: '#dcfce7', cor: '#166534', texto: 'Pronta para Retirada' }
+        return { badgeClass: 'ob-badge--ok', texto: 'Pronta para Retirada' }
       case 'ATENDIDA':
-        return { bg: '#dcfce7', cor: '#166534', texto: 'Atendida / Entregue' }
+        return { badgeClass: 'ob-badge--ok', texto: 'Atendida / Entregue' }
       case 'CANCELADA':
-        return { bg: '#fee2e2', cor: '#991b1b', texto: 'Cancelada' }
+        return { badgeClass: 'ob-badge--crit', texto: 'Cancelada' }
     }
   }
 
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
-      {/* Cabecalho */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
-            {ehEncarregado ? 'Minhas Requisicoes de Obra' : 'Painel de Requisicoes de Obra'}
-          </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
-            {ehEncarregado
-              ? 'Solicite materiais e ferramentas disponiveis no estoque da obra e acompanhe seus pedidos'
-              : 'Atenda requisicoes com baixa automatica no estoque e exporte os registros atendidos para o SIENGE'}
-          </p>
-        </div>
+    <main className="flex flex-col w-full min-h-screen bg-surface pb-28 font-body text-on-surface">
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 flex flex-col gap-6">
+        {/* Cabecalho Nativo */}
+        <div className="flex flex-wrap justify-between items-center gap-4 pt-2">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-accent-text">
+              Controle de Canteiro
+            </span>
+            <h1 className="ob-heading text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
+              {ehEncarregado ? 'Minhas Requisicoes de Obra' : 'Requisicoes de Obra'}
+            </h1>
+            <p className="text-xs sm:text-sm text-on-surface-variant font-body">
+              {ehEncarregado
+                ? 'Solicite materiais e ferramentas disponiveis no estoque da obra e acompanhe seus pedidos'
+                : 'Atenda requisicoes com baixa automatica no estoque e exporte os registros atendidos para o SIENGE'}
+            </p>
+          </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {podeAtenderEExportar && (
+          <div className="flex flex-wrap items-center gap-2">
+            {podeAtenderEExportar && (
+              <button
+                type="button"
+                disabled={exportarSiengeMutation.isPending}
+                onClick={() => {
+                  setMensagemFeedback(null)
+                  setErroFeedback(null)
+                  const reexportar = filtroSienge === 'EXPORTADAS'
+                  exportarSiengeMutation.mutate(reexportar)
+                }}
+                className="ob-btn ob-btn--outline ob-btn--sm min-h-[48px]"
+              >
+                <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                <span>
+                  {exportarSiengeMutation.isPending
+                    ? 'Exportando CSV...'
+                    : `Exportar para SIENGE (CSV)${qtdPendentesSienge > 0 ? ` [${qtdPendentesSienge}]` : ''}`}
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
-              disabled={exportarSiengeMutation.isPending}
-              onClick={() => {
-                setMensagemFeedback(null)
-                setErroFeedback(null)
-                const reexportar = filtroSienge === 'EXPORTADAS'
-                exportarSiengeMutation.mutate(reexportar)
-              }}
-              style={{
-                backgroundColor: '#0f766e',
-                color: '#ffffff',
-                border: 'none',
-                padding: '0.65rem 1.15rem',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontSize: '0.88rem',
-              }}
+              onClick={handleAbrirModal}
+              className="ob-btn ob-btn--primary ob-btn--sm min-h-[48px]"
             >
-              {exportarSiengeMutation.isPending
-                ? 'Exportando CSV...'
-                : `Exportar para SIENGE (CSV)${qtdPendentesSienge > 0 ? ` [${qtdPendentesSienge}]` : ''}`}
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>+ Nova Requisicao</span>
             </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleAbrirModal}
-            style={{
-              backgroundColor: '#0284c7',
-              color: '#ffffff',
-              border: 'none',
-              padding: '0.65rem 1.25rem',
-              borderRadius: '6px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-            }}
-          >
-            + Nova Requisicao
-          </button>
+          </div>
         </div>
-      </div>
 
-      {/* Mensagens de Feedback */}
-      {mensagemFeedback && (
-        <div
-          style={{
-            backgroundColor: '#f0fdf4',
-            color: '#166534',
-            border: '1px solid #bbf7d0',
-            padding: '0.75rem 1rem',
-            borderRadius: '6px',
-            marginBottom: '1rem',
-            fontSize: '0.88rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span>{mensagemFeedback}</span>
-          <button
-            type="button"
-            onClick={() => setMensagemFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 700 }}
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {erroFeedback && (
-        <div
-          style={{
-            backgroundColor: '#fef2f2',
-            color: '#b91c1c',
-            border: '1px solid #fecaca',
-            padding: '0.75rem 1rem',
-            borderRadius: '6px',
-            marginBottom: '1rem',
-            fontSize: '0.88rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span>{erroFeedback}</span>
-          <button
-            type="button"
-            onClick={() => setErroFeedback(null)}
-            style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontWeight: 700 }}
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {/* Barra de Filtros e Busca */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.85rem',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Buscar por numero (#101), obra, pavimento, solicitante ou quem retirou..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{
-            flex: '1',
-            minWidth: '250px',
-            padding: '0.6rem 1rem',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            backgroundColor: '#ffffff',
-            color: '#0f172a',
-            fontSize: '0.88rem',
-          }}
-        />
-
-        {/* Botoes dos 3 Status Principais + Todas */}
-        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-          {[
-            { id: 'TODAS', label: 'Todas' },
-            { id: 'SOLICITADA', label: 'Pendentes' },
-            { id: 'ATENDIDA', label: 'Atendidas' },
-            { id: 'CANCELADA', label: 'Canceladas' },
-          ].map((st) => (
+        {/* Mensagens de Feedback */}
+        {mensagemFeedback && (
+          <div className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fade-up">
+            <span className="font-medium">{mensagemFeedback}</span>
             <button
-              key={st.id}
               type="button"
-              onClick={() => setFiltroStatus(st.id)}
-              style={{
-                padding: '0.45rem 0.85rem',
-                borderRadius: '6px',
-                border: '1px solid',
-                borderColor: filtroStatus === st.id ? '#0284c7' : '#cbd5e1',
-                backgroundColor: filtroStatus === st.id ? '#0284c7' : '#ffffff',
-                color: filtroStatus === st.id ? '#ffffff' : '#475569',
-                cursor: 'pointer',
-                fontSize: '0.84rem',
-                fontWeight: filtroStatus === st.id ? 600 : 400,
-              }}
+              onClick={() => setMensagemFeedback(null)}
+              className="text-on-secondary-container font-bold text-lg hover:opacity-70 px-1 cursor-pointer"
             >
-              {st.label}
+              &times;
             </button>
-          ))}
+          </div>
+        )}
+
+        {erroFeedback && (
+          <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-sm animate-fade-up">
+            <span className="font-medium">{erroFeedback}</span>
+            <button
+              type="button"
+              onClick={() => setErroFeedback(null)}
+              className="text-on-error-container font-bold text-lg hover:opacity-70 px-1 cursor-pointer"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+
+        {/* Summary Spark Card */}
+        <div className="ob-card p-4 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed shadow-sm">
+              <span className="material-symbols-outlined text-[22px]">pending_actions</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-on-surface">Pico matinal no Almoxarifado</p>
+              <p className="text-xs text-on-surface-variant font-mono">
+                Tempo médio de espera atual: 8 minutos • Separação rápida ativa
+              </p>
+            </div>
+          </div>
+          <span className="material-symbols-outlined text-accent-text text-[22px]">bolt</span>
         </div>
 
-        {/* Filtro rapido para ocultar requisicoes ja atendidas */}
-        <label
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            fontSize: '0.84rem',
-            color: '#334155',
-            cursor: 'pointer',
-            backgroundColor: '#f8fafc',
-            padding: '0.45rem 0.75rem',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={ocultarAtendidas}
-            onChange={(e) => setOcultarAtendidas(e.target.checked)}
-          />
-          Ocultar ja atendidas
-        </label>
+        {/* Barra de Filtros: Tabs + Search */}
+        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <div className="overflow-x-auto max-w-full pb-1">
+            <div className="ob-tabs" role="tablist">
+              {[
+                { id: 'TODAS', label: 'Todas' },
+                { id: 'SOLICITADA', label: 'Pendentes' },
+                { id: 'ATENDIDA', label: 'Atendidas' },
+                { id: 'CANCELADA', label: 'Canceladas' },
+              ].map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={filtroStatus === st.id}
+                  onClick={() => setFiltroStatus(st.id)}
+                  className="ob-tab"
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Filtro de Exportacao SIENGE (Exclusivo Almoxarife / Admin) */}
-        {podeAtenderEExportar && (
-          <select
-            aria-label="Filtrar por status de exportacao SIENGE"
-            value={filtroSienge}
-            onChange={(e) => setFiltroSienge(e.target.value as any)}
-            style={{
-              padding: '0.48rem 0.75rem',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              color: '#0f172a',
-              fontSize: '0.84rem',
-            }}
-          >
-            <option value="TODAS">SIENGE: Todas</option>
-            <option value="PENDENTES">SIENGE: Pendentes de Exportacao</option>
-            <option value="EXPORTADAS">SIENGE: Ja Exportadas</option>
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="ob-search flex-1 sm:w-64">
+              <span className="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Buscar por #101, obra, solicitante..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="ob-input text-xs sm:text-sm"
+              />
+            </div>
+
+            <label className="inline-flex items-center gap-2 text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-2 rounded-xl border border-surface-container cursor-pointer select-none min-h-[44px]">
+              <input
+                type="checkbox"
+                checked={ocultarAtendidas}
+                onChange={(e) => setOcultarAtendidas(e.target.checked)}
+                className="w-4 h-4 rounded text-accent-text"
+              />
+              <span>Ocultar ja atendidas</span>
+            </label>
+
+            {podeAtenderEExportar && (
+              <select
+                aria-label="Filtrar por status de exportacao SIENGE"
+                value={filtroSienge}
+                onChange={(e) => setFiltroSienge(e.target.value as any)}
+                className="ob-input px-3 py-2 text-xs w-auto min-h-[44px]"
+              >
+                <option value="TODAS">SIENGE: Todas</option>
+                <option value="PENDENTES">SIENGE: Pendentes</option>
+                <option value="EXPORTADAS">SIENGE: Exportadas</option>
+              </select>
+            )}
+          </div>
+        </div>
+
+        {/* Lista de Requisicoes */}
+        {carregandoRequisicoes ? (
+          <div className="p-12 text-center text-sm text-on-surface-variant font-body">
+            Carregando requisicoes...
+          </div>
+        ) : requisicoesFiltradas.length === 0 ? (
+          <div className="ob-card p-8 text-center text-sm text-on-surface-variant border border-dashed border-surface-container">
+            Nenhuma requisicao encontrada para os filtros selecionados.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {requisicoesFiltradas.map((r) => {
+              const statusConfig = badgeStatus(r.status)
+              const podeCancelar =
+                r.status === 'SOLICITADA' &&
+                (usuario?.id === r.requisitanteId || podeAtenderEExportar)
+              const podeAtender = r.status === 'SOLICITADA' && podeAtenderEExportar
+
+              return (
+                <div
+                  key={r.id}
+                  className="ob-card p-4 sm:p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all"
+                >
+                  {/* Linha Superior: #REQ e Status */}
+                  <div className="flex flex-wrap justify-between items-center gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-accent-text tracking-tight">
+                        #{r.numeroSequencial}
+                      </span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
+                      <span className={`ob-badge ${statusConfig.badgeClass}`}>
+                        {statusConfig.texto}
+                      </span>
+
+                      {podeAtenderEExportar && r.status === 'ATENDIDA' && (
+                        <span
+                          className={`ob-badge ${
+                            r.exportadaSienge ? 'ob-badge--ok' : 'ob-badge--low'
+                          }`}
+                        >
+                          {r.exportadaSienge ? 'Exportada SIENGE' : 'Pendente Exportacao SIENGE'}
+                        </span>
+                      )}
+                    </div>
+
+                    <span className="text-xs text-on-surface-variant font-mono tabular-nums">
+                      Solicitado em: {new Date(r.solicitadaEm).toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+
+                  {/* Localizacao, Solicitante e Retirada */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 bg-surface-container-low p-3 rounded-xl text-xs sm:text-sm">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="material-symbols-outlined text-[17px] text-primary">
+                        apartment
+                      </span>
+                      <span className="text-on-surface-variant">Obra / Destino:</span>
+                      <strong className="text-on-surface truncate">
+                        {r.area?.obra?.codigo} &bull; {r.area?.nome}
+                      </strong>
+                    </div>
+
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="material-symbols-outlined text-[17px] text-primary">
+                        engineering
+                      </span>
+                      <span className="text-on-surface-variant">Solicitante:</span>
+                      <strong className="text-on-surface truncate">{r.requisitante?.nome}</strong>
+                    </div>
+
+                    {r.status === 'ATENDIDA' && r.retiradoPor && (
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="material-symbols-outlined text-[17px] text-secondary">
+                          badge
+                        </span>
+                        <span className="text-on-surface-variant">Retirado na obra por:</span>
+                        <strong className="text-secondary truncate">{r.retiradoPor}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Itens Requisitados */}
+                  <div className="bg-surface-container-lowest p-3 rounded-xl border border-surface-container">
+                    <div className="text-xs font-bold text-on-surface-variant mb-2 uppercase tracking-wide">
+                      Itens da Requisicao ({r.itens.length}):
+                    </div>
+                    <ul className="m-0 pl-4 text-xs sm:text-sm text-on-surface space-y-1">
+                      {r.itens.map((it) => {
+                        const qtdSol = Number(it.quantidade)
+                        const temEntregue =
+                          it.quantidadeEntregue !== null && it.quantidadeEntregue !== undefined
+                        const qtdEnt = temEntregue ? Number(it.quantidadeEntregue) : null
+
+                        const obraItemId = r.area?.obra?.id || r.area?.obraId
+                        const infoOrcCard =
+                          obraItemId && it.materialId
+                            ? mapaLimitesPorObraMaterial.get(`${obraItemId}:${it.materialId}`)
+                            : undefined
+                        const excedeLimiteCard = Boolean(
+                          infoOrcCard &&
+                            r.status !== 'CANCELADA' &&
+                            (qtdSol > infoOrcCard.quantidadeOrcada ||
+                              infoOrcCard.quantidadeConsumida > infoOrcCard.quantidadeOrcada)
+                        )
+
+                        return (
+                          <li key={it.id}>
+                            {it.material ? (
+                              <span>
+                                {r.status === 'ATENDIDA' && qtdEnt !== null ? (
+                                  <span>
+                                    <strong>
+                                      Solicitado: {qtdSol} {it.material.unidadeConsumo.sigla} |
+                                      Entregue: {qtdEnt} {it.material.unidadeConsumo.sigla}
+                                    </strong>{' '}
+                                    &mdash; {it.material.descricao}{' '}
+                                    <span className="text-on-surface-variant">
+                                      ({it.material.codigo})
+                                    </span>
+                                  </span>
+                                ) : (
+                                  <span>
+                                    <strong>
+                                      {qtdSol} {it.material.unidadeConsumo.sigla}
+                                    </strong>{' '}
+                                    &mdash; {it.material.descricao}{' '}
+                                    <span className="text-on-surface-variant">
+                                      ({it.material.codigo})
+                                    </span>
+                                  </span>
+                                )}
+                                {excedeLimiteCard && infoOrcCard && (
+                                  <span className="ml-2 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold">
+                                    Excede Limite Orcado ({infoOrcCard.quantidadeOrcada}{' '}
+                                    {it.material.unidadeConsumo.sigla})
+                                  </span>
+                                )}
+                              </span>
+                            ) : it.ferramenta ? (
+                              <span>
+                                <strong>1 un</strong> &mdash; {it.ferramenta.nome}{' '}
+                                <span className="text-on-surface-variant">
+                                  [Ferramenta cod: {it.ferramenta.codigo}]
+                                </span>
+                              </span>
+                            ) : (
+                              <span>Item nao especificado</span>
+                            )}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+
+                  {/* Observações e Ações do Card */}
+                  <div className="flex flex-wrap justify-between items-center gap-2 pt-1 border-t border-surface-container">
+                    <span className="text-xs text-on-surface-variant italic truncate max-w-md">
+                      {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
+                    </span>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                      {podeAtender && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirModalAtendimento(r)}
+                          className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px]"
+                        >
+                          Atender / Entregar Material
+                        </button>
+                      )}
+
+                      {podeCancelar && (
+                        <button
+                          type="button"
+                          disabled={cancelarRequisicaoMutation.isPending}
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Deseja cancelar a requisicao #${r.numeroSequencial}?`
+                              )
+                            ) {
+                              cancelarRequisicaoMutation.mutate(r.id)
+                            }
+                          }}
+                          className="ob-btn ob-btn--outline ob-btn--sm min-h-[44px] text-error border-error/30 hover:bg-error-container/20"
+                        >
+                          Cancelar Requisicao
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
 
-      {/* Lista de Requisicoes */}
-      {carregandoRequisicoes ? (
-        <p style={{ color: '#64748b' }}>Carregando requisicoes...</p>
-      ) : requisicoesFiltradas.length === 0 ? (
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            padding: '3rem',
-            borderRadius: '8px',
-            textAlign: 'center',
-            color: '#94a3b8',
-            border: '1px dashed #cbd5e1',
-          }}
-        >
-          Nenhuma requisicao encontrada para os filtros selecionados.
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {requisicoesFiltradas.map((r) => {
-            const statusConfig = badgeStatus(r.status)
-            const podeCancelar =
-              r.status === 'SOLICITADA' &&
-              (usuario?.id === r.requisitanteId || podeAtenderEExportar)
-            const podeAtender =
-              r.status === 'SOLICITADA' && podeAtenderEExportar
-
-            return (
-              <div
-                key={r.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                }}
-              >
-                {/* Linha Superior */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                    <span
-                      style={{
-                        fontSize: '1.1rem',
-                        fontWeight: 700,
-                        color: '#0f172a',
-                      }}
-                    >
-                      #{r.numeroSequencial}
-                    </span>
-                    <span
-                      style={{
-                        backgroundColor: statusConfig.bg,
-                        color: statusConfig.cor,
-                        padding: '0.2rem 0.6rem',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {statusConfig.texto}
-                    </span>
-
-                    {/* Badge SIENGE exclusivo para Almoxarife e Admin nas requisicoes atendidas */}
-                    {podeAtenderEExportar && r.status === 'ATENDIDA' && (
-                      <span
-                        style={{
-                          backgroundColor: r.exportadaSienge ? '#e0f2fe' : '#f1f5f9',
-                          color: r.exportadaSienge ? '#0369a1' : '#475569',
-                          border: `1px solid ${r.exportadaSienge ? '#bae6fd' : '#cbd5e1'}`,
-                          padding: '0.18rem 0.55rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {r.exportadaSienge
-                          ? `Exportada para SIENGE${r.exportadaEm ? ` (${new Date(r.exportadaEm).toLocaleDateString('pt-BR')})` : ''}`
-                          : 'Pendente Exportacao SIENGE'}
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                    Solicitado em: {new Date(r.solicitadaEm).toLocaleString('pt-BR')}
-                  </div>
-                </div>
-
-                {/* Localizacao, Solicitante e Quem Retirou */}
-                <div style={{ display: 'flex', gap: '1.75rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
-                  <div>
-                    <span style={{ color: '#64748b' }}>Obra / Destino: </span>
-                    <strong style={{ color: '#1e293b' }}>
-                      {r.area?.obra?.codigo} - {r.area?.obra?.nome} &bull; {r.area?.nome}
-                    </strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#64748b' }}>Solicitante: </span>
-                    <strong style={{ color: '#1e293b' }}>
-                      {r.requisitante?.nome} ({r.requisitante?.cargo?.nome || 'Encarregado'})
-                    </strong>
-                  </div>
-                  {r.status === 'ATENDIDA' && r.retiradoPor && (
-                    <div>
-                      <span style={{ color: '#64748b' }}>Retirado na obra por: </span>
-                      <strong style={{ color: '#15803d' }}>{r.retiradoPor}</strong>
-                    </div>
-                  )}
-                </div>
-
-                {/* Itens da Requisicao (com historico Solicitado vs Entregue) */}
-                <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.4rem' }}>
-                    Itens da Requisicao ({r.itens.length}):
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', color: '#334155' }}>
-                    {r.itens.map((it) => {
-                      const qtdSol = Number(it.quantidade)
-                      const temEntregue =
-                        it.quantidadeEntregue !== null && it.quantidadeEntregue !== undefined
-                      const qtdEnt = temEntregue ? Number(it.quantidadeEntregue) : null
-
-                      return (
-                        <li key={it.id} style={{ marginBottom: '0.25rem' }}>
-                          {it.material ? (
-                            <>
-                              {r.status === 'ATENDIDA' && qtdEnt !== null ? (
-                                <span>
-                                  <strong>
-                                    Solicitado: {qtdSol} {it.material.unidadeConsumo.sigla} | Entregue:{' '}
-                                    {qtdEnt} {it.material.unidadeConsumo.sigla}
-                                  </strong>{' '}
-                                  &mdash; {it.material.descricao}{' '}
-                                  <span style={{ color: '#64748b' }}>({it.material.codigo})</span>
-                                </span>
-                              ) : (
-                                <>
-                                  <strong>
-                                    {qtdSol} {it.material.unidadeConsumo.sigla}
-                                  </strong>{' '}
-                                  &mdash; {it.material.descricao}{' '}
-                                  <span style={{ color: '#64748b' }}>({it.material.codigo})</span>
-                                </>
-                              )}
-                            </>
-                          ) : it.ferramenta ? (
-                            <>
-                              <strong>1 un</strong> &mdash; {it.ferramenta.nome}{' '}
-                              <span style={{ color: '#64748b' }}>[Ferramenta cod: {it.ferramenta.codigo}]</span>
-                            </>
-                          ) : (
-                            <span>Item nao especificado</span>
-                          )}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-
-                {/* Observacao e Acoes */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: r.observacao ? 'normal' : 'italic' }}>
-                    {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
-                    {r.status === 'ATENDIDA' && r.atendidoPor && (
-                      <span style={{ marginLeft: '0.75rem', fontStyle: 'normal', color: '#475569' }}>
-                        &bull; Atendido por: <strong>{r.atendidoPor.nome}</strong>
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {podeAtender && (
-                      <button
-                        type="button"
-                        onClick={() => handleAbrirModalAtendimento(r)}
-                        style={{
-                          backgroundColor: '#16a34a',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '0.4rem 0.9rem',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.82rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        Atender / Entregar Material
-                      </button>
-                    )}
-
-                    {podeCancelar && (
-                      <button
-                        type="button"
-                        disabled={cancelarRequisicaoMutation.isPending}
-                        onClick={() => {
-                          if (window.confirm(`Deseja cancelar a requisicao #${r.numeroSequencial}?`)) {
-                            cancelarRequisicaoMutation.mutate(r.id)
-                          }
-                        }}
-                        style={{
-                          backgroundColor: '#fff1f2',
-                          color: '#e11d48',
-                          border: '1px solid #fecdd3',
-                          padding: '0.35rem 0.75rem',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.8rem',
-                          fontWeight: 500,
-                        }}
-                      >
-                        Cancelar Requisicao
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
       {/* MODAL: ATENDER REQUISICAO (ALMOXARIFE / ADMIN) */}
       {requisicaoEmAtendimento && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '1.75rem',
-              maxWidth: '620px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 0.35rem', fontSize: '1.25rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-2">
               Atender Requisicao #{requisicaoEmAtendimento.numeroSequencial}
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+            <p className="text-sm text-on-surface-variant mb-4 font-body">
               Confirme ou ajuste as quantidades entregues e informe o nome de quem esta retirando o material na obra.
             </p>
 
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                padding: '0.75rem',
-                marginBottom: '1rem',
-                fontSize: '0.84rem',
-                color: '#334155',
-              }}
-            >
+            <div className="bg-surface-container-low border border-surface-container rounded-xl p-4 mb-4 text-sm text-on-surface space-y-1">
               <div>
                 <strong>Obra / Area:</strong> {requisicaoEmAtendimento.area?.obra?.codigo} -{' '}
                 {requisicaoEmAtendimento.area?.obra?.nome} &bull; {requisicaoEmAtendimento.area?.nome}
               </div>
-              <div style={{ marginTop: '0.25rem' }}>
+              <div>
                 <strong>Solicitante:</strong> {requisicaoEmAtendimento.requisitante?.nome}
               </div>
             </div>
 
             {erroAtendimento && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroAtendimento}
               </div>
             )}
 
-            <form onSubmit={handleSubmeterAtendimento} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmeterAtendimento} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.35rem', fontWeight: 600 }}>
+                <label className="block text-sm font-semibold text-on-surface mb-2 font-body">
                   Itens e Quantidades Entregues
                 </label>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="flex flex-col gap-2">
                   {requisicaoEmAtendimento.itens.map((it) => {
                     const sigla = it.material?.unidadeConsumo?.sigla || 'UN'
                     return (
                       <div
                         key={it.id}
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 140px',
-                          gap: '0.75rem',
-                          alignItems: 'center',
-                          backgroundColor: '#f8fafc',
-                          padding: '0.65rem 0.75rem',
-                          borderRadius: '6px',
-                          border: '1px solid #e2e8f0',
-                        }}
+                        className="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-3 items-center bg-surface-container-low p-3.5 rounded-xl border border-surface-container"
                       >
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a' }}>
+                          <div className="font-semibold text-sm text-on-surface">
                             {it.material
                               ? `${it.material.codigo} - ${it.material.descricao}`
                               : `${it.ferramenta?.codigo} - ${it.ferramenta?.nome}`}
                           </div>
-                          <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          <div className="text-xs text-on-surface-variant font-mono tabular-nums">
                             Quantidade solicitada: <strong>{Number(it.quantidade)} {sigla}</strong>
                           </div>
                         </div>
 
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', color: '#475569', marginBottom: '0.2rem' }}>
+                          <label className="block text-xs text-on-surface-variant mb-1 font-body">
                             Qtd Entregue ({sigla})
                           </label>
                           <input
@@ -976,16 +975,7 @@ export function RequisicoesPage() {
                                 [it.id]: e.target.value,
                               }))
                             }
-                            style={{
-                              width: '100%',
-                              padding: '0.45rem',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e1',
-                              backgroundColor: it.ferramenta ? '#f1f5f9' : '#ffffff',
-                              fontSize: '0.85rem',
-                              color: '#0f172a',
-                              boxSizing: 'border-box',
-                            }}
+                            className="ob-input font-mono tabular-nums text-sm py-2 px-3 w-full disabled:opacity-60"
                           />
                         </div>
                       </div>
@@ -995,7 +985,7 @@ export function RequisicoesPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 600 }}>
+                <label className="block text-sm font-semibold text-on-surface mb-2 font-body">
                   Retirado por (Responsavel pelo recebimento na obra)
                 </label>
                 <input
@@ -1005,47 +995,22 @@ export function RequisicoesPage() {
                   placeholder="ex: Jose da Silva - Pedreiro"
                   value={retiradoPor}
                   onChange={(e) => setRetiradoPor(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    fontSize: '0.88rem',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input text-sm w-full font-body"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setRequisicaoEmAtendimento(null)}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={atenderRequisicaoMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1.2rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#16a34a',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {atenderRequisicaoMutation.isPending
                     ? 'Confirmando...'
@@ -1059,88 +1024,61 @@ export function RequisicoesPage() {
 
       {/* MODAL: NOVA REQUISICAO */}
       {modalNovaRequisicaoAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '1.75rem',
-              maxWidth: '720px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-2xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl sm:text-2xl font-bold text-on-surface mb-2">
               Nova Requisicao de Obra
             </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+            <p className="text-sm text-on-surface-variant mb-4 font-body">
               Informe o destino da aplicacao e adicione os materiais (limitados ao saldo disponivel no estoque da obra) ou ferramentas.
             </p>
 
             {erroForm && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm font-body">
                 {erroForm}
               </div>
             )}
 
-            <form onSubmit={handleCriarRequisicao} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarRequisicao} className="flex flex-col gap-4">
               {/* Selecao da Obra e Area */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                     Obra
                   </label>
-                  <select
-                    value={obraIdSelecionada}
-                    onChange={(e) => {
-                      setObraIdSelecionada(e.target.value)
-                      setAreaIdSelecionada('')
-                    }}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
-                      fontSize: '0.85rem',
-                    }}
-                  >
-                    <option value="">Selecione a obra...</option>
-                    {obras.map((o) => (
-                      <option key={o.id} value={o.id}>
-                        {o.codigo} - {o.nome}
-                      </option>
-                    ))}
-                  </select>
+                  {usuario?.obraId || obras.length === 1 ? (
+                    <div className="ob-input w-full text-sm font-body py-2.5 px-3 bg-surface-container text-on-surface font-semibold flex items-center justify-between">
+                      <span>
+                        {usuario?.obra
+                          ? `${usuario.obra.codigo} - ${usuario.obra.nome}`
+                          : obras[0]
+                            ? `${obras[0].codigo} - ${obras[0].nome}`
+                            : 'Obra'}
+                      </span>
+                      <span className="text-xs text-secondary font-normal">(Fixa)</span>
+                    </div>
+                  ) : (
+                    <select
+                      value={obraIdSelecionada}
+                      onChange={(e) => {
+                        setObraIdSelecionada(e.target.value)
+                        setAreaIdSelecionada('')
+                      }}
+                      required
+                      className="ob-input w-full text-sm font-body"
+                    >
+                      <option value="">Selecione a obra...</option>
+                      {obras.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.codigo} - {o.nome}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                  <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                     Area / Pavimento de Destino
                   </label>
                   <select
@@ -1148,15 +1086,7 @@ export function RequisicoesPage() {
                     onChange={(e) => setAreaIdSelecionada(e.target.value)}
                     required
                     disabled={!obraIdSelecionada}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: !obraIdSelecionada ? '#f1f5f9' : '#ffffff',
-                      color: '#0f172a',
-                      fontSize: '0.85rem',
-                    }}
+                    className="ob-input w-full text-sm disabled:opacity-50 font-body"
                   >
                     <option value="">
                       {!obraIdSelecionada ? 'Selecione a obra primeiro' : 'Selecione a area...'}
@@ -1172,64 +1102,36 @@ export function RequisicoesPage() {
 
               {/* Itens do Pedido */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 600 }}>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-semibold text-on-surface font-body">
                     Itens Solicitados
                   </label>
                   <button
                     type="button"
                     onClick={handleAdicionarItem}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#0284c7',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
+                    className="text-xs sm:text-sm font-semibold text-accent-text hover:underline cursor-pointer"
                   >
                     + Adicionar Outro Item
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="flex flex-col gap-2.5">
                   {itensForm.map((linha, idx) => (
                     <div
                       key={idx}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns:
-                          itensForm.length > 1
-                            ? '105px minmax(0, 1fr) 88px 28px'
-                            : '105px minmax(0, 1fr) 88px',
-                        gap: '0.5rem',
-                        alignItems: 'center',
-                        backgroundColor: '#f8fafc',
-                        padding: '0.5rem',
-                        borderRadius: '4px',
-                        border: '1px solid #e2e8f0',
-                        boxSizing: 'border-box',
-                      }}
+                      className="grid grid-cols-1 sm:grid-cols-[105px_minmax(0,1fr)_100px_32px] gap-2 items-center bg-surface-container-low p-2.5 rounded-xl border border-surface-container"
                     >
                       {/* Tipo */}
                       <select
                         value={linha.tipo}
                         onChange={(e) => handleAtualizarItem(idx, 'tipo', e.target.value)}
-                        style={{
-                          padding: '0.45rem',
-                          borderRadius: '4px',
-                          border: '1px solid #cbd5e1',
-                          backgroundColor: '#ffffff',
-                          fontSize: '0.8rem',
-                          color: '#0f172a',
-                        }}
+                        className="ob-input text-xs sm:text-sm py-2 px-2 font-body"
                       >
                         <option value="MATERIAL">Material</option>
                         <option value="FERRAMENTA">Ferramenta</option>
                       </select>
 
-                      {/* Select Item Pesquisavel: puxa exclusivamente materiais em estoque na obra */}
+                      {/* Select Item Pesquisavel */}
                       {linha.tipo === 'MATERIAL' ? (
                         <SeletorItemPesquisavel
                           itens={materiaisEmEstoqueNaObra.map(({ material: m, disponivel }) => ({
@@ -1281,52 +1183,91 @@ export function RequisicoesPage() {
                             placeholder="Qtd"
                             value={linha.quantidade}
                             onChange={(e) => handleAtualizarItem(idx, 'quantidade', parseFloat(e.target.value) || 0)}
-                            style={{
-                              width: '100%',
-                              padding: '0.45rem',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e1',
-                              backgroundColor: '#ffffff',
-                              fontSize: '0.8rem',
-                              color: '#0f172a',
-                              boxSizing: 'border-box',
-                            }}
+                            className="ob-input font-mono tabular-nums text-xs sm:text-sm py-2 px-2 w-full"
                           />
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'center', display: 'block' }}>
+                          <span className="text-xs text-on-surface-variant font-mono text-center block">
                             1 unidade
                           </span>
                         )}
                       </div>
 
                       {/* Botao Excluir Linha */}
-                      {itensForm.length > 1 && (
-                        <div style={{ textAlign: 'center' }}>
+                      {itensForm.length > 1 ? (
+                        <div className="text-center">
                           <button
                             type="button"
                             onClick={() => handleRemoverItem(idx)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#ef4444',
-                              cursor: 'pointer',
-                              fontWeight: 700,
-                              fontSize: '1rem',
-                              padding: 0,
-                            }}
+                            className="text-error hover:text-on-error-container text-lg font-bold p-1 cursor-pointer"
+                            aria-label="Remover item"
                           >
                             &times;
                           </button>
                         </div>
-                      )}
+                      ) : <div />}
                     </div>
                   ))}
                 </div>
+
+                {/* Alertas em Tempo Real: Saldo Fisico e Limite de Orcamento da Engenharia */}
+                {alertasModalPorMaterial.listaFaltaEstoque.length > 0 && (
+                  <div
+                    role="alert"
+                    className="mt-4 bg-error-container text-on-error-container border border-error/20 rounded-xl p-4 text-sm font-body"
+                  >
+                    <strong className="block mb-2 font-bold">
+                      Saldo fisico insuficiente no estoque da obra (Bloqueio de emissao):
+                    </strong>
+                    <ul className="m-0 pl-4 list-disc space-y-1">
+                      {alertasModalPorMaterial.listaFaltaEstoque.map((al) => (
+                        <li key={al.materialId}>
+                          <strong>
+                            {al.codigo} - {al.descricao}:
+                          </strong>{' '}
+                          solicitado <span className="font-mono tabular-nums">{al.solicitado}</span> {al.sigla}, mas ha apenas{' '}
+                          <strong className="font-mono tabular-nums">
+                            {al.disponivel} {al.sigla}
+                          </strong>{' '}
+                          disponiveis no almoxarifado desta obra.
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {alertasModalPorMaterial.listaEstouroOrcamento.length > 0 && (
+                  <div
+                    role="status"
+                    className="mt-4 bg-tertiary-fixed text-on-tertiary-fixed border border-tertiary/20 rounded-xl p-4 text-sm font-body"
+                  >
+                    <strong className="block mb-2 font-bold">
+                      Alerta da Engenharia: Estouro de Orcamento Previsto na Obra
+                    </strong>
+                    <p className="mb-2 text-xs sm:text-sm opacity-90 font-body">
+                      A quantidade solicitada ultrapassa o teto orcado pela Engenharia. O pedido
+                      podera ser enviado se houver saldo fisico, mas ficara destacado no Painel de
+                      Estouro de Orcamento:
+                    </p>
+                    <ul className="m-0 pl-4 list-disc space-y-1 text-xs sm:text-sm font-mono tabular-nums">
+                      {alertasModalPorMaterial.listaEstouroOrcamento.map((al) => (
+                        <li key={al.materialId}>
+                          <strong>
+                            {al.codigo} - {al.descricao}:
+                          </strong>{' '}
+                          solicitando {al.solicitado} {al.sigla} (Orcado: {al.orcado} {al.sigla} |
+                          Ja consumido: {al.consumido} {al.sigla} | Saldo orcado restante:{' '}
+                          {al.saldoOrcamento} {al.sigla} | Excedente: +{al.excedentePrevisto}{' '}
+                          {al.sigla}).
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Observacao */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Observacao (opcional)
                 </label>
                 <input
@@ -1335,50 +1276,23 @@ export function RequisicoesPage() {
                   value={observacao}
                   onChange={(e) => setObservacao(e.target.value)}
                   placeholder="ex: Urgente para a concretagem do bloco norte"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    fontSize: '0.85rem',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input text-sm w-full font-body"
                 />
               </div>
 
               {/* Botoes do Modal */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalNovaRequisicaoAberto(false)}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarRequisicaoMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1.2rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                  }}
+                  className="ob-btn ob-btn--primary ob-btn--lg"
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}
                 </button>
@@ -1387,6 +1301,6 @@ export function RequisicoesPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }

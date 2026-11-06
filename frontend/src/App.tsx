@@ -63,6 +63,7 @@ export function App() {
               }
             >
               <Route path="/orcamento" element={<OrcamentoObraPage />} />
+              <Route path="/orcamento-obra" element={<OrcamentoObraPage />} />
             </Route>
 
             {/* Rotas Restritas Exclusivas para ADMIN */}

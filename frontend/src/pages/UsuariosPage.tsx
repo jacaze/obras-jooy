@@ -5,6 +5,7 @@ import {
   createUsuario,
   deleteUsuario,
   getCargos,
+  getObras,
   getUsuarios,
   resetarSenhaUsuario,
   toggleCargoSituacao,
@@ -52,6 +53,7 @@ export function UsuariosPage() {
   const [novaSenha, setNovaSenha] = useState('')
   const [novoPerfil, setNovoPerfil] = useState<PerfilUsuario>('ALMOXARIFE')
   const [novoCargoId, setNovoCargoId] = useState('')
+  const [novoObraId, setNovoObraId] = useState('')
   const [erroForm, setErroForm] = useState<string | null>(null)
 
   // Estados do formulario de edicao de usuario
@@ -60,6 +62,7 @@ export function UsuariosPage() {
   const [editLogin, setEditLogin] = useState('')
   const [editPerfil, setEditPerfil] = useState<PerfilUsuario>('ALMOXARIFE')
   const [editCargoId, setEditCargoId] = useState('')
+  const [editObraId, setEditObraId] = useState('')
   const [erroEditForm, setErroEditForm] = useState<string | null>(null)
 
   // Estados de exclusao de usuario
@@ -91,6 +94,11 @@ export function UsuariosPage() {
   const { data: todosOsCargos = [], isLoading: carregandoCargos } = useQuery({
     queryKey: ['cargos-todos'],
     queryFn: () => getCargos(false),
+  })
+
+  const { data: obras = [] } = useQuery({
+    queryKey: ['obras-ativas'],
+    queryFn: () => getObras(true),
   })
 
   // Mutations
@@ -162,7 +170,7 @@ export function UsuariosPage() {
       dados,
     }: {
       id: string
-      dados: { nome: string; login: string; perfil: PerfilUsuario; cargoId: string }
+      dados: { nome: string; login: string; perfil: PerfilUsuario; cargoId: string; obraId?: string | null }
     }) => updateUsuario(id, dados),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
@@ -194,6 +202,7 @@ export function UsuariosPage() {
     setEditLogin(u.login)
     setEditPerfil(u.perfil)
     setEditCargoId(u.cargo.id)
+    setEditObraId(u.obraId || '')
     setErroEditForm(null)
     setModalEditarUsuarioAberto(true)
   }
@@ -215,6 +224,7 @@ export function UsuariosPage() {
         login: editLogin.trim(),
         perfil: editPerfil,
         cargoId: editCargoId,
+        obraId: editObraId || null,
       },
     })
   }
@@ -236,6 +246,7 @@ export function UsuariosPage() {
     setNovaSenha('')
     setNovoPerfil('ALMOXARIFE')
     setNovoCargoId('')
+    setNovoObraId('')
     setErroForm(null)
   }
 
@@ -254,6 +265,7 @@ export function UsuariosPage() {
       senha: novaSenha,
       perfil: novoPerfil,
       cargoId: novoCargoId,
+      obraId: novoObraId || null,
     })
   }
 
@@ -297,23 +309,14 @@ export function UsuariosPage() {
   })
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <main className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-24 font-body text-on-surface">
       {/* Cabecalho Principal */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 className="ob-heading text-2xl sm:text-3xl font-bold text-on-surface tracking-tight m-0">
             Painel Administrativo
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p className="text-xs sm:text-sm text-on-surface-variant font-body mt-1">
             Controle de acessos de usuarios e cadastro de cargos do canteiro de obras
           </p>
         </div>
@@ -321,38 +324,24 @@ export function UsuariosPage() {
         <div>
           {abaAtiva === 'usuarios' ? (
             <button
+              type="button"
               onClick={() => {
                 limparFormUsuario()
                 setModalNovoUsuarioAberto(true)
               }}
-              style={{
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                border: 'none',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px]"
             >
               + Novo Usuario
             </button>
           ) : (
             <button
+              type="button"
               onClick={() => {
                 setNomeNovoCargo('')
                 setErroCargo(null)
                 setModalNovoCargoAberto(true)
               }}
-              style={{
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                border: 'none',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px]"
             >
               + Novo Cargo
             </button>
@@ -361,37 +350,21 @@ export function UsuariosPage() {
       </div>
 
       {/* Navegacao por Abas */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid #e2e8f0', marginBottom: '1.5rem' }}>
+      <div className="ob-tabs mb-6">
         <button
+          type="button"
+          aria-selected={abaAtiva === 'usuarios'}
           onClick={() => setAbaAtiva('usuarios')}
-          style={{
-            padding: '0.75rem 1.25rem',
-            background: 'none',
-            border: 'none',
-            borderBottom: abaAtiva === 'usuarios' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'usuarios' ? '#0284c7' : '#64748b',
-            fontWeight: abaAtiva === 'usuarios' ? 700 : 500,
-            cursor: 'pointer',
-            fontSize: '1rem',
-            marginBottom: '-2px',
-          }}
+          className="ob-tab"
         >
           Gestao de Usuarios ({usuarios.length})
         </button>
 
         <button
+          type="button"
+          aria-selected={abaAtiva === 'cargos'}
           onClick={() => setAbaAtiva('cargos')}
-          style={{
-            padding: '0.75rem 1.25rem',
-            background: 'none',
-            border: 'none',
-            borderBottom: abaAtiva === 'cargos' ? '3px solid #0284c7' : '3px solid transparent',
-            color: abaAtiva === 'cargos' ? '#0284c7' : '#64748b',
-            fontWeight: abaAtiva === 'cargos' ? 700 : 500,
-            cursor: 'pointer',
-            fontSize: '1rem',
-            marginBottom: '-2px',
-          }}
+          className="ob-tab"
         >
           Gerenciamento de Cargos ({todosOsCargos.length})
         </button>
@@ -400,172 +373,126 @@ export function UsuariosPage() {
       {/* ABA 1: USUARIOS */}
       {abaAtiva === 'usuarios' && (
         <>
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="ob-search max-w-md mb-6">
+            <span className="material-symbols-outlined">search</span>
             <input
               type="text"
               placeholder="Buscar por nome, login, cargo ou perfil..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              style={{
-                width: '100%',
-                maxWidth: '450px',
-                padding: '0.6rem 1rem',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
+              className="ob-input text-xs sm:text-sm"
             />
           </div>
 
           {carregandoUsuarios ? (
-            <p style={{ color: '#64748b' }}>Carregando usuarios...</p>
+            <p className="text-sm text-on-surface-variant font-body">Carregando usuarios...</p>
           ) : (
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                border: '1px solid #e2e8f0',
-                overflowX: 'auto',
-              }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Login</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cargo</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Perfil</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {usuariosFiltrados.map((u) => {
-                    const ehOUsuarioLogado = usuarioLogado?.id === u.id
+            <div className="ob-card overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="ob-table">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Login</th>
+                      <th>Cargo</th>
+                      <th>Perfil</th>
+                      <th>Obra de Lotacao</th>
+                      <th>Situacao</th>
+                      <th style={{ textAlign: 'right' }}>Acoes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usuariosFiltrados.map((u) => {
+                      const ehOUsuarioLogado = usuarioLogado?.id === u.id
 
-                    return (
-                      <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#1e293b' }}>
-                          {u.nome} {ehOUsuarioLogado && <span style={{ color: '#0284c7', fontSize: '0.75rem' }}>(Voce)</span>}
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{u.login}</td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#334155' }}>{u.cargo.nome}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <span
-                            style={{
-                              backgroundColor: u.perfil === 'ADMIN' ? '#fef3c7' : '#e0f2fe',
-                              color: u.perfil === 'ADMIN' ? '#92400e' : '#0369a1',
-                              padding: '0.2rem 0.5rem',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {u.perfil}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <span
-                            style={{
-                              backgroundColor: u.ativo ? '#dcfce7' : '#fee2e2',
-                              color: u.ativo ? '#166534' : '#991b1b',
-                              padding: '0.2rem 0.5rem',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {u.ativo ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
-                            <button
-                              onClick={() => abrirModalEdicao(u)}
-                              style={{
-                                backgroundColor: '#f0f9ff',
-                                color: '#0369a1',
-                                border: '1px solid #bae6fd',
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem',
-                                fontWeight: 500,
-                              }}
+                      return (
+                        <tr key={u.id}>
+                          <td className="font-medium text-on-surface">
+                            {u.nome} {ehOUsuarioLogado && <span className="text-accent-text text-xs ml-1 font-semibold">(Voce)</span>}
+                          </td>
+                          <td className="text-on-surface-variant font-mono">{u.login}</td>
+                          <td className="text-on-surface font-body">{u.cargo.nome}</td>
+                          <td>
+                            <span
+                              className={`ob-badge ${
+                                u.perfil === 'ADMIN' ? 'ob-badge--low' : 'ob-badge--info'
+                              }`}
                             >
-                              Editar
-                            </button>
+                              {u.perfil}
+                            </span>
+                          </td>
+                          <td className="text-on-surface-variant text-xs font-body">
+                            {u.obra ? (
+                              <span>
+                                <strong className="text-on-surface">{u.obra.codigo}</strong> - {u.obra.nome}
+                              </span>
+                            ) : (
+                              <span className="text-on-surface-variant/60 italic">Todas / Global</span>
+                            )}
+                          </td>
+                          <td>
+                            <span
+                              className={`ob-badge ${
+                                u.ativo ? 'ob-badge--ok' : 'ob-badge--crit'
+                              }`}
+                            >
+                              {u.ativo ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div className="inline-flex items-center gap-2 justify-end">
+                              <button
+                                type="button"
+                                onClick={() => abrirModalEdicao(u)}
+                                className="ob-btn ob-btn--outline ob-btn--sm"
+                              >
+                                Editar
+                              </button>
 
-                            <button
-                              onClick={() => {
-                                setUsuarioAlvoReset({ id: u.id, nome: u.nome })
-                                setSenhaResetVal('')
-                                setModalResetSenhaAberto(true)
-                              }}
-                              style={{
-                                backgroundColor: '#f1f5f9',
-                                color: '#475569',
-                                border: '1px solid #cbd5e1',
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem',
-                              }}
-                            >
-                              Resetar Senha
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setUsuarioAlvoReset({ id: u.id, nome: u.nome })
+                                  setSenhaResetVal('')
+                                  setModalResetSenhaAberto(true)
+                                }}
+                                className="ob-btn ob-btn--outline ob-btn--sm"
+                              >
+                                Resetar Senha
+                              </button>
 
-                            <button
-                              disabled={ehOUsuarioLogado || toggleUsuarioMutation.isPending}
-                              onClick={() => toggleUsuarioMutation.mutate({ id: u.id, ativo: !u.ativo })}
-                              style={{
-                                backgroundColor: u.ativo ? '#fef2f2' : '#f0fdf4',
-                                color: u.ativo ? '#b91c1c' : '#15803d',
-                                border: `1px solid ${u.ativo ? '#fecaca' : '#bbf7d0'}`,
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: ehOUsuarioLogado ? 'not-allowed' : 'pointer',
-                                fontSize: '0.8rem',
-                                opacity: ehOUsuarioLogado ? 0.4 : 1,
-                              }}
-                            >
-                              {u.ativo ? 'Desativar' : 'Ativar'}
-                            </button>
+                              <button
+                                type="button"
+                                disabled={ehOUsuarioLogado || toggleUsuarioMutation.isPending}
+                                onClick={() => toggleUsuarioMutation.mutate({ id: u.id, ativo: !u.ativo })}
+                                className="ob-btn ob-btn--outline ob-btn--sm disabled:opacity-40"
+                              >
+                                {u.ativo ? 'Desativar' : 'Ativar'}
+                              </button>
 
-                            <button
-                              disabled={ehOUsuarioLogado || excluirUsuarioMutation.isPending}
-                              onClick={() => abrirModalExclusao(u)}
-                              style={{
-                                backgroundColor: '#fff1f2',
-                                color: '#e11d48',
-                                border: '1px solid #fecdd3',
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: ehOUsuarioLogado ? 'not-allowed' : 'pointer',
-                                fontSize: '0.8rem',
-                                opacity: ehOUsuarioLogado ? 0.4 : 1,
-                              }}
-                            >
-                              Excluir
-                            </button>
-                          </div>
+                              <button
+                                type="button"
+                                disabled={ehOUsuarioLogado || excluirUsuarioMutation.isPending}
+                                onClick={() => abrirModalExclusao(u)}
+                                className="ob-btn ob-btn--outline ob-btn--sm text-error border-error/30 hover:bg-error-container/20 disabled:opacity-40"
+                              >
+                                Excluir
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    {usuariosFiltrados.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-on-surface-variant font-body">
+                          Nenhum usuario encontrado.
                         </td>
                       </tr>
-                    )
-                  })}
-                  {usuariosFiltrados.length === 0 && (
-                    <tr>
-                      <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                        Nenhum usuario encontrado.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </>
@@ -574,117 +501,81 @@ export function UsuariosPage() {
       {/* ABA 2: CARGOS */}
       {abaAtiva === 'cargos' && (
         <>
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="ob-search max-w-md mb-6">
+            <span className="material-symbols-outlined">search</span>
             <input
               type="text"
               placeholder="Buscar por nome do cargo..."
               value={buscaCargo}
               onChange={(e) => setBuscaCargo(e.target.value)}
-              style={{
-                width: '100%',
-                maxWidth: '450px',
-                padding: '0.6rem 1rem',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
+              className="ob-input text-xs sm:text-sm"
             />
           </div>
 
           {carregandoCargos ? (
-            <p style={{ color: '#64748b' }}>Carregando cargos...</p>
+            <p className="text-sm text-on-surface-variant font-body">Carregando cargos...</p>
           ) : (
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                border: '1px solid #e2e8f0',
-                overflowX: 'auto',
-              }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome da Funcao / Cargo</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Usuarios Vinculados</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cadastrado Em</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cargosFiltrados.map((c) => {
-                    const qtdUsuarios = c._count?.usuarios ?? 0
+            <div className="ob-card overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="ob-table">
+                  <thead>
+                    <tr>
+                      <th>Nome da Funcao / Cargo</th>
+                      <th>Usuarios Vinculados</th>
+                      <th>Situacao</th>
+                      <th>Cadastrado Em</th>
+                      <th style={{ textAlign: 'right' }}>Acoes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cargosFiltrados.map((c) => {
+                      const qtdUsuarios = c._count?.usuarios ?? 0
 
-                    return (
-                      <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#1e293b' }}>
-                          {c.nome}
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
-                          <span
-                            style={{
-                              backgroundColor: qtdUsuarios > 0 ? '#e0f2fe' : '#f1f5f9',
-                              color: qtdUsuarios > 0 ? '#0369a1' : '#64748b',
-                              padding: '0.2rem 0.5rem',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {qtdUsuarios} {qtdUsuarios === 1 ? 'usuario' : 'usuarios'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <span
-                            style={{
-                              backgroundColor: c.ativo ? '#dcfce7' : '#fee2e2',
-                              color: c.ativo ? '#166534' : '#991b1b',
-                              padding: '0.2rem 0.5rem',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {c.ativo ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
-                          {new Date(c.criadoEm).toLocaleDateString('pt-BR')}
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                          <button
-                            disabled={toggleCargoMutation.isPending}
-                            onClick={() => toggleCargoMutation.mutate({ id: c.id, ativo: !c.ativo })}
-                            style={{
-                              backgroundColor: c.ativo ? '#fef2f2' : '#f0fdf4',
-                              color: c.ativo ? '#b91c1c' : '#15803d',
-                              border: `1px solid ${c.ativo ? '#fecaca' : '#bbf7d0'}`,
-                              padding: '0.3rem 0.6rem',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '0.8rem',
-                            }}
-                          >
-                            {c.ativo ? 'Desativar Cargo' : 'Ativar Cargo'}
-                          </button>
+                      return (
+                        <tr key={c.id}>
+                          <td className="font-medium text-on-surface">
+                            {c.nome}
+                          </td>
+                          <td className="text-on-surface-variant font-mono">
+                            <span className="ob-badge ob-badge--info">
+                              {qtdUsuarios} {qtdUsuarios === 1 ? 'usuario' : 'usuarios'}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`ob-badge ${
+                                c.ativo ? 'ob-badge--ok' : 'ob-badge--crit'
+                              }`}
+                            >
+                              {c.ativo ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </td>
+                          <td className="text-on-surface-variant font-mono tabular-nums text-xs">
+                            {new Date(c.criadoEm).toLocaleDateString('pt-BR')}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              disabled={toggleCargoMutation.isPending}
+                              onClick={() => toggleCargoMutation.mutate({ id: c.id, ativo: !c.ativo })}
+                              className="ob-btn ob-btn--outline ob-btn--sm"
+                            >
+                              {c.ativo ? 'Desativar Cargo' : 'Ativar Cargo'}
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    {cargosFiltrados.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-on-surface-variant font-body">
+                          Nenhum cargo encontrado.
                         </td>
                       </tr>
-                    )
-                  })}
-                  {cargosFiltrados.length === 0 && (
-                    <tr>
-                      <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                        Nenhum cargo encontrado.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </>
@@ -692,49 +583,19 @@ export function UsuariosPage() {
 
       {/* Modal: Novo Usuario */}
       {modalNovoUsuarioAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '2rem',
-              maxWidth: '500px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>Cadastrar Novo Usuario</h2>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-4">Cadastrar Novo Usuario</h2>
 
             {erroForm && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroForm}
               </div>
             )}
 
-            <form onSubmit={handleCriarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarUsuario} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nome Completo
                 </label>
                 <input
@@ -743,20 +604,12 @@ export function UsuariosPage() {
                   value={novoNome}
                   onChange={(e) => setNovoNome(e.target.value)}
                   placeholder="ex: Carlos Alberto de Souza"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Login
                 </label>
                 <input
@@ -765,20 +618,12 @@ export function UsuariosPage() {
                   value={novoLogin}
                   onChange={(e) => setNovoLogin(e.target.value)}
                   placeholder="ex: carlos.souza"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full font-mono text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Senha Inicial (min. 6 caracteres)
                 </label>
                 <input
@@ -787,46 +632,30 @@ export function UsuariosPage() {
                   value={novaSenha}
                   onChange={(e) => setNovaSenha(e.target.value)}
                   placeholder="Defina a senha inicial"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Perfil de Acesso
                 </label>
                 <select
                   value={novoPerfil}
                   onChange={(e) => setNovoPerfil(e.target.value as PerfilUsuario)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                  }}
+                  className="ob-input w-full text-sm font-body"
                 >
-                  <option value="ALMOXARIFE" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ALMOXARIFE (Recebe, separa e baixa material)</option>
-                  <option value="ENCARREGADO" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ENCARREGADO (Pede material pelo celular)</option>
-                  <option value="ENGENHARIA" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ENGENHARIA (Define limites de consumo)</option>
-                  <option value="ADMINISTRACAO" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMINISTRACAO (Relatorios gerenciais)</option>
-                  <option value="ADMIN" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMIN (Controle total de usuarios e cadastros)</option>
+                  <option value="ALMOXARIFE">ALMOXARIFE (Recebe, separa e baixa material)</option>
+                  <option value="ENCARREGADO">ENCARREGADO (Pede material pelo celular)</option>
+                  <option value="ENGENHARIA">ENGENHARIA (Define limites de consumo)</option>
+                  <option value="ADMINISTRACAO">ADMINISTRACAO (Relatorios gerenciais)</option>
+                  <option value="ADMIN">ADMIN (Controle total de usuarios e cadastros)</option>
                 </select>
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>Cargo Exercido</label>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-sm font-medium text-on-surface font-body">Cargo Exercido</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -834,15 +663,7 @@ export function UsuariosPage() {
                       setErroCargo(null)
                       setModalNovoCargoAberto(true)
                     }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#0284c7',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      padding: 0,
-                    }}
+                    className="text-xs sm:text-sm font-semibold text-accent-text hover:underline cursor-pointer"
                   >
                     + Novo Cargo
                   </button>
@@ -851,53 +672,50 @@ export function UsuariosPage() {
                   value={novoCargoId}
                   onChange={(e) => setNovoCargoId(e.target.value)}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                  }}
+                  className="ob-input w-full text-sm font-body"
                 >
-                  <option value="" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>Selecione o cargo...</option>
+                  <option value="">Selecione o cargo...</option>
                   {cargosAtivos.map((c) => (
-                    <option key={c.id} value={c.id} style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
+                    <option key={c.id} value={c.id}>
                       {c.nome}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
+                  Obra de Lotacao (Canteiro Fixo)
+                </label>
+                <select
+                  value={novoObraId}
+                  onChange={(e) => setNovoObraId(e.target.value)}
+                  className="ob-input w-full text-sm font-body"
+                >
+                  <option value="">Sem obra fixa (Acesso Global / Engenharia / Admin)</option>
+                  {obras.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.codigo} - {o.nome} ({o.cidade})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-on-surface-variant font-body">
+                  Para Encarregados e Almoxarifes, vincule a obra para travar o canteiro e evitar selecao manual.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalNovoUsuarioAberto(false)}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarUsuarioMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {criarUsuarioMutation.isPending ? 'Salvando...' : 'Salvar Usuario'}
                 </button>
@@ -909,49 +727,19 @@ export function UsuariosPage() {
 
       {/* Modal Rapido: Criar Novo Cargo */}
       {modalNovoCargoAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '1.5rem',
-              maxWidth: '400px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#0f172a' }}>Cadastrar Novo Cargo</h3>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h3 className="ob-heading text-lg font-bold text-on-surface mb-4">Cadastrar Novo Cargo</h3>
 
             {erroCargo && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.8rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-3 rounded-xl mb-4 text-xs sm:text-sm">
                 {erroCargo}
               </div>
             )}
 
-            <form onSubmit={handleCriarCargoRapido}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+            <form onSubmit={handleCriarCargoRapido} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nome da Funcao / Cargo
                 </label>
                 <input
@@ -960,48 +748,22 @@ export function UsuariosPage() {
                   placeholder="ex: Mestre de Obras"
                   value={nomeNovoCargo}
                   onChange={(e) => setNomeNovoCargo(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalNovoCargoAberto(false)}
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: 500,
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarCargoMutation.isPending}
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {criarCargoMutation.isPending ? 'Cadastrando...' : 'Cadastrar Cargo'}
                 </button>
@@ -1013,52 +775,22 @@ export function UsuariosPage() {
 
       {/* Modal: Reset de Senha */}
       {modalResetSenhaAberto && usuarioAlvoReset && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '1.75rem',
-              maxWidth: '420px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h3 style={{ margin: '0 0 0.5rem', color: '#0f172a' }}>Resetar Senha de Acesso</h3>
-            <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 1rem' }}>
-              Defina a nova senha para o usuario: <strong>{usuarioAlvoReset.nome}</strong>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h3 className="ob-heading text-lg font-bold text-on-surface mb-1">Resetar Senha de Acesso</h3>
+            <p className="text-xs text-on-surface-variant mb-4 font-body">
+              Defina a nova senha para o usuario: <strong className="text-on-surface">{usuarioAlvoReset.nome}</strong>
             </p>
 
             {mensagemSucessoReset && (
-              <div
-                style={{
-                  backgroundColor: '#f0fdf4',
-                  color: '#15803d',
-                  padding: '0.6rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #bbf7d0',
-                }}
-              >
+              <div className="bg-secondary-container text-on-secondary-container border border-secondary/20 p-3 rounded-xl mb-4 text-xs sm:text-sm">
                 {mensagemSucessoReset}
               </div>
             )}
 
-            <form onSubmit={handleResetarSenha}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+            <form onSubmit={handleResetarSenha} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nova Senha (min. 6 caracteres)
                 </label>
                 <input
@@ -1067,46 +799,22 @@ export function UsuariosPage() {
                   placeholder="Nova senha temporaria"
                   value={senhaResetVal}
                   onChange={(e) => setSenhaResetVal(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalResetSenhaAberto(false)}
-                  style={{
-                    padding: '0.5rem 0.9rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={resetarSenhaMutation.isPending}
-                  style={{
-                    padding: '0.5rem 0.9rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {resetarSenhaMutation.isPending ? 'Salvando...' : 'Salvar Nova Senha'}
                 </button>
@@ -1118,49 +826,19 @@ export function UsuariosPage() {
 
       {/* Modal: Editar Usuario */}
       {modalEditarUsuarioAberto && usuarioEditando && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '2rem',
-              maxWidth: '500px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>Editar Dados do Usuario</h2>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-4">Editar Dados do Usuario</h2>
 
             {erroEditForm && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroEditForm}
               </div>
             )}
 
-            <form onSubmit={handleAtualizarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleAtualizarUsuario} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nome Completo
                 </label>
                 <input
@@ -1169,20 +847,12 @@ export function UsuariosPage() {
                   value={editNome}
                   onChange={(e) => setEditNome(e.target.value)}
                   placeholder="ex: Carlos Alberto de Souza"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Login
                 </label>
                 <input
@@ -1191,52 +861,36 @@ export function UsuariosPage() {
                   value={editLogin}
                   onChange={(e) => setEditLogin(e.target.value)}
                   placeholder="ex: carlos.souza"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full font-mono text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Perfil de Acesso
                 </label>
                 <select
                   value={editPerfil}
                   onChange={(e) => setEditPerfil(e.target.value as PerfilUsuario)}
                   disabled={usuarioLogado?.id === usuarioEditando.id}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    boxSizing: 'border-box',
-                    backgroundColor: usuarioLogado?.id === usuarioEditando.id ? '#f1f5f9' : '#ffffff',
-                    color: '#0f172a',
-                  }}
+                  className="ob-input w-full text-sm disabled:opacity-50 font-body"
                 >
-                  <option value="ALMOXARIFE" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ALMOXARIFE (Recebe, separa e baixa material)</option>
-                  <option value="ENCARREGADO" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ENCARREGADO (Pede material pelo celular)</option>
-                  <option value="ENGENHARIA" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ENGENHARIA (Define limites de consumo)</option>
-                  <option value="ADMINISTRACAO" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMINISTRACAO (Relatorios gerenciais)</option>
-                  <option value="ADMIN" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>ADMIN (Controle total de usuarios e cadastros)</option>
+                  <option value="ALMOXARIFE">ALMOXARIFE (Recebe, separa e baixa material)</option>
+                  <option value="ENCARREGADO">ENCARREGADO (Pede material pelo celular)</option>
+                  <option value="ENGENHARIA">ENGENHARIA (Define limites de consumo)</option>
+                  <option value="ADMINISTRACAO">ADMINISTRACAO (Relatorios gerenciais)</option>
+                  <option value="ADMIN">ADMIN (Controle total de usuarios e cadastros)</option>
                 </select>
                 {usuarioLogado?.id === usuarioEditando.id && (
-                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+                  <p className="mt-1.5 text-xs text-on-surface-variant font-body">
                     O perfil do proprio administrador logado nao pode ser alterado.
                   </p>
                 )}
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>Cargo Exercido</label>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-sm font-medium text-on-surface font-body">Cargo Exercido</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -1244,15 +898,7 @@ export function UsuariosPage() {
                       setErroCargo(null)
                       setModalNovoCargoAberto(true)
                     }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#0284c7',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      padding: 0,
-                    }}
+                    className="text-xs sm:text-sm font-semibold text-accent-text hover:underline cursor-pointer"
                   >
                     + Novo Cargo
                   </button>
@@ -1261,53 +907,50 @@ export function UsuariosPage() {
                   value={editCargoId}
                   onChange={(e) => setEditCargoId(e.target.value)}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                  }}
+                  className="ob-input w-full text-sm font-body"
                 >
-                  <option value="" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>Selecione o cargo...</option>
+                  <option value="">Selecione o cargo...</option>
                   {cargosAtivos.map((c) => (
-                    <option key={c.id} value={c.id} style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
+                    <option key={c.id} value={c.id}>
                       {c.nome}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
+                  Obra de Lotacao (Canteiro Fixo)
+                </label>
+                <select
+                  value={editObraId}
+                  onChange={(e) => setEditObraId(e.target.value)}
+                  className="ob-input w-full text-sm font-body"
+                >
+                  <option value="">Sem obra fixa (Acesso Global / Engenharia / Admin)</option>
+                  {obras.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.codigo} - {o.nome} ({o.cidade})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-on-surface-variant font-body">
+                  Para Encarregados e Almoxarifes, vincule a obra para travar o canteiro e evitar selecao manual.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalEditarUsuarioAberto(false)}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={editarUsuarioMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {editarUsuarioMutation.isPending ? 'Salvando...' : 'Salvar Alteracoes'}
                 </button>
@@ -1319,68 +962,27 @@ export function UsuariosPage() {
 
       {/* Modal: Confirmacao de Exclusao de Usuario */}
       {modalExcluirUsuarioAberto && usuarioExcluindo && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 60,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '1.75rem',
-              maxWidth: '460px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h3 style={{ margin: '0 0 0.75rem', color: '#b91c1c', fontSize: '1.15rem' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h3 className="ob-heading text-lg font-bold text-error mb-2">
               Confirmar Exclusao de Usuario
             </h3>
-            <p style={{ color: '#334155', fontSize: '0.9rem', margin: '0 0 0.75rem', lineHeight: '1.4' }}>
+            <p className="text-sm text-on-surface mb-4 leading-normal">
               Deseja realmente excluir permanentemente o usuario{' '}
               <strong>{usuarioExcluindo.nome}</strong> (login: <em>{usuarioExcluindo.login}</em>)?
             </p>
 
-            <div
-              style={{
-                backgroundColor: '#fffbeb',
-                color: '#92400e',
-                border: '1px solid #fef3c7',
-                padding: '0.75rem',
-                borderRadius: '4px',
-                fontSize: '0.8rem',
-                marginBottom: '1rem',
-                lineHeight: '1.4',
-              }}
-            >
+            <div className="bg-tertiary-fixed text-on-tertiary-fixed border border-tertiary/20 p-4 rounded-xl text-xs sm:text-sm mb-4 leading-normal">
               <strong>Regra de integridade:</strong> Usuarios que ja tenham realizado qualquer emprestimo de ferramenta ou solicitacao de material nao podem ser excluidos para preservar o historico da obra. Nesses casos, a exclusao e bloqueada e o usuario deve apenas ser desativado.
             </div>
 
             {erroExcluir && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroExcluir}
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => {
@@ -1388,15 +990,7 @@ export function UsuariosPage() {
                   setUsuarioExcluindo(null)
                   setErroExcluir(null)
                 }}
-                style={{
-                  padding: '0.5rem 0.9rem',
-                  borderRadius: '4px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: '#334155',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                }}
+                className="ob-btn ob-btn--outline"
               >
                 Cancelar
               </button>
@@ -1404,15 +998,7 @@ export function UsuariosPage() {
                 type="button"
                 disabled={excluirUsuarioMutation.isPending}
                 onClick={handleConfirmarExclusao}
-                style={{
-                  padding: '0.5rem 0.9rem',
-                  borderRadius: '4px',
-                  border: 'none',
-                  backgroundColor: '#dc2626',
-                  color: '#ffffff',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className="ob-btn ob-btn--outline text-error border-error/30 hover:bg-error-container/20"
               >
                 {excluirUsuarioMutation.isPending ? 'Excluindo...' : 'Confirmar Exclusao'}
               </button>
@@ -1420,6 +1006,6 @@ export function UsuariosPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }

@@ -2,6 +2,39 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
+const CONTAS_DEMO_MVP = [
+  {
+    rotulo: 'Admin Geral',
+    login: 'admin',
+    senha: 'admin123456',
+    papel: 'Acesso total + Usuarios',
+  },
+  {
+    rotulo: 'Almoxarife',
+    login: 'almoxarife',
+    senha: 'admin123456',
+    papel: 'Estoque, Ferramentas e SIENGE',
+  },
+  {
+    rotulo: 'Engenharia',
+    login: 'engenharia',
+    senha: 'admin123456',
+    papel: 'Limites de Orcamento e Obras',
+  },
+  {
+    rotulo: 'Administracao',
+    login: 'administracao',
+    senha: 'admin123456',
+    papel: 'Auditoria e Custos da Obra',
+  },
+  {
+    rotulo: 'Encarregado',
+    login: 'encarregado',
+    senha: 'admin123456',
+    papel: 'Pedidos de Material no Canteiro',
+  },
+]
+
 export function LoginPage() {
   const [loginVal, setLoginVal] = useState('')
   const [senhaVal, setSenhaVal] = useState('')
@@ -11,13 +44,12 @@ export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+  async function autenticar(usuarioLogin: string, usuarioSenha: string) {
     setErro(null)
     setSubmetendo(true)
 
     try {
-      await login(loginVal, senhaVal)
+      await login(usuarioLogin, usuarioSenha)
       navigate('/')
     } catch (err: any) {
       const msg = err.response?.data?.erro || 'Falha na autenticacao. Verifique login e senha.'
@@ -27,56 +59,47 @@ export function LoginPage() {
     }
   }
 
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    await autenticar(loginVal, senhaVal)
+  }
+
+  async function handleAcessoRapidoDemo(conta: (typeof CONTAS_DEMO_MVP)[number]) {
+    setLoginVal(conta.login)
+    setSenhaVal(conta.senha)
+    await autenticar(conta.login, conta.senha)
+  }
+
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0f172a',
-        padding: '1rem',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '400px',
-          backgroundColor: '#1e293b',
-          borderRadius: '8px',
-          padding: '2rem',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)',
-          border: '1px solid #334155',
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <h1 style={{ color: '#38bdf8', margin: 0, fontSize: '1.5rem' }}>Obras Jooy</h1>
-          <p style={{ color: '#94a3b8', margin: '0.5rem 0 0', fontSize: '0.9rem' }}>
-            Acesso ao Sistema de Almoxarifado
+    <div className="min-h-screen flex items-center justify-center bg-surface p-4 sm:p-6 font-body text-on-surface">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container shadow-sm mb-3">
+            <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+            <span className="text-caption-1 font-semibold text-on-surface tracking-tight">
+              JOOY Construtora • MVP Almoxarifado
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface">
+            Obras Jooy
+          </h1>
+          <p className="text-caption-1 text-on-surface-variant mt-1.5">
+            Acesso ao Sistema de Almoxarifado e Controle de Obras
           </p>
         </div>
 
         {erro && (
-          <div
-            style={{
-              backgroundColor: '#7f1d1d',
-              color: '#fecaca',
-              padding: '0.75rem',
-              borderRadius: '4px',
-              marginBottom: '1rem',
-              fontSize: '0.85rem',
-              border: '1px solid #991b1b',
-            }}
-          >
-            {erro}
+          <div className="bg-error-container/20 border border-error/30 text-error p-3.5 rounded-xl mb-4 text-caption-1 font-medium flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{erro}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label
               htmlFor="login"
-              style={{ display: 'block', color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '0.4rem' }}
+              className="block text-caption-1 font-semibold text-on-surface mb-1.5"
             >
               Login de Usuario
             </label>
@@ -87,23 +110,14 @@ export function LoginPage() {
               value={loginVal}
               onChange={(e) => setLoginVal(e.target.value)}
               placeholder="ex: admin"
-              style={{
-                width: '100%',
-                padding: '0.6rem 0.75rem',
-                borderRadius: '4px',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
+              className="w-full min-h-[48px] px-3.5 rounded-xl bg-surface-container-low border border-surface-container text-on-surface text-body outline-none focus:border-primary transition-all"
             />
           </div>
 
           <div>
             <label
               htmlFor="senha"
-              style={{ display: 'block', color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '0.4rem' }}
+              className="block text-caption-1 font-semibold text-on-surface mb-1.5"
             >
               Senha
             </label>
@@ -114,38 +128,47 @@ export function LoginPage() {
               value={senhaVal}
               onChange={(e) => setSenhaVal(e.target.value)}
               placeholder="Sua senha de acesso"
-              style={{
-                width: '100%',
-                padding: '0.6rem 0.75rem',
-                borderRadius: '4px',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
+              className="w-full min-h-[48px] px-3.5 rounded-xl bg-surface-container-low border border-surface-container text-on-surface text-body outline-none focus:border-primary transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={submetendo}
-            style={{
-              marginTop: '0.5rem',
-              backgroundColor: '#0284c7',
-              color: '#ffffff',
-              padding: '0.75rem',
-              borderRadius: '4px',
-              border: 'none',
-              fontWeight: 600,
-              cursor: submetendo ? 'not-allowed' : 'pointer',
-              opacity: submetendo ? 0.7 : 1,
-            }}
+            className="w-full min-h-[48px] bg-primary text-on-primary rounded-xl font-headline text-headline flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-95 transition-all cursor-pointer disabled:opacity-60 mt-1"
           >
-            {submetendo ? 'Entrando...' : 'Entrar no Sistema'}
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">login</span>
+            <span>{submetendo ? 'Entrando...' : 'Entrar no Sistema'}</span>
           </button>
         </form>
+
+        {/* Painel de Acesso Rapido para Apresentacao do MVP */}
+        <div className="mt-6 pt-5 border-t border-surface-container">
+          <div className="text-caption-2 uppercase font-semibold tracking-wider text-on-surface-variant mb-3 text-center sm:text-left">
+            Acesso Rapido de Demonstracao (1 Clique por Perfil)
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {CONTAS_DEMO_MVP.map((conta) => (
+              <button
+                key={conta.login}
+                type="button"
+                disabled={submetendo}
+                onClick={() => handleAcessoRapidoDemo(conta)}
+                className="flex flex-col items-start justify-center min-h-[48px] p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container text-left transition-all active:scale-[0.98] cursor-pointer"
+              >
+                <div className="text-caption-1 font-semibold text-primary">
+                  {conta.rotulo}
+                </div>
+                <div className="text-caption-2 text-on-surface-variant line-clamp-1">
+                  {conta.papel}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
 }
+export default LoginPage

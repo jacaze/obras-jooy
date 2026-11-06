@@ -11,7 +11,7 @@ export function ProtectedRoute({
 
   if (carregando) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem', color: '#64748b' }}>
+      <div className="flex justify-center p-12 text-on-surface-variant font-body">
         Carregando credenciais...
       </div>
     )

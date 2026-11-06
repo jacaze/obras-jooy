@@ -116,12 +116,18 @@ export async function getUsuarios(): Promise<UsuarioListagem[]> {
   return response.data
 }
 
+export async function getUsuariosOpcoes(): Promise<UsuarioListagem[]> {
+  const response = await api.get<UsuarioListagem[]>('/usuarios/opcoes')
+  return response.data
+}
+
 export async function createUsuario(dados: {
   nome: string
   login: string
   senha: string
   perfil: PerfilUsuario
   cargoId: string
+  obraId?: string | null
 }): Promise<UsuarioListagem> {
   const response = await api.post<UsuarioListagem>('/usuarios', dados)
   return response.data
@@ -132,6 +138,7 @@ export interface AtualizarUsuarioInput {
   login?: string
   perfil?: PerfilUsuario
   cargoId?: string
+  obraId?: string | null
 }
 
 export async function updateUsuario(id: string, dados: AtualizarUsuarioInput): Promise<UsuarioListagem> {

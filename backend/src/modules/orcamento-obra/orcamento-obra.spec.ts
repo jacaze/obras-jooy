@@ -113,6 +113,19 @@ describe('Modulo de Orcamento e Limites de Material por Obra (T13)', () => {
         },
       ] as any)
 
+      vi.spyOn(prisma.requisicaoItem, 'findMany').mockResolvedValueOnce([
+        {
+          materialId: materialLuvaId,
+          quantidade: 60,
+          quantidadeEntregue: 60,
+          requisicao: {
+            id: 'req-antiga',
+            status: StatusRequisicao.ATENDIDA,
+            area: { obraId },
+          },
+        },
+      ] as any)
+
       const response = await app.inject({
         method: 'GET',
         url: `/api/orcamentos-obra/limites?obraId=${obraId}`,
@@ -125,6 +138,8 @@ describe('Modulo de Orcamento e Limites de Material por Obra (T13)', () => {
       const body = JSON.parse(response.body)
       expect(body).toHaveLength(1)
       expect(body[0].quantidadeOrcada).toBe(200)
+      expect(body[0].quantidadeConsumida).toBe(60)
+      expect(body[0].saldoOrcamento).toBe(140)
     })
   })
 

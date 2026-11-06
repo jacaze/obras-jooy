@@ -39,10 +39,12 @@ model Usuario {
   senhaHash String        @map("senha_hash") @db.VarChar(255)
   perfil    PerfilUsuario
   cargoId   String        @map("cargo_id") @db.Uuid
+  obraId    String?       @map("obra_id") @db.Uuid
   ativo     Boolean       @default(true)
   criadoEm  DateTime      @default(now()) @map("criado_em")
 
   cargo     Cargo         @relation(fields: [cargoId], references: [id])
+  obra      Obra?         @relation(fields: [obraId], references: [id])
   ferramentasEmprestadas   Ferramenta[]
   requisicoesFeitas        Requisicao[]          @relation("RequisicaoSolicitante")
   requisicoesAtendidas     Requisicao[]          @relation("RequisicaoAtendidaPor")
@@ -76,6 +78,7 @@ model Obra {
 
   areas              AreaObra[]
   locaisEstoque      LocalEstoque[]
+  usuarios           Usuario[]
   orcamentosMaterial OrcamentoObraMaterial[]
 
   @@map("obra")

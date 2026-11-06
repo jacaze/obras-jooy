@@ -209,30 +209,22 @@ export function ObrasPage() {
   )
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem', fontFamily: 'system-ui, sans-serif' }}>
+    <main className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-24 font-body text-on-surface">
       {/* Cabecalho da Pagina */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
-          <h1 style={{ color: '#0f172a', margin: '0 0 0.25rem', fontSize: '1.75rem' }}>
+          <h1 className="ob-heading text-2xl sm:text-3xl font-bold text-on-surface tracking-tight m-0">
             Obras e Pavimentos
           </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>
+          <p className="text-xs sm:text-sm text-on-surface-variant font-body mt-1">
             Estrutura da obra e organizacao por setores/pavimentos para controle de materiais
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="flex flex-wrap items-center gap-2">
           {podeGerenciarObras && (
             <button
+              type="button"
               onClick={() => {
                 setNovoCodigoObra('')
                 setNovoNomeObra('')
@@ -240,15 +232,7 @@ export function ObrasPage() {
                 setErroObra(null)
                 setModalNovaObraAberto(true)
               }}
-              style={{
-                backgroundColor: '#ffffff',
-                color: '#0284c7',
-                border: '1px solid #0284c7',
-                padding: '0.6rem 1.1rem',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--outline ob-btn--sm min-h-[44px]"
             >
               + Nova Obra
             </button>
@@ -256,21 +240,14 @@ export function ObrasPage() {
 
           {podeGerenciarAreas && obraAtual && (
             <button
+              type="button"
               onClick={() => {
                 setNovoNomeArea('')
                 setNovaOrdemArea(areas.length > 0 ? Math.max(...areas.map((a) => a.ordem)) + 1 : 0)
                 setErroArea(null)
                 setModalNovaAreaAberto(true)
               }}
-              style={{
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                border: 'none',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px]"
             >
               + Nova Area
             </button>
@@ -280,102 +257,56 @@ export function ObrasPage() {
 
       {erroExclusaoArea && (
         <div
-          style={{
-            backgroundColor: '#fef2f2',
-            color: '#b91c1c',
-            padding: '0.75rem 1rem',
-            borderRadius: '6px',
-            marginBottom: '1.5rem',
-            border: '1px solid #fecaca',
-            fontSize: '0.9rem',
-          }}
+          role="alert"
+          className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-6 text-sm animate-fade-up"
         >
           {erroExclusaoArea}
         </div>
       )}
 
       {carregandoObras ? (
-        <p style={{ color: '#64748b' }}>Carregando dados das obras...</p>
+        <p className="text-sm text-on-surface-variant">Carregando dados das obras...</p>
       ) : obras.length === 0 ? (
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            padding: '3rem',
-            textAlign: 'center',
-            border: '1px solid #e2e8f0',
-            color: '#64748b',
-          }}
-        >
+        <div className="ob-card p-8 text-center text-sm text-on-surface-variant border border-dashed border-surface-container">
           Nenhuma obra cadastrada no sistema.
         </div>
       ) : (
         <>
           {/* Cartao Informativo da Obra Ativa */}
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              padding: '1.5rem',
-              marginBottom: '2rem',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div className="ob-card p-6 mb-8 shadow-sm">
+            <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                  <span
-                    style={{
-                      backgroundColor: '#0284c7',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      letterSpacing: '0.5px',
-                    }}
-                  >
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <span className="ob-mono font-semibold text-accent-text text-base">
                     {obraAtual.codigo}
                   </span>
-                  <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>
+                  <h2 className="ob-heading text-2xl font-bold text-on-surface m-0">
                     {obraAtual.nome}
                   </h2>
                   <span
-                    style={{
-                      backgroundColor: obraAtual.ativa ? '#dcfce7' : '#fee2e2',
-                      color: obraAtual.ativa ? '#166534' : '#991b1b',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                    }}
+                    className={`ob-badge ${
+                      obraAtual.ativa ? 'ob-badge--ok' : 'ob-badge--crit'
+                    }`}
                   >
                     {obraAtual.ativa ? 'Obra Ativa' : 'Obra Inativa'}
                   </span>
                 </div>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
-                  Cidade: <strong>{obraAtual.cidade}</strong> | Total de Áreas/Pavimentos: <strong>{areas.length}</strong>
+                <p className="text-xs sm:text-sm text-on-surface-variant m-0 font-body">
+                  Cidade: <strong className="text-on-surface">{obraAtual.cidade}</strong> | Total de Áreas/Pavimentos:{' '}
+                  <strong className="text-on-surface font-mono tabular-nums">{areas.length}</strong>
                 </p>
               </div>
 
               {/* Seletor caso haja mais de uma obra */}
               {obras.length > 1 && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs text-on-surface-variant mb-1 font-body">
                     Alternar Empreendimento:
                   </label>
                   <select
                     value={obraAtual.id}
                     onChange={(e) => setObraSelecionadaId(e.target.value)}
-                    style={{
-                      padding: '0.45rem 0.8rem',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
-                      fontSize: '0.85rem',
-                    }}
+                    className="ob-input text-sm py-2 px-3"
                   >
                     {obras.map((o) => (
                       <option key={o.id} value={o.id}>
@@ -388,18 +319,10 @@ export function ObrasPage() {
 
               {podeGerenciarObras && (
                 <button
+                  type="button"
                   disabled={toggleObraMutation.isPending}
                   onClick={() => toggleObraMutation.mutate({ id: obraAtual.id, ativa: !obraAtual.ativa })}
-                  style={{
-                    backgroundColor: obraAtual.ativa ? '#fef2f2' : '#f0fdf4',
-                    color: obraAtual.ativa ? '#b91c1c' : '#15803d',
-                    border: `1px solid ${obraAtual.ativa ? '#fecaca' : '#bbf7d0'}`,
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '4px',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
+                  className="ob-btn ob-btn--outline ob-btn--sm text-error border-error/30 hover:bg-error-container/20"
                 >
                   {obraAtual.ativa ? 'Desativar Obra' : 'Reativar Obra'}
                 </button>
@@ -408,163 +331,111 @@ export function ObrasPage() {
           </div>
 
           {/* Secao de Gestao de Areas */}
-          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
             <div>
-              <h3 style={{ margin: '0 0 0.25rem', color: '#0f172a', fontSize: '1.15rem' }}>
+              <h3 className="ob-heading text-base font-bold text-on-surface m-0">
                 Pavimentos e Setores da Obra
               </h3>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
+              <p className="text-xs text-on-surface-variant m-0 font-body">
                 {podeGerenciarAreas
                   ? 'Engenharia e Administracao possuem permissao para cadastrar, editar e gerenciar areas'
                   : 'Visualizacao restrita aos dados cadastrados'}
               </p>
             </div>
 
-            <input
-              type="text"
-              placeholder="Buscar por nome da area ou pavimento..."
-              value={buscaArea}
-              onChange={(e) => setBuscaArea(e.target.value)}
-              style={{
-                width: '100%',
-                maxWidth: '380px',
-                padding: '0.55rem 0.9rem',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                outline: 'none',
-                fontSize: '0.9rem',
-              }}
-            />
+            <div className="ob-search flex-1 max-w-sm">
+              <span className="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                placeholder="Buscar por nome da area ou pavimento..."
+                value={buscaArea}
+                onChange={(e) => setBuscaArea(e.target.value)}
+                className="ob-input text-xs sm:text-sm"
+              />
+            </div>
           </div>
 
           {carregandoAreas ? (
-            <p style={{ color: '#64748b' }}>Carregando areas da obra...</p>
+            <p className="text-sm text-on-surface-variant">Carregando areas da obra...</p>
           ) : (
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                border: '1px solid #e2e8f0',
-                overflowX: 'auto',
-              }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                    <th style={{ padding: '0.75rem 1rem', width: '100px' }}>Ordem</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Nome da Area / Pavimento</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Situacao</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cadastrada Em</th>
-                    {podeGerenciarAreas && <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acoes</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {areasFiltradas.map((a) => (
-                    <tr key={a.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <span
-                          style={{
-                            backgroundColor: '#f1f5f9',
-                            color: '#334155',
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '4px',
-                            fontWeight: 700,
-                            fontSize: '0.8rem',
-                            display: 'inline-block',
-                            minWidth: '24px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          {a.ordem}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#1e293b' }}>
-                        {a.nome}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <span
-                          style={{
-                            backgroundColor: a.ativa ? '#dcfce7' : '#fee2e2',
-                            color: a.ativa ? '#166534' : '#991b1b',
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {a.ativa ? 'Ativa' : 'Inativa'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>
-                        {new Date(a.criadaEm).toLocaleDateString('pt-BR')}
-                      </td>
-                      {podeGerenciarAreas && (
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
-                            <button
-                              onClick={() => abrirModalEditar(a)}
-                              style={{
-                                backgroundColor: '#f1f5f9',
-                                color: '#0369a1',
-                                border: '1px solid #bae6fd',
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem',
-                                fontWeight: 500,
-                              }}
-                            >
-                              Editar
-                            </button>
-
-                            <button
-                              disabled={toggleAreaMutation.isPending}
-                              onClick={() => toggleAreaMutation.mutate({ id: a.id, ativa: !a.ativa })}
-                              style={{
-                                backgroundColor: a.ativa ? '#fff7ed' : '#f0fdf4',
-                                color: a.ativa ? '#c2410c' : '#15803d',
-                                border: `1px solid ${a.ativa ? '#ffedd5' : '#bbf7d0'}`,
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem',
-                              }}
-                            >
-                              {a.ativa ? 'Desativar' : 'Ativar'}
-                            </button>
-
-                            <button
-                              disabled={excluirAreaMutation.isPending}
-                              onClick={() => handleConfirmarExclusao(a)}
-                              style={{
-                                backgroundColor: '#fef2f2',
-                                color: '#b91c1c',
-                                border: '1px solid #fecaca',
-                                padding: '0.3rem 0.6rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem',
-                              }}
-                            >
-                              Excluir
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                  {areasFiltradas.length === 0 && (
+            <div className="ob-card overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="ob-table">
+                  <thead>
                     <tr>
-                      <td colSpan={podeGerenciarAreas ? 5 : 4} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                        Nenhuma area cadastrada ou encontrada para esta obra.
-                      </td>
+                      <th style={{ width: '100px' }}>Ordem</th>
+                      <th>Nome da Area / Pavimento</th>
+                      <th>Situacao</th>
+                      <th>Cadastrada Em</th>
+                      {podeGerenciarAreas && <th style={{ textAlign: 'right' }}>Acoes</th>}
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {areasFiltradas.map((a) => (
+                      <tr key={a.id}>
+                        <td>
+                          <span className="ob-mono text-xs font-semibold px-2 py-0.5 rounded bg-surface-container text-on-surface">
+                            {a.ordem}
+                          </span>
+                        </td>
+                        <td className="font-medium text-on-surface">
+                          {a.nome}
+                        </td>
+                        <td>
+                          <span
+                            className={`ob-badge ${
+                              a.ativa ? 'ob-badge--ok' : 'ob-badge--crit'
+                            }`}
+                          >
+                            {a.ativa ? 'Ativa' : 'Inativa'}
+                          </span>
+                        </td>
+                        <td className="text-on-surface-variant font-mono tabular-nums text-xs">
+                          {new Date(a.criadaEm).toLocaleDateString('pt-BR')}
+                        </td>
+                        {podeGerenciarAreas && (
+                          <td style={{ textAlign: 'right' }}>
+                            <div className="inline-flex items-center gap-2 justify-end">
+                              <button
+                                type="button"
+                                onClick={() => abrirModalEditar(a)}
+                                className="ob-btn ob-btn--outline ob-btn--sm"
+                              >
+                                Editar
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={toggleAreaMutation.isPending}
+                                onClick={() => toggleAreaMutation.mutate({ id: a.id, ativa: !a.ativa })}
+                                className="ob-btn ob-btn--outline ob-btn--sm"
+                              >
+                                {a.ativa ? 'Desativar' : 'Ativar'}
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={excluirAreaMutation.isPending}
+                                onClick={() => handleConfirmarExclusao(a)}
+                                className="ob-btn ob-btn--outline ob-btn--sm text-error border-error/30 hover:bg-error-container/20"
+                              >
+                                Excluir
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                    {areasFiltradas.length === 0 && (
+                      <tr>
+                        <td colSpan={podeGerenciarAreas ? 5 : 4} className="p-8 text-center text-on-surface-variant font-body">
+                          Nenhuma area cadastrada ou encontrada para esta obra.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </>
@@ -572,51 +443,21 @@ export function ObrasPage() {
 
       {/* Modal: Nova Obra */}
       {modalNovaObraAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '2rem',
-              maxWidth: '460px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 1rem', fontSize: '1.25rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-4">
               Cadastrar Nova Obra
             </h2>
 
             {erroObra && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroObra}
               </div>
             )}
 
-            <form onSubmit={handleCriarObra} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarObra} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Codigo Interno (imutavel)
                 </label>
                 <input
@@ -625,20 +466,12 @@ export function ObrasPage() {
                   placeholder="ex: JOOY-02"
                   value={novoCodigoObra}
                   onChange={(e) => setNovoCodigoObra(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full font-mono uppercase text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nome do Empreendimento / Condominio
                 </label>
                 <input
@@ -647,20 +480,12 @@ export function ObrasPage() {
                   placeholder="ex: Residencial Jooy Horizonte"
                   value={novoNomeObra}
                   onChange={(e) => setNovoNomeObra(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Cidade
                 </label>
                 <input
@@ -669,46 +494,22 @@ export function ObrasPage() {
                   placeholder="ex: Campo Grande"
                   value={novaCidadeObra}
                   onChange={(e) => setNovaCidadeObra(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalNovaObraAberto(false)}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarObraMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {criarObraMutation.isPending ? 'Cadastrando...' : 'Cadastrar Obra'}
                 </button>
@@ -720,54 +521,24 @@ export function ObrasPage() {
 
       {/* Modal: Nova Area da Obra */}
       {modalNovaAreaAberto && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '2rem',
-              maxWidth: '440px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-1">
               Cadastrar Nova Area
             </h2>
-            <p style={{ margin: '0 0 1rem', color: '#64748b', fontSize: '0.85rem' }}>
-              Obra: <strong>{obraAtual?.nome}</strong>
+            <p className="text-xs text-on-surface-variant mb-4 font-body">
+              Obra: <strong className="text-on-surface">{obraAtual?.nome}</strong>
             </p>
 
             {erroArea && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroArea}
               </div>
             )}
 
-            <form onSubmit={handleCriarArea} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleCriarArea} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nome da Area / Pavimento
                 </label>
                 <input
@@ -776,20 +547,12 @@ export function ObrasPage() {
                   placeholder="ex: 4o Pavimento ou Garagem"
                   value={novoNomeArea}
                   onChange={(e) => setNovoNomeArea(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Ordem de Exibicao (Negativo = Subsolo, 0 = Terreo)
                 </label>
                 <input
@@ -797,46 +560,22 @@ export function ObrasPage() {
                   required
                   value={novaOrdemArea}
                   onChange={(e) => setNovaOrdemArea(Number(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full font-mono tabular-nums text-sm"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalNovaAreaAberto(false)}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarAreaMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {criarAreaMutation.isPending ? 'Salvando...' : 'Salvar Area'}
                 </button>
@@ -848,54 +587,24 @@ export function ObrasPage() {
 
       {/* Modal: Editar Area da Obra */}
       {modalEditarAreaAberto && areaParaEditar && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              padding: '2rem',
-              maxWidth: '440px',
-              width: '100%',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: '#0f172a' }}>
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <h2 className="ob-heading text-xl font-bold text-on-surface mb-1">
               Editar Area / Pavimento
             </h2>
-            <p style={{ margin: '0 0 1rem', color: '#64748b', fontSize: '0.85rem' }}>
-              Obra: <strong>{obraAtual?.nome}</strong>
+            <p className="text-xs text-on-surface-variant mb-4 font-body">
+              Obra: <strong className="text-on-surface">{obraAtual?.nome}</strong>
             </p>
 
             {erroEdicaoArea && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#b91c1c',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid #fecaca',
-                }}
-              >
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl mb-4 text-sm">
                 {erroEdicaoArea}
               </div>
             )}
 
-            <form onSubmit={handleEditarArea} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleEditarArea} className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Nome da Area / Pavimento
                 </label>
                 <input
@@ -904,20 +613,12 @@ export function ObrasPage() {
                   placeholder="ex: 1o Pavimento Torre A"
                   value={editarNomeArea}
                   onChange={(e) => setEditarNomeArea(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#334155', marginBottom: '0.25rem', fontWeight: 500 }}>
+                <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                   Ordem de Exibicao
                 </label>
                 <input
@@ -925,49 +626,25 @@ export function ObrasPage() {
                   required
                   value={editarOrdemArea}
                   onChange={(e) => setEditarOrdemArea(Number(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                  }}
+                  className="ob-input w-full font-mono tabular-nums text-sm"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => {
                     setModalEditarAreaAberto(false)
                     setAreaParaEditar(null)
                   }}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={editarAreaMutation.isPending}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+                  className="ob-btn ob-btn--primary"
                 >
                   {editarAreaMutation.isPending ? 'Salvando...' : 'Salvar Alteracoes'}
                 </button>
@@ -976,6 +653,6 @@ export function ObrasPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }

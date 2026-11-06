@@ -60,6 +60,8 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         ativo: true,
       } as any)
 
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
+
       vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
         id: areaId,
         obraId,
@@ -178,6 +180,8 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         ativo: true,
       } as any)
 
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
+
       vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
         id: areaId,
         obraId,
@@ -260,6 +264,8 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         ativo: true,
       } as any)
 
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
+
       vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
         id: areaId,
         ativa: false,
@@ -288,6 +294,8 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         id: encarregadoId,
         ativo: true,
       } as any)
+
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
 
       vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
         id: areaId,

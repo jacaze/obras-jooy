@@ -96,12 +96,17 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **T11** | `feature/T11-requisicoes-obra` | Modulo de Requisicoes de Obra e Isolamento de Acesso para Encarregado | 12 testes Vitest (9 backend + 3 frontend) | Concluido | Sim (PR #8 mergeado) |
 | **T08** | `feature/T08-estoque-livro-razao` | Estoque Fisico, Saldos, Locacoes Opcionais e Livro-Razao Imutavel (Kardex) | 19 testes Vitest (15 backend + 4 frontend) | Concluido | Sim (PR #9 mergeado) |
 | **T12** | `feature/T12-atendimento-requisicoes-sienge` | Validacao de Saldo na Requisicao, Atendimento com Baixa Atomica no Estoque e Exportacao CSV para SIENGE | 19 testes Vitest (14 backend + 5 frontend) | Concluido | Sim (PR #10 mergeado) |
-| **T13** | `feature/T13-orcamento-obra` | Orcamento e Limites de Material por Obra, Exibicao de Limite na Requisicao e Painel Grafico para Engenharia/Administracao | 9 testes Vitest (7 backend + 2 frontend) | Concluido | Aguardando aprovacao (PR #11) |
+| **T13** | `feature/T13-orcamento-obra` | Orcamento e Limites de Material por Obra, Exibicao de Limite na Requisicao e Painel Grafico para Engenharia/Administracao | 9 testes Vitest (7 backend + 2 frontend) | Concluido | Sim (PR #11 mergeado - preservado em branch de portfolio) |
+| **F01** | `feature/F01-vinculo-usuario-obra` | Vinculo de usuario a obra (lotação fixa para Encarregado e Almoxarife sem seleção manual) | Vitest | Pendente | Não |
+| **F02** | `feature/F02-etapas-por-local` | Etapas de execucao por pavimento/area com bloqueio de requisicoes quando encerradas | Vitest | Pendente | Não |
+| **F03** | `feature/F03-codigo-sienge-opcional` | Codigo proprio do material obrigatorio e codigo SIENGE opcional e editavel | Vitest | Pendente | Não |
+| **F04** | `feature/F04-exportacao-analitica-engenharia` | Relatorio analitico e exportacao CSV com filtros por data, material, codigo e etapa | Vitest | Pendente | Não |
 | **T09** | *(a criar)* | Recebimento com conversão e controle sem documento | Vitest | Pendente | Não |
 | **T10** | *(a criar)* | Parâmetros de Estoque Mínimo e Máximo | Vitest | Pendente | Não |
 | **T14** | *(a criar)* | Ativos e Ferramentas (próprias, locadas, terceiros) | Vitest | Pendente | Não |
 | **T15** | *(a criar)* | Empréstimo e Teste de Saída da Ferramenta | Vitest | Pendente | Não |
 | **T16** | *(a criar)* | Devolução, Teste Pós-Retorno e Ocorrências | Vitest | Pendente | Não |
+| **F05** | `feature/F05-pwa-offline` | Modo Offline PWA para requisicoes sem conexao e sincronizacao automatica em background | Vitest / E2E | Pendente | Não |
 | **T17** | *(a criar)* | Relatórios Operacionais e Kardex | Vitest | Pendente | Não |
 | **T18** | *(a criar)* | Auditoria e Rate Limiting avançado | Vitest | Pendente | Não |
 | **T19** | *(a criar)* | Testes de Integração Ponta a Ponta | E2E | Pendente | Não |

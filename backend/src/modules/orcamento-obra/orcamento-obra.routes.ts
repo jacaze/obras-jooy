@@ -55,11 +55,69 @@ export async function orcamentoObraRoutes(app: FastifyInstance) {
         },
       })
 
+      const obraIds = Array.from(new Set(limites.map((l) => l.obraId)))
+      const materialIds = Array.from(new Set(limites.map((l) => l.materialId)))
+
+      const consumoMap = new Map<string, number>()
+
+      if (obraIds.length > 0 && materialIds.length > 0) {
+        const itensRequisitados = await prisma.requisicaoItem.findMany({
+          where: {
+            materialId: { in: materialIds },
+            requisicao: {
+              status: { not: StatusRequisicao.CANCELADA },
+              area: {
+                obraId: { in: obraIds },
+              },
+            },
+          },
+          select: {
+            materialId: true,
+            quantidade: true,
+            quantidadeEntregue: true,
+            requisicao: {
+              select: {
+                status: true,
+                area: {
+                  select: {
+                    obraId: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        for (const it of itensRequisitados) {
+          if (!it.materialId) continue
+          const chave = `${it.requisicao.area.obraId}:${it.materialId}`
+          const atual = consumoMap.get(chave) || 0
+          const valor =
+            it.requisicao.status === StatusRequisicao.ATENDIDA &&
+            it.quantidadeEntregue !== null &&
+            it.quantidadeEntregue !== undefined
+              ? Number(it.quantidadeEntregue)
+              : Number(it.quantidade)
+          consumoMap.set(chave, Number((atual + valor).toFixed(4)))
+        }
+      }
+
       return reply.status(200).send(
-        limites.map((l) => ({
-          ...l,
-          quantidadeOrcada: Number(l.quantidadeOrcada),
-        }))
+        limites.map((l) => {
+          const quantidadeOrcada = Number(l.quantidadeOrcada)
+          const quantidadeConsumida =
+            consumoMap.get(`${l.obraId}:${l.materialId}`) || 0
+          const saldoOrcamento = Number(
+            (quantidadeOrcada - quantidadeConsumida).toFixed(4)
+          )
+
+          return {
+            ...l,
+            quantidadeOrcada,
+            quantidadeConsumida,
+            saldoOrcamento,
+          }
+        })
       )
     }
   )

@@ -28,6 +28,11 @@ export const criarUsuarioSchema = z.object({
   cargoId: z
     .string({ required_error: 'O cargo e obrigatorio' })
     .uuid('Identificador do cargo invalido'),
+  obraId: z
+    .string()
+    .uuid('Identificador da obra invalido')
+    .nullable()
+    .optional(),
 })
 
 export const resetarSenhaSchema = z.object({
@@ -63,5 +68,10 @@ export const atualizarUsuarioSchema = z.object({
   cargoId: z
     .string()
     .uuid('Identificador do cargo invalido')
+    .optional(),
+  obraId: z
+    .string()
+    .uuid('Identificador da obra invalido')
+    .nullable()
     .optional(),
 })

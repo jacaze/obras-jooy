@@ -95,4 +95,31 @@ describe('LoginPage Component', () => {
       expect(screen.getByText('Credenciais invalidas')).toBeInTheDocument()
     })
   })
+
+  it('deve permitir acesso rapido de demonstracao ao clicar em um perfil do MVP', async () => {
+    const mockLogin = vi.fn().mockResolvedValue(undefined)
+
+    render(
+      <AuthContext.Provider
+        value={{
+          usuario: null,
+          token: null,
+          carregando: false,
+          login: mockLogin,
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>
+      </AuthContext.Provider>
+    )
+
+    const btnAlmoxarife = screen.getByRole('button', { name: /Almoxarife/i })
+    fireEvent.click(btnAlmoxarife)
+
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith('almoxarife', 'admin123456')
+    })
+  })
 })

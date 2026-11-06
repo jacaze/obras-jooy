@@ -8,12 +8,14 @@ declare module '@fastify/jwt' {
       login: string
       nome: string
       perfil: PerfilUsuario
+      obraId?: string | null
     }
     user: {
       sub: string
       login: string
       nome: string
       perfil: PerfilUsuario
+      obraId?: string | null
     }
   }
 }
