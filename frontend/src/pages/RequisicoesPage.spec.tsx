@@ -6,6 +6,7 @@ import { RequisicoesPage } from './RequisicoesPage'
 import * as apiClient from '../api/client'
 import { AuthContext } from '../contexts/auth-context'
 import type { Requisicao } from '../types/requisicao'
+import { salvarCacheObras, salvarCacheEtapas } from '../services/offlineStorage'
 
 const mockEncarregado = {
   id: 'enc-id-01',
@@ -580,5 +581,91 @@ describe('RequisicoesPage Component', () => {
         name: /Exportacao Analitica \(Engenharia\)/i,
       })
     ).not.toBeInTheDocument()
+  })
+
+  it('deve permitir que o ENCARREGADO crie requisicao offline sem conexao com a internet (F05)', async () => {
+    salvarCacheObras(mockObras)
+    salvarCacheEtapas('area-1', [
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Alvenaria',
+        ordem: 1,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+    localStorage.setItem('obras_offline_areas_obra-1', JSON.stringify(mockAreas))
+    localStorage.setItem(
+      'obras_offline_saldos_obra-1',
+      JSON.stringify([
+        {
+          localId: 'local-1',
+          materialId: 'mat-1',
+          quantidade: 50,
+          reservado: 0,
+          disponivel: 50,
+          material: mockMateriais[0],
+        },
+      ])
+    )
+
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    const createSpy = vi.spyOn(apiClient, 'createRequisicao')
+
+    renderRequisicoesPage(mockEncarregado)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    // Abre modal
+    fireEvent.click(screen.getByRole('button', { name: /\+ Nova Requisicao/i }))
+
+    expect(screen.getByText('Nova Requisicao de Obra')).toBeInTheDocument()
+
+    // Seleciona Area
+    await waitFor(() => {
+      expect(screen.getByText('Pavimento 02')).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByDisplayValue('Selecione a area...'), {
+      target: { value: 'area-1' },
+    })
+
+    // Seleciona Etapa
+    await waitFor(() => {
+      expect(screen.getByText('Alvenaria')).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByDisplayValue('Selecione a etapa...'), {
+      target: { value: 'etapa-1' },
+    })
+
+    const inputBuscaMaterial = screen.getByPlaceholderText(
+      'Digite codigo ou descricao do material em estoque...'
+    )
+    fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('Cimento Votoran Todas as Obras')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
+
+    // Submete pedido
+    const btnEnviar = screen.getByRole('button', { name: /Enviar Requisicao/i })
+    fireEvent.click(btnEnviar)
+
+    // O pedido NAO deve chamar a API online, e sim ser gravado offline
+    expect(createSpy).not.toHaveBeenCalled()
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Pedido salvo no dispositivo \(Modo Offline\)/i)
+      ).toBeInTheDocument()
+      expect(screen.getByText('#OFFLINE')).toBeInTheDocument()
+      expect(screen.getByText('Offline (Pendente Sync)')).toBeInTheDocument()
+    })
   })
 })

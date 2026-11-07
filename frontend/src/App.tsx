@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthProvider'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Navbar } from './components/Navbar'
+import { OfflineBanner } from './components/OfflineBanner'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { UsuariosPage } from './pages/UsuariosPage'
@@ -29,6 +30,7 @@ export function App() {
       <BrowserRouter>
         <AuthProvider>
           <Navbar />
+          <OfflineBanner />
           <Routes>
             {/* Rotas Publicas */}
             <Route path="/login" element={<LoginPage />} />
