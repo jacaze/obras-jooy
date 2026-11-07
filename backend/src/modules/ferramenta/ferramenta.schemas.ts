@@ -33,10 +33,40 @@ export const atualizarFerramentaSchema = z.object({
 
 export const registrarEmprestimoSchema = z.object({
   usuarioId: z.string().uuid('Selecione o usuario que esta retirando a ferramenta'),
+  areaId: z.string().uuid('ID de area invalido').nullable().optional(),
+  testadoNaSaida: z
+    .boolean({ required_error: 'Confirme que a ferramenta foi testada antes da entrega' })
+    .refine((val) => val === true, {
+      message: 'A ferramenta deve obrigatoriamente ser testada na saida antes de ser emprestada',
+    }),
+  previsaoDevolucao: z
+    .string()
+    .nullable()
+    .optional()
+    .refine((val) => !val || !isNaN(Date.parse(val)), {
+      message: 'Data de previsao de devolucao invalida',
+    }),
+  observacaoSaida: z
+    .string()
+    .max(255, 'A observacao de saida deve ter no maximo 255 caracteres')
+    .trim()
+    .nullable()
+    .optional(),
 })
 
 export const registrarDevolucaoSchema = z.object({
+  testadoNoRetorno: z
+    .boolean({ required_error: 'Confirme que a ferramenta foi testada no retorno' })
+    .refine((val) => val === true, {
+      message: 'A ferramenta deve obrigatoriamente ser testada no retorno pelo almoxarife',
+    }),
   comDefeito: z.boolean().default(false),
+  observacaoDevolucao: z
+    .string()
+    .max(255, 'A observacao de devolucao deve ter no maximo 255 caracteres')
+    .trim()
+    .nullable()
+    .optional(),
 })
 
 export const listarFerramentasQuerySchema = z.object({

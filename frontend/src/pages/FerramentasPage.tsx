@@ -6,21 +6,28 @@ import {
   updateFerramenta,
   registrarEmprestimoFerramenta,
   registrarDevolucaoFerramenta,
+  getCautelasFerramenta,
   getUsuariosOpcoes,
   getUsuarios,
+  getObras,
+  getAreasObra,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import type { Ferramenta, StatusFerramenta } from '../types/material'
+import type { Ferramenta, StatusFerramenta, CautelaFerramenta } from '../types/material'
 
 export function FerramentasPage() {
   const { usuario } = useAuth()
   const queryClient = useQueryClient()
 
-  // Permissoes: Admin, Engenharia e Almoxarife gerenciam
+  // Permissoes: Admin, Engenharia e Almoxarife gerenciam catalogo
   const podeGerenciar =
     usuario?.perfil === 'ADMIN' ||
     usuario?.perfil === 'ENGENHARIA' ||
     usuario?.perfil === 'ALMOXARIFE'
+
+  // Somente ALMOXARIFE e ADMIN podem entregar e devolver ferramentas fisicamente
+  const podeOperarBalcao =
+    usuario?.perfil === 'ADMIN' || usuario?.perfil === 'ALMOXARIFE'
 
   // Filtros
   const [busca, setBusca] = useState('')
@@ -37,13 +44,22 @@ export function FerramentasPage() {
   const [formCodigo, setFormCodigo] = useState('')
   const [formNome, setFormNome] = useState('')
 
-  // Modal de Emprestimo
+  // Modal de Emprestimo (Cautela)
   const [ferramentaParaEmprestimo, setFerramentaParaEmprestimo] = useState<Ferramenta | null>(null)
   const [usuarioEmprestimoId, setUsuarioEmprestimoId] = useState('')
+  const [areaEmprestimoId, setAreaEmprestimoId] = useState('')
+  const [testadoNaSaida, setTestadoNaSaida] = useState(false)
+  const [previsaoDevolucao, setPrevisaoDevolucao] = useState('')
+  const [observacaoSaida, setObservacaoSaida] = useState('')
 
   // Modal de Devolucao
   const [ferramentaParaDevolucao, setFerramentaParaDevolucao] = useState<Ferramenta | null>(null)
+  const [testadoNoRetorno, setTestadoNoRetorno] = useState(false)
   const [devolucaoComDefeito, setDevolucaoComDefeito] = useState(false)
+  const [observacaoDevolucao, setObservacaoDevolucao] = useState('')
+
+  // Modal de Historico de Cautelas
+  const [ferramentaHistorico, setFerramentaHistorico] = useState<Ferramenta | null>(null)
 
   // Queries
   const { data: ferramentas = [], isLoading: carregandoFerramentas } = useQuery({
@@ -54,6 +70,44 @@ export function FerramentasPage() {
         status: (statusFiltro as StatusFerramenta) || undefined,
         somenteAtivas,
       }),
+  })
+
+  const { data: obras = [] } = useQuery({
+    queryKey: ['obras-ferramentas'],
+    queryFn: async () => {
+      if (typeof getObras === 'function') {
+        const res = await getObras(true)
+        return res || []
+      }
+      return []
+    },
+    enabled: podeOperarBalcao,
+  })
+
+  const obraAtivaId = usuario?.obraId || obras[0]?.id || ''
+
+  const { data: areasObra = [] } = useQuery({
+    queryKey: ['areas-obra-ferramentas', obraAtivaId],
+    queryFn: async () => {
+      if (obraAtivaId && typeof getAreasObra === 'function') {
+        const res = await getAreasObra(obraAtivaId, true)
+        return res || []
+      }
+      return []
+    },
+    enabled: Boolean(obraAtivaId && podeOperarBalcao),
+  })
+
+  const { data: historicoCautelas = [], isLoading: carregandoHistorico } = useQuery({
+    queryKey: ['cautelas-ferramenta', ferramentaHistorico?.id],
+    queryFn: async () => {
+      if (ferramentaHistorico && typeof getCautelasFerramenta === 'function') {
+        const res = await getCautelasFerramenta(ferramentaHistorico.id)
+        return res || ferramentaHistorico.cautelas || []
+      }
+      return ferramentaHistorico?.cautelas || []
+    },
+    enabled: Boolean(ferramentaHistorico),
   })
 
   const { data: usuariosOpcoes = [] } = useQuery({
@@ -104,15 +158,39 @@ export function FerramentasPage() {
   })
 
   const emprestarFerramentaMutation = useMutation({
-    mutationFn: async ({ id, usuarioId }: { id: string; usuarioId: string }) =>
-      registrarEmprestimoFerramenta(id, usuarioId),
+    mutationFn: async ({
+      id,
+      usuarioId,
+      areaId,
+      testadoNaSaida,
+      previsaoDevolucao,
+      observacaoSaida,
+    }: {
+      id: string
+      usuarioId: string
+      areaId?: string | null
+      testadoNaSaida: boolean
+      previsaoDevolucao?: string | null
+      observacaoSaida?: string | null
+    }) =>
+      registrarEmprestimoFerramenta(id, {
+        usuarioId,
+        areaId: areaId || null,
+        testadoNaSaida,
+        previsaoDevolucao: previsaoDevolucao || null,
+        observacaoSaida: observacaoSaida || null,
+      }),
     onSuccess: (ferAtualizada) => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
       setFerramentaParaEmprestimo(null)
       setUsuarioEmprestimoId('')
+      setAreaEmprestimoId('')
+      setTestadoNaSaida(false)
+      setPrevisaoDevolucao('')
+      setObservacaoSaida('')
       setMensagemErro(null)
       setMensagemSucesso(
-        `Emprestimo registrado: ${ferAtualizada.codigo} (${ferAtualizada.nome}) entregue para ${ferAtualizada.emprestadoPara?.nome || 'usuario selecionado'}.`
+        `Cautela registrada: ${ferAtualizada.codigo} (${ferAtualizada.nome}) testada e entregue para ${ferAtualizada.emprestadoPara?.nome || 'usuario selecionado'}.`
       )
     },
     onError: (err: any) => {
@@ -123,17 +201,33 @@ export function FerramentasPage() {
   })
 
   const devolverFerramentaMutation = useMutation({
-    mutationFn: async ({ id, comDefeito }: { id: string; comDefeito: boolean }) =>
-      registrarDevolucaoFerramenta(id, comDefeito),
+    mutationFn: async ({
+      id,
+      testadoNoRetorno,
+      comDefeito,
+      observacaoDevolucao,
+    }: {
+      id: string
+      testadoNoRetorno: boolean
+      comDefeito: boolean
+      observacaoDevolucao?: string | null
+    }) =>
+      registrarDevolucaoFerramenta(id, {
+        testadoNoRetorno,
+        comDefeito,
+        observacaoDevolucao: observacaoDevolucao || null,
+      }),
     onSuccess: (ferAtualizada) => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
       setFerramentaParaDevolucao(null)
+      setTestadoNoRetorno(false)
       setDevolucaoComDefeito(false)
+      setObservacaoDevolucao('')
       setMensagemErro(null)
       setMensagemSucesso(
         ferAtualizada.status === 'COM_DEFEITO'
-          ? `Devolucao registrada com avaria: ${ferAtualizada.codigo} encaminhada para manutencao.`
-          : `Devolucao registrada com sucesso: ${ferAtualizada.codigo} disponivel novamente no almoxarifado.`
+          ? `Devolucao registrada com avaria: ${ferAtualizada.codigo} testada e encaminhada para manutencao.`
+          : `Devolucao registrada com sucesso: ${ferAtualizada.codigo} testada e disponivel novamente no almoxarifado.`
       )
     },
     onError: (err: any) => {
@@ -393,13 +487,29 @@ export function FerramentasPage() {
                         </td>
                         <td className="text-sm font-body">
                           {fer.status === 'EMPRESTADO' && fer.emprestadoPara ? (
-                            <div>
-                              <span className="font-semibold text-on-surface">
-                                {fer.emprestadoPara.nome}
-                              </span>
-                              <span className="text-on-surface-variant text-xs ml-1.5 font-mono">
-                                (@{fer.emprestadoPara.login})
-                              </span>
+                            <div className="space-y-0.5">
+                              <div>
+                                <span className="font-semibold text-on-surface">
+                                  {fer.emprestadoPara.nome}
+                                </span>
+                                <span className="text-on-surface-variant text-xs ml-1.5 font-mono">
+                                  (@{fer.emprestadoPara.login})
+                                </span>
+                              </div>
+                              {fer.cautelas && fer.cautelas[0] && !fer.cautelas[0].devolvidaEm && (
+                                <div className="text-xs text-on-surface-variant flex flex-wrap gap-2 items-center">
+                                  {fer.cautelas[0].area && (
+                                    <span className="bg-surface-container px-2 py-0.5 rounded font-medium">
+                                      Local: {fer.cautelas[0].area.nome}
+                                    </span>
+                                  )}
+                                  {fer.cautelas[0].testadoNaSaida && (
+                                    <span className="text-secondary font-medium">
+                                      Testada na saída
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <span className="text-on-surface-variant">-</span>
@@ -408,13 +518,17 @@ export function FerramentasPage() {
                         {podeGerenciar && (
                           <td style={{ textAlign: 'right' }}>
                             <div className="inline-flex items-center gap-2 flex-wrap justify-end">
-                              {fer.status === 'DISPONIVEL' && fer.ativo && (
+                              {podeOperarBalcao && fer.status === 'DISPONIVEL' && fer.ativo && (
                                 <button
                                   type="button"
                                   aria-label="Emprestar"
                                   onClick={() => {
                                     setFerramentaParaEmprestimo(fer)
                                     setUsuarioEmprestimoId('')
+                                    setAreaEmprestimoId('')
+                                    setTestadoNaSaida(false)
+                                    setPrevisaoDevolucao('')
+                                    setObservacaoSaida('')
                                     setMensagemErro(null)
                                   }}
                                   className="ob-btn ob-btn--solid ob-btn--sm"
@@ -424,13 +538,15 @@ export function FerramentasPage() {
                                 </button>
                               )}
 
-                              {fer.status === 'EMPRESTADO' && (
+                              {podeOperarBalcao && fer.status === 'EMPRESTADO' && (
                                 <button
                                   type="button"
                                   aria-label="Devolver"
                                   onClick={() => {
                                     setFerramentaParaDevolucao(fer)
+                                    setTestadoNoRetorno(false)
                                     setDevolucaoComDefeito(false)
+                                    setObservacaoDevolucao('')
                                     setMensagemErro(null)
                                   }}
                                   className="ob-btn ob-btn--primary ob-btn--sm"
@@ -440,7 +556,7 @@ export function FerramentasPage() {
                                 </button>
                               )}
 
-                              {fer.status === 'COM_DEFEITO' && (
+                              {podeOperarBalcao && fer.status === 'COM_DEFEITO' && (
                                 <button
                                   type="button"
                                   aria-label="Liberar Conserto"
@@ -458,6 +574,15 @@ export function FerramentasPage() {
                                   <span>Liberar Conserto</span>
                                 </button>
                               )}
+
+                              <button
+                                type="button"
+                                aria-label="Historico"
+                                onClick={() => setFerramentaHistorico(fer)}
+                                className="ob-btn ob-btn--outline ob-btn--sm"
+                              >
+                                Histórico
+                              </button>
 
                               <button
                                 type="button"
@@ -527,7 +652,7 @@ export function FerramentasPage() {
                   {ferramentaParaEmprestimo.nome}
                 </div>
                 <div className="text-xs text-on-surface-variant">
-                  Selecione o colaborador responsavel pela retirada e guarda do equipamento.
+                  Selecione o colaborador responsavel, local de uso e confirme o teste de bancada antes da entrega.
                 </div>
               </div>
 
@@ -538,9 +663,17 @@ export function FerramentasPage() {
                     setMensagemErro('Selecione o usuario solicitante para registrar o emprestimo.')
                     return
                   }
+                  if (!testadoNaSaida) {
+                    setMensagemErro('Confirme que a ferramenta foi testada na bancada antes de entregar.')
+                    return
+                  }
                   emprestarFerramentaMutation.mutate({
                     id: ferramentaParaEmprestimo.id,
                     usuarioId: usuarioEmprestimoId,
+                    areaId: areaEmprestimoId || null,
+                    testadoNaSaida,
+                    previsaoDevolucao: previsaoDevolucao || null,
+                    observacaoSaida: observacaoSaida.trim() || null,
                   })
                 }}
                 className="flex flex-col gap-4"
@@ -568,6 +701,87 @@ export function FerramentasPage() {
                   </select>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="emprestimo-area"
+                      className="block text-sm font-semibold text-on-surface mb-1.5"
+                    >
+                      Area / Pavimento de Uso
+                    </label>
+                    <select
+                      id="emprestimo-area"
+                      value={areaEmprestimoId}
+                      onChange={(e) => setAreaEmprestimoId(e.target.value)}
+                      className="ob-input w-full text-sm font-body"
+                    >
+                      <option value="">Selecione a area (opcional)...</option>
+                      {areasObra.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="emprestimo-previsao"
+                      className="block text-sm font-semibold text-on-surface mb-1.5"
+                    >
+                      Previsao de Devolucao
+                    </label>
+                    <input
+                      id="emprestimo-previsao"
+                      type="date"
+                      value={previsaoDevolucao}
+                      onChange={(e) => setPrevisaoDevolucao(e.target.value)}
+                      className="ob-input w-full text-sm font-body"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="emprestimo-observacao"
+                    className="block text-sm font-semibold text-on-surface mb-1.5"
+                  >
+                    Observacao na Saida (opcional)
+                  </label>
+                  <input
+                    id="emprestimo-observacao"
+                    type="text"
+                    value={observacaoSaida}
+                    onChange={(e) => setObservacaoSaida(e.target.value)}
+                    placeholder="Ex: Entregue com maleta e 2 brocas SDS"
+                    className="ob-input w-full text-sm"
+                  />
+                </div>
+
+                <label
+                  htmlFor="emprestimo-testado-saida"
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    testadoNaSaida
+                      ? 'border-secondary bg-secondary-container/30 text-on-surface'
+                      : 'border-surface-container bg-surface-container-low text-on-surface-variant'
+                  }`}
+                >
+                  <input
+                    id="emprestimo-testado-saida"
+                    type="checkbox"
+                    required
+                    checked={testadoNaSaida}
+                    onChange={(e) => setTestadoNaSaida(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded text-secondary"
+                  />
+                  <span className="text-sm leading-snug">
+                    <strong>Ferramenta testada na entrega *</strong>
+                    <span className="block text-xs text-on-surface-variant mt-0.5">
+                      Confirmo que o equipamento foi ligado/inspecionado no balcao antes de sair para o canteiro.
+                    </span>
+                  </span>
+                </label>
+
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     type="button"
@@ -578,8 +792,8 @@ export function FerramentasPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={emprestarFerramentaMutation.isPending}
-                    className="ob-btn ob-btn--solid"
+                    disabled={emprestarFerramentaMutation.isPending || !testadoNaSaida}
+                    className="ob-btn ob-btn--solid disabled:opacity-50"
                   >
                     {emprestarFerramentaMutation.isPending
                       ? 'Registrando...'
@@ -625,16 +839,46 @@ export function FerramentasPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
+                  if (!testadoNoRetorno) {
+                    setMensagemErro('Confirme que a ferramenta foi testada no retorno ao almoxarifado.')
+                    return
+                  }
                   devolverFerramentaMutation.mutate({
                     id: ferramentaParaDevolucao.id,
+                    testadoNoRetorno,
                     comDefeito: devolucaoComDefeito,
+                    observacaoDevolucao: observacaoDevolucao.trim() || null,
                   })
                 }}
                 className="flex flex-col gap-4"
               >
+                <label
+                  htmlFor="devolucao-testado-retorno"
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    testadoNoRetorno
+                      ? 'border-secondary bg-secondary-container/30 text-on-surface'
+                      : 'border-surface-container bg-surface-container-low text-on-surface-variant'
+                  }`}
+                >
+                  <input
+                    id="devolucao-testado-retorno"
+                    type="checkbox"
+                    required
+                    checked={testadoNoRetorno}
+                    onChange={(e) => setTestadoNoRetorno(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded text-secondary"
+                  />
+                  <span className="text-sm leading-snug">
+                    <strong>Ferramenta testada no retorno *</strong>
+                    <span className="block text-xs text-on-surface-variant mt-0.5">
+                      Confirmo que realizei o teste de funcionamento no recebimento da ferramenta no balcao.
+                    </span>
+                  </span>
+                </label>
+
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-on-surface">
-                    Condicao de retorno ao almoxarifado:
+                    Condicao de retorno apos o teste:
                   </span>
 
                   <label
@@ -676,6 +920,27 @@ export function FerramentasPage() {
                   </label>
                 </div>
 
+                <div>
+                  <label
+                    htmlFor="devolucao-observacao"
+                    className="block text-sm font-semibold text-on-surface mb-1.5"
+                  >
+                    Observacao na Devolucao {devolucaoComDefeito ? '(descreva o defeito)' : '(opcional)'}
+                  </label>
+                  <input
+                    id="devolucao-observacao"
+                    type="text"
+                    value={observacaoDevolucao}
+                    onChange={(e) => setObservacaoDevolucao(e.target.value)}
+                    placeholder={
+                      devolucaoComDefeito
+                        ? 'Ex: Cabo eletrico rompido ou gatilho travando'
+                        : 'Ex: Devolvida limpa e completa'
+                    }
+                    className="ob-input w-full text-sm"
+                  />
+                </div>
+
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     type="button"
@@ -686,8 +951,10 @@ export function FerramentasPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={devolverFerramentaMutation.isPending}
-                    className={`ob-btn ${devolucaoComDefeito ? 'ob-btn--solid text-error' : 'ob-btn--primary'}`}
+                    disabled={devolverFerramentaMutation.isPending || !testadoNoRetorno}
+                    className={`ob-btn disabled:opacity-50 ${
+                      devolucaoComDefeito ? 'ob-btn--solid text-error' : 'ob-btn--primary'
+                    }`}
                   >
                     {devolverFerramentaMutation.isPending
                       ? 'Confirmando...'
@@ -695,6 +962,105 @@ export function FerramentasPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Historico de Cautelas */}
+        {ferramentaHistorico && (
+          <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+            <div className="w-full max-w-2xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h2 className="ob-heading text-xl font-bold text-on-surface m-0">
+                    Historico de Cautelas ({ferramentaHistorico.codigo})
+                  </h2>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    {ferramentaHistorico.nome}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFerramentaHistorico(null)}
+                  className="text-on-surface-variant hover:text-on-surface text-lg cursor-pointer p-1"
+                  aria-label="Fechar"
+                >
+                  &times;
+                </button>
+              </div>
+
+              {carregandoHistorico ? (
+                <div className="py-8 text-center text-sm text-on-surface-variant">
+                  Carregando historico de cautelas...
+                </div>
+              ) : (historicoCautelas as CautelaFerramenta[]).length === 0 ? (
+                <div className="py-8 text-center text-sm text-on-surface-variant bg-surface-container-low rounded-xl border border-surface-container">
+                  Nenhum registro de cautela encontrado para esta ferramenta.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(historicoCautelas as CautelaFerramenta[]).map((cautela) => (
+                    <div
+                      key={cautela.id}
+                      className="p-4 rounded-xl border border-surface-container bg-surface-container-low text-xs sm:text-sm space-y-2"
+                    >
+                      <div className="flex flex-wrap justify-between items-center gap-2">
+                        <div className="font-semibold text-on-surface">
+                          Responsavel: {cautela.usuario?.nome || 'Usuario'}
+                          {cautela.area ? ` — Local: ${cautela.area.nome}` : ''}
+                        </div>
+                        <span
+                          className={`ob-badge ${
+                            !cautela.devolvidaEm
+                              ? 'ob-badge--info'
+                              : cautela.comDefeito
+                              ? 'ob-badge--crit'
+                              : 'ob-badge--ok'
+                          }`}
+                        >
+                          {!cautela.devolvidaEm
+                            ? 'Em Campo'
+                            : cautela.comDefeito
+                            ? 'Devolvida com Defeito'
+                            : 'Devolvida OK'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-on-surface-variant">
+                        <div>
+                          <strong>Saida:</strong>{' '}
+                          {new Date(cautela.retiradaEm).toLocaleString('pt-BR')}
+                          {cautela.entreguePor ? ` (por ${cautela.entreguePor.nome})` : ''}
+                          {cautela.testadoNaSaida ? ' [Testada na saida]' : ''}
+                          {cautela.observacaoSaida ? ` — Obs: ${cautela.observacaoSaida}` : ''}
+                        </div>
+                        <div>
+                          <strong>Retorno:</strong>{' '}
+                          {cautela.devolvidaEm
+                            ? `${new Date(cautela.devolvidaEm).toLocaleString('pt-BR')}${
+                                cautela.recebidoPor ? ` (por ${cautela.recebidoPor.nome})` : ''
+                              }${cautela.testadoNoRetorno ? ' [Testada no retorno]' : ''}${
+                                cautela.observacaoDevolucao
+                                  ? ` — Obs: ${cautela.observacaoDevolucao}`
+                                  : ''
+                              }`
+                            : 'Aguardando devolucao'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={() => setFerramentaHistorico(null)}
+                  className="ob-btn ob-btn--outline"
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
           </div>
         )}

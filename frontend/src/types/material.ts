@@ -69,7 +69,7 @@ export interface FiltrosMaterial {
 }
 
 // ----------------------------------------------------
-// FERRAMENTAS RASTREAVEIS
+// FERRAMENTAS RASTREAVEIS E CAUTELAS (F06)
 // ----------------------------------------------------
 export type StatusFerramenta = 'DISPONIVEL' | 'EMPRESTADO' | 'COM_DEFEITO'
 
@@ -77,7 +77,31 @@ export interface UsuarioResumo {
   id: string
   nome: string
   login: string
-  perfil: string
+  perfil?: string
+}
+
+export interface CautelaFerramenta {
+  id: string
+  ferramentaId: string
+  usuarioId: string
+  areaId?: string | null
+  entreguePorId: string
+  testadoNaSaida: boolean
+  observacaoSaida?: string | null
+  previsaoDevolucao?: string | null
+  retiradaEm: string
+  devolvidaEm?: string | null
+  recebidoPorId?: string | null
+  testadoNoRetorno?: boolean | null
+  comDefeito?: boolean | null
+  observacaoDevolucao?: string | null
+  usuario?: UsuarioResumo
+  area?: {
+    id: string
+    nome: string
+  } | null
+  entreguePor?: UsuarioResumo
+  recebidoPor?: UsuarioResumo | null
 }
 
 export interface Ferramenta {
@@ -89,6 +113,21 @@ export interface Ferramenta {
   ativo: boolean
   criadaEm: string
   emprestadoPara?: UsuarioResumo | null
+  cautelas?: CautelaFerramenta[]
+}
+
+export interface RegistrarEmprestimoInput {
+  usuarioId: string
+  areaId?: string | null
+  testadoNaSaida: boolean
+  previsaoDevolucao?: string | null
+  observacaoSaida?: string | null
+}
+
+export interface RegistrarDevolucaoInput {
+  testadoNoRetorno: boolean
+  comDefeito: boolean
+  observacaoDevolucao?: string | null
 }
 
 export interface CriarFerramentaInput {

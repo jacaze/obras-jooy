@@ -46,6 +46,9 @@ model Usuario {
   cargo     Cargo         @relation(fields: [cargoId], references: [id])
   obra      Obra?         @relation(fields: [obraId], references: [id])
   ferramentasEmprestadas   Ferramenta[]
+  cautelasRetiradas        CautelaFerramenta[]   @relation("CautelaResponsavel")
+  cautelasEntregues        CautelaFerramenta[]   @relation("CautelaEntreguePor")
+  cautelasRecebidas        CautelaFerramenta[]   @relation("CautelaRecebidoPor")
   requisicoesFeitas        Requisicao[]          @relation("RequisicaoSolicitante")
   requisicoesAtendidas     Requisicao[]          @relation("RequisicaoAtendidaPor")
   requisicoesExportadas    Requisicao[]          @relation("RequisicaoExportadaPor")
@@ -96,6 +99,7 @@ model AreaObra {
   etapas        EtapaArea[]
   requisicoes   Requisicao[]
   movimentacoes MovimentacaoEstoque[]
+  cautelas      CautelaFerramenta[]
 
   @@unique([obraId, nome], name: "area_obra_nome_unico")
   @@map("area_obra")
@@ -182,18 +186,45 @@ enum StatusFerramenta {
 }
 
 model Ferramenta {
-  id                String           @id @default(uuid()) @db.Uuid
-  codigo            String           @unique @db.VarChar(50)
-  nome              String           @db.VarChar(120)
-  status            StatusFerramenta @default(DISPONIVEL)
-  emprestadoParaId  String?          @map("emprestado_para_id") @db.Uuid
-  ativo             Boolean          @default(true)
-  criadaEm          DateTime         @default(now()) @map("criada_em")
+  id                String              @id @default(uuid()) @db.Uuid
+  codigo            String              @unique @db.VarChar(50)
+  nome              String              @db.VarChar(120)
+  status            StatusFerramenta    @default(DISPONIVEL)
+  emprestadoParaId  String?             @map("emprestado_para_id") @db.Uuid
+  ativo             Boolean             @default(true)
+  criadaEm          DateTime            @default(now()) @map("criada_em")
 
-  emprestadoPara    Usuario?         @relation(fields: [emprestadoParaId], references: [id], onDelete: SetNull)
+  emprestadoPara    Usuario?            @relation(fields: [emprestadoParaId], references: [id], onDelete: SetNull)
   itensRequisicao   RequisicaoItem[]
+  cautelas          CautelaFerramenta[]
 
   @@map("ferramenta")
+}
+
+model CautelaFerramenta {
+  id                  String      @id @default(uuid()) @db.Uuid
+  ferramentaId        String      @map("ferramenta_id") @db.Uuid
+  usuarioId           String      @map("usuario_id") @db.Uuid
+  areaId              String?     @map("area_id") @db.Uuid
+  entreguePorId       String      @map("entregue_por_id") @db.Uuid
+  testadoNaSaida      Boolean     @default(true) @map("testado_na_saida")
+  observacaoSaida     String?     @map("observacao_saida") @db.VarChar(255)
+  previsaoDevolucao   DateTime?   @map("previsao_devolucao")
+  retiradaEm          DateTime    @default(now()) @map("retirada_em")
+
+  devolvidaEm         DateTime?   @map("devolvida_em")
+  recebidoPorId       String?     @map("recebido_por_id") @db.Uuid
+  testadoNoRetorno    Boolean?    @map("testado_no_retorno")
+  comDefeito          Boolean?    @map("com_defeito")
+  observacaoDevolucao String?     @map("observacao_devolucao") @db.VarChar(255)
+
+  ferramenta          Ferramenta  @relation(fields: [ferramentaId], references: [id], onDelete: Cascade)
+  usuario             Usuario     @relation("CautelaResponsavel", fields: [usuarioId], references: [id], onDelete: Restrict)
+  area                AreaObra?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  entreguePor         Usuario     @relation("CautelaEntreguePor", fields: [entreguePorId], references: [id], onDelete: Restrict)
+  recebidoPor         Usuario?    @relation("CautelaRecebidoPor", fields: [recebidoPorId], references: [id], onDelete: SetNull)
+
+  @@map("cautela_ferramenta")
 }
 
 // ----------------------------------------------------
