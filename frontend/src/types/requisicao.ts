@@ -69,7 +69,7 @@ export interface ItemRequisicaoInput {
 
 export interface CriarRequisicaoInput {
   areaId: string
-  etapaId?: string | null
+  etapaId: string
   observacao?: string
   chaveIdempotencia?: string
   itens: ItemRequisicaoInput[]

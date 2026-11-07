@@ -230,25 +230,23 @@ export async function requisicaoRoutes(app: FastifyInstance) {
         throw new BusinessRuleError('Area informada nao existe ou esta inativa na obra')
       }
 
-      // Valida etapa da obra se informada (F02)
-      if (dados.etapaId) {
-        const etapa = await prisma.etapaArea.findUnique({
-          where: { id: dados.etapaId },
-        })
+      // Valida etapa da obra obrigatoria (F02)
+      const etapa = await prisma.etapaArea.findUnique({
+        where: { id: dados.etapaId },
+      })
 
-        if (!etapa) {
-          throw new NotFoundError('Etapa informada nao existe')
-        }
+      if (!etapa) {
+        throw new NotFoundError('Etapa informada nao existe')
+      }
 
-        if (etapa.areaId !== dados.areaId) {
-          throw new BusinessRuleError('A etapa informada nao pertence a area selecionada')
-        }
+      if (etapa.areaId !== dados.areaId) {
+        throw new BusinessRuleError('A etapa informada nao pertence a area selecionada')
+      }
 
-        if (etapa.status === 'ENCERRADA') {
-          throw new BusinessRuleError(
-            `A etapa "${etapa.nome}" esta encerrada e nao aceita novos pedidos de material`
-          )
-        }
+      if (etapa.status === 'ENCERRADA') {
+        throw new BusinessRuleError(
+          `A etapa "${etapa.nome}" esta encerrada e nao aceita novos pedidos de material`
+        )
       }
 
       // Consolida quantidades por materialId para impedir que linhas duplicadas burlem o saldo

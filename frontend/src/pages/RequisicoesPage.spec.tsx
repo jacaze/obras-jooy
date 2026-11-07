@@ -170,7 +170,16 @@ describe('RequisicoesPage Component', () => {
         quantidadeOrcada: 200,
       },
     ])
-    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([])
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Alvenaria',
+        ordem: 1,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
   })
 
   it('deve listar as requisicoes do Encarregado com historico de solicitada vs entregue e ocultar opcoes de almoxarife', async () => {
@@ -233,6 +242,14 @@ describe('RequisicoesPage Component', () => {
       target: { value: 'area-1' },
     })
 
+    await waitFor(() => {
+      expect(screen.getByText('Alvenaria')).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByDisplayValue('Selecione a etapa...'), {
+      target: { value: 'etapa-1' },
+    })
+
     // Selecionar material pelo SeletorItemPesquisavel (puxando itens em estoque)
     const inputBuscaMaterial = screen.getByPlaceholderText('Digite codigo ou descricao do material em estoque...')
     fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
@@ -257,6 +274,7 @@ describe('RequisicoesPage Component', () => {
       expect(createReqSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           areaId: 'area-1',
+          etapaId: 'etapa-1',
           observacao: 'Material para inicio da alvenaria',
           itens: [
             expect.objectContaining({

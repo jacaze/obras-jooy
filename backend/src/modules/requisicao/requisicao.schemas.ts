@@ -25,7 +25,9 @@ export const criarRequisicaoSchema = z.object({
   areaId: z
     .string({ required_error: 'A area de aplicacao da obra e obrigatoria' })
     .uuid('Identificador da area invalido'),
-  etapaId: z.string().uuid('Identificador da etapa invalido').optional().nullable(),
+  etapaId: z
+    .string({ required_error: 'A etapa de execucao da obra e obrigatoria' })
+    .uuid('Identificador da etapa invalido'),
   observacao: z.string().max(255, 'Observacao nao pode exceder 255 caracteres').optional().nullable(),
   chaveIdempotencia: z.string().max(100).optional().nullable(),
   itens: z

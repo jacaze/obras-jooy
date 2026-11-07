@@ -471,6 +471,11 @@ export function RequisicoesPage() {
       return
     }
 
+    if (!etapaIdSelecionada) {
+      setErroForm('Selecione a etapa de execucao da obra')
+      return
+    }
+
     if (itensForm.length === 0) {
       setErroForm('Adicione ao menos um item a requisicao')
       return
@@ -499,7 +504,7 @@ export function RequisicoesPage() {
 
     criarRequisicaoMutation.mutate({
       areaId: areaIdSelecionada,
-      etapaId: etapaIdSelecionada || undefined,
+      etapaId: etapaIdSelecionada,
       observacao: observacao.trim() || undefined,
       chaveIdempotencia,
       itens: itensForm.map((it) => ({
@@ -1134,11 +1139,12 @@ export function RequisicoesPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
-                    Etapa de Execucao (opcional)
+                    Etapa de Execucao <span className="text-error">*</span>
                   </label>
                   <select
                     value={etapaIdSelecionada}
                     onChange={(e) => setEtapaIdSelecionada(e.target.value)}
+                    required
                     disabled={!areaIdSelecionada || etapasArea.length === 0}
                     className="ob-input w-full text-sm disabled:opacity-50 font-body"
                   >
@@ -1146,7 +1152,7 @@ export function RequisicoesPage() {
                       {!areaIdSelecionada
                         ? 'Selecione a area primeiro'
                         : etapasArea.length === 0
-                          ? 'Nenhuma etapa cadastrada'
+                          ? 'Nenhuma etapa cadastrada nesta area'
                           : 'Selecione a etapa...'}
                     </option>
                     {etapasArea.map((et) => (
@@ -1358,7 +1364,7 @@ export function RequisicoesPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={criarRequisicaoMutation.isPending || etapaEstaEncerrada}
+                  disabled={criarRequisicaoMutation.isPending || !etapaIdSelecionada || etapaEstaEncerrada}
                   className="ob-btn ob-btn--primary ob-btn--lg"
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}
