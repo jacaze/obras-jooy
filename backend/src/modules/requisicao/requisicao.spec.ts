@@ -1051,6 +1051,27 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
       expect(body.erro).toContain('Acesso negado para este perfil')
     })
 
+    it('deve rejeitar acesso para perfil ALMOXARIFE com 403', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: almoxarifeId,
+        perfil: PerfilUsuario.ALMOXARIFE,
+        ativo: true,
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes/exportar-analitico',
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+        payload: {},
+      })
+
+      expect(response.statusCode).toBe(403)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Acesso negado para este perfil')
+    })
+
     it('deve retornar 422 quando nenhuma requisicao coincidir com os filtros analiticos', async () => {
       vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
         id: engenhariaId,

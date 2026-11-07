@@ -72,8 +72,7 @@ export function RequisicoesPage() {
   const podeExportarAnalitico =
     usuario?.perfil === 'ADMIN' ||
     usuario?.perfil === 'ENGENHARIA' ||
-    usuario?.perfil === 'ADMINISTRACAO' ||
-    usuario?.perfil === 'ALMOXARIFE'
+    usuario?.perfil === 'ADMINISTRACAO'
 
   // Filtros de listagem
   const [busca, setBusca] = useState('')

@@ -31,7 +31,6 @@ const PERFIS_ANALITICO_ENGENHARIA = [
   PerfilUsuario.ADMIN,
   PerfilUsuario.ENGENHARIA,
   PerfilUsuario.ADMINISTRACAO,
-  PerfilUsuario.ALMOXARIFE,
 ]
 
 const REQUISICAO_INCLUDE = {

@@ -567,4 +567,18 @@ describe('RequisicoesPage Component', () => {
       ).toBeInTheDocument()
     })
   })
+
+  it('nao deve exibir o botao de exportacao analitica para o perfil ALMOXARIFE (F04)', async () => {
+    renderRequisicoesPage(mockAlmoxarife)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole('button', {
+        name: /Exportacao Analitica \(Engenharia\)/i,
+      })
+    ).not.toBeInTheDocument()
+  })
 })
