@@ -46,6 +46,11 @@ export async function areaObraRoutes(app: FastifyInstance) {
           obraId,
           ...(somenteAtivas ? { ativa: true } : {}),
         },
+        include: {
+          etapas: {
+            orderBy: [{ ordem: 'asc' }, { nome: 'asc' }],
+          },
+        },
         orderBy: [{ ordem: 'asc' }, { nome: 'asc' }],
       })
 

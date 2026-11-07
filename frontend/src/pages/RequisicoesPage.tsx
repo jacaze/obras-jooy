@@ -228,6 +228,11 @@ export function RequisicoesPage() {
     if (areasServidor.length > 0 && obraIdSelecionada) {
       try {
         localStorage.setItem(`obras_offline_areas_${obraIdSelecionada}`, JSON.stringify(areasServidor))
+        areasServidor.forEach((area) => {
+          if (area.etapas && area.etapas.length > 0) {
+            salvarCacheEtapas(area.id, area.etapas)
+          }
+        })
       } catch (e) {}
     }
   }, [areasServidor, obraIdSelecionada])
@@ -239,7 +244,13 @@ export function RequisicoesPage() {
           if (!obraIdSelecionada) return []
           try {
             const raw = localStorage.getItem(`obras_offline_areas_${obraIdSelecionada}`)
-            return raw ? JSON.parse(raw) : []
+            const parsed: AreaObra[] = raw ? JSON.parse(raw) : []
+            parsed.forEach((area) => {
+              if (area.etapas && area.etapas.length > 0) {
+                salvarCacheEtapas(area.id, area.etapas)
+              }
+            })
+            return parsed
           } catch {
             return []
           }
@@ -257,12 +268,15 @@ export function RequisicoesPage() {
     }
   }, [etapasAreaServidor, areaIdSelecionada])
 
-  const etapasArea =
-    etapasAreaServidor.length > 0
-      ? etapasAreaServidor
-      : areaIdSelecionada
-      ? obterCacheEtapas(areaIdSelecionada)
-      : []
+  const etapasArea = useMemo(() => {
+    if (etapasAreaServidor.length > 0) return etapasAreaServidor
+    if (!areaIdSelecionada) return []
+    const areaAtual = areas.find((a) => a.id === areaIdSelecionada)
+    if (areaAtual?.etapas && areaAtual.etapas.length > 0) {
+      return areaAtual.etapas
+    }
+    return obterCacheEtapas(areaIdSelecionada)
+  }, [etapasAreaServidor, areaIdSelecionada, areas])
 
   const etapaSelecionada = etapasArea.find((e) => e.id === etapaIdSelecionada)
   const etapaEstaEncerrada = etapaSelecionada?.status === 'ENCERRADA'
