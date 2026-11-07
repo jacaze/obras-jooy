@@ -62,6 +62,7 @@ export const atenderRequisicaoSchema = z.object({
     .min(2, 'Informe o nome completo ou identificacao de quem retirou (minimo 2 caracteres)')
     .max(120, 'O nome do responsavel pela retirada nao pode exceder 120 caracteres'),
   observacao: z.string().trim().max(255).optional().nullable(),
+  testadoNaSaida: z.boolean().optional(),
   itens: z.array(itemAtendimentoSchema).optional(),
 })
 
