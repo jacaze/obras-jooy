@@ -118,6 +118,7 @@ export function RequisicoesPage() {
   const [requisicaoEmAtendimento, setRequisicaoEmAtendimento] = useState<Requisicao | null>(null)
   const [retiradoPor, setRetiradoPor] = useState('')
   const [qtdsEntreguesMap, setQtdsEntreguesMap] = useState<Record<string, string>>({})
+  const [testadoFerramentaAtendimento, setTestadoFerramentaAtendimento] = useState(false)
   const [erroAtendimento, setErroAtendimento] = useState<string | null>(null)
 
   // Integracao com Modo Offline e PWA (F05)
@@ -678,6 +679,7 @@ export function RequisicoesPage() {
   function handleAbrirModalAtendimento(req: Requisicao) {
     setRequisicaoEmAtendimento(req)
     setRetiradoPor('')
+    setTestadoFerramentaAtendimento(false)
     setErroAtendimento(null)
     const mapaInicial: Record<string, string> = {}
     for (const it of req.itens) {
@@ -693,6 +695,12 @@ export function RequisicoesPage() {
 
     if (retiradoPor.trim().length < 2) {
       setErroAtendimento('Informe o nome de quem esta retirando o material na obra')
+      return
+    }
+
+    const contemFerramenta = requisicaoEmAtendimento.itens.some((it) => Boolean(it.ferramenta || it.ferramentaId))
+    if (contemFerramenta && !testadoFerramentaAtendimento) {
+      setErroAtendimento('Confirme que a(s) ferramenta(s) foram testadas na bancada antes da entrega')
       return
     }
 
@@ -718,6 +726,7 @@ export function RequisicoesPage() {
       id: requisicaoEmAtendimento.id,
       dados: {
         retiradoPor: retiradoPor.trim(),
+        ...(contemFerramenta ? { testadoNaSaida: testadoFerramentaAtendimento } : {}),
         itens: itensPayload,
       },
     })
@@ -1347,6 +1356,32 @@ export function RequisicoesPage() {
                 />
               </div>
 
+              {requisicaoEmAtendimento.itens.some((it) => Boolean(it.ferramenta || it.ferramentaId)) && (
+                <label
+                  htmlFor="atendimento-testado-saida"
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    testadoFerramentaAtendimento
+                      ? 'border-secondary bg-secondary-container/30 text-on-surface'
+                      : 'border-surface-container bg-surface-container-low text-on-surface-variant'
+                  }`}
+                >
+                  <input
+                    id="atendimento-testado-saida"
+                    type="checkbox"
+                    required
+                    checked={testadoFerramentaAtendimento}
+                    onChange={(e) => setTestadoFerramentaAtendimento(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded text-secondary"
+                  />
+                  <span className="text-sm leading-snug">
+                    <strong>Ferramenta(s) testada(s) na entrega *</strong>
+                    <span className="block text-xs text-on-surface-variant mt-0.5">
+                      Confirmo que a(s) ferramenta(s) foram testadas/inspecionadas na bancada do almoxarifado antes da entrega ao colaborador.
+                    </span>
+                  </span>
+                </label>
+              )}
+
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -1357,8 +1392,12 @@ export function RequisicoesPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={atenderRequisicaoMutation.isPending}
-                  className="ob-btn ob-btn--primary"
+                  disabled={
+                    atenderRequisicaoMutation.isPending ||
+                    (requisicaoEmAtendimento.itens.some((it) => Boolean(it.ferramenta || it.ferramentaId)) &&
+                      !testadoFerramentaAtendimento)
+                  }
+                  className="ob-btn ob-btn--primary disabled:opacity-50"
                 >
                   {atenderRequisicaoMutation.isPending
                     ? 'Confirmando...'

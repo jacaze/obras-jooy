@@ -668,4 +668,66 @@ describe('RequisicoesPage Component', () => {
       expect(screen.getByText('Offline (Pendente Sync)')).toBeInTheDocument()
     })
   })
+
+  it('deve exigir o flag de ferramenta testada na entrega ao atender uma requisicao que contenha ferramenta (F06)', async () => {
+    const reqComFerramenta: Requisicao = {
+      ...mockRequisicoes[0],
+      id: 'req-fer',
+      numeroSequencial: 105,
+      itens: [
+        {
+          id: 'item-fer-1',
+          requisicaoId: 'req-fer',
+          ferramentaId: 'fer-1',
+          quantidade: 1,
+          quantidadeEntregue: null,
+          ferramenta: mockFerramentas[0] as any,
+        },
+      ],
+    }
+
+    vi.spyOn(apiClient, 'getRequisicoes').mockResolvedValue([reqComFerramenta])
+    const atenderSpy = vi.spyOn(apiClient, 'atenderRequisicao').mockResolvedValue({
+      ...reqComFerramenta,
+      status: 'ATENDIDA',
+      retiradoPor: 'Pedro Eletricista',
+    })
+
+    renderRequisicoesPage(mockAlmoxarife)
+
+    await waitFor(() => {
+      expect(screen.getByText('#105')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Atender \/ Entregar Material/i }))
+
+    expect(screen.getByText('Atender Requisicao #105')).toBeInTheDocument()
+
+    const btnConfirmar = screen.getByRole('button', {
+      name: /Confirmar Entrega e Baixar Estoque/i,
+    })
+    expect(btnConfirmar).toBeDisabled()
+
+    const checkboxTeste = screen.getByLabelText(/Ferramenta\(s\) testada\(s\) na entrega/i)
+    fireEvent.click(checkboxTeste)
+    expect(btnConfirmar).not.toBeDisabled()
+
+    const inputRetiradoPor = screen.getByPlaceholderText('ex: Jose da Silva - Pedreiro')
+    fireEvent.change(inputRetiradoPor, { target: { value: 'Pedro Eletricista' } })
+
+    fireEvent.click(btnConfirmar)
+
+    await waitFor(() => {
+      expect(atenderSpy).toHaveBeenCalledWith('req-fer', {
+        retiradoPor: 'Pedro Eletricista',
+        testadoNaSaida: true,
+        itens: [
+          {
+            itemId: 'item-fer-1',
+            quantidadeEntregue: 1,
+          },
+        ],
+      })
+    })
+  })
 })

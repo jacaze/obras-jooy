@@ -937,6 +937,12 @@ export async function requisicaoRoutes(app: FastifyInstance) {
           }
 
           if (item.ferramentaId && qtdEntregue > 0) {
+            if (dados.testadoNaSaida === false) {
+              throw new BusinessRuleError(
+                'A ferramenta deve obrigatoriamente ser testada na saida antes de ser entregue na requisicao'
+              )
+            }
+
             const fer = await tx.ferramenta.findUnique({
               where: { id: item.ferramentaId },
             })
@@ -946,6 +952,17 @@ export async function requisicaoRoutes(app: FastifyInstance) {
                 `A ferramenta "${fer?.nome || item.ferramentaId}" nao esta disponivel para entrega`
               )
             }
+
+            await tx.cautelaFerramenta.create({
+              data: {
+                ferramentaId: item.ferramentaId,
+                usuarioId: requisicao.requisitanteId,
+                areaId: requisicao.areaId,
+                entreguePorId: almoxarifeId,
+                testadoNaSaida: true,
+                observacaoSaida: `Atendimento Req #${requisicao.numeroSequencial} - Retirado por: ${dados.retiradoPor}`,
+              },
+            })
 
             await tx.ferramenta.update({
               where: { id: item.ferramentaId },

@@ -149,7 +149,7 @@ describe('FerramentasPage', () => {
     expect(screen.getByDisplayValue('Martelete Rompedor 800W')).toBeInTheDocument()
   })
 
-  it('deve permitir registrar o emprestimo de uma ferramenta disponivel para um usuario ativo', async () => {
+  it('deve permitir registrar o emprestimo de uma ferramenta disponivel para um usuario ativo exigindo flag de teste na saida', async () => {
     vi.mocked(client.registrarEmprestimoFerramenta).mockResolvedValueOnce({
       ...mockFerramentas[0],
       status: 'EMPRESTADO',
@@ -172,14 +172,27 @@ describe('FerramentasPage', () => {
     const selectUsuario = screen.getByLabelText(/Usuario Solicitante/i)
     fireEvent.change(selectUsuario, { target: { value: 'usr-mestre' } })
 
-    fireEvent.click(screen.getByRole('button', { name: /Confirmar Emprestimo/i }))
+    const btnConfirmar = screen.getByRole('button', { name: /Confirmar Emprestimo/i })
+    expect(btnConfirmar).toBeDisabled()
+
+    const checkboxTesteSaida = screen.getByLabelText(/Ferramenta testada na entrega/i)
+    fireEvent.click(checkboxTesteSaida)
+    expect(btnConfirmar).not.toBeDisabled()
+
+    fireEvent.click(btnConfirmar)
 
     await waitFor(() => {
-      expect(client.registrarEmprestimoFerramenta).toHaveBeenCalledWith('fer-1', 'usr-mestre')
+      expect(client.registrarEmprestimoFerramenta).toHaveBeenCalledWith('fer-1', {
+        usuarioId: 'usr-mestre',
+        areaId: null,
+        testadoNaSaida: true,
+        previsaoDevolucao: null,
+        observacaoSaida: null,
+      })
     })
   })
 
-  it('deve permitir registrar a devolucao de uma ferramenta emprestada informando se houve defeito', async () => {
+  it('deve permitir registrar a devolucao de uma ferramenta emprestada exigindo flag de teste no retorno e informando se houve defeito', async () => {
     vi.mocked(client.registrarDevolucaoFerramenta).mockResolvedValueOnce({
       ...mockFerramentas[1],
       status: 'COM_DEFEITO',
@@ -199,14 +212,49 @@ describe('FerramentasPage', () => {
       screen.getByRole('heading', { name: /Registrar Devolucao de Ferramenta/i })
     ).toBeInTheDocument()
 
+    const btnConfirmarDev = screen.getByRole('button', { name: /Confirmar Devolucao/i })
+    expect(btnConfirmarDev).toBeDisabled()
+
+    const checkboxTesteRetorno = screen.getByLabelText(/Ferramenta testada no retorno/i)
+    fireEvent.click(checkboxTesteRetorno)
+    expect(btnConfirmarDev).not.toBeDisabled()
+
     const radioComDefeito = screen.getByLabelText(/Devolvida com defeito \/ avaria/i)
     fireEvent.click(radioComDefeito)
 
-    fireEvent.click(screen.getByRole('button', { name: /Confirmar Devolucao/i }))
+    fireEvent.click(btnConfirmarDev)
 
     await waitFor(() => {
-      expect(client.registrarDevolucaoFerramenta).toHaveBeenCalledWith('fer-2', true)
+      expect(client.registrarDevolucaoFerramenta).toHaveBeenCalledWith('fer-2', {
+        testadoNoRetorno: true,
+        comDefeito: true,
+        observacaoDevolucao: null,
+      })
     })
+  })
+
+  it('nao deve exibir botoes de Emprestar ou Devolver para perfil ENGENHARIA (exclusivo ALMOXARIFE e ADMIN)', async () => {
+    vi.mocked(authHook.useAuth).mockReturnValue({
+      usuario: {
+        id: 'usr-eng',
+        nome: 'Paula Engenharia',
+        login: 'eng.paula',
+        perfil: 'ENGENHARIA',
+        cargo: 'Engenheira Civil',
+      },
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+
+    renderComponent()
+
+    await waitFor(() => {
+      expect(screen.getByText('Martelete Rompedor 800W')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByRole('button', { name: 'Emprestar' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Devolver' })).not.toBeInTheDocument()
   })
 
   it('deve permitir liberar ferramenta com defeito de volta para disponivel', async () => {

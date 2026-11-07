@@ -9,9 +9,12 @@ import type {
   Material,
   UnidadeMedida,
   Ferramenta,
+  CautelaFerramenta,
   CriarFerramentaInput,
   AtualizarFerramentaInput,
   FiltrosFerramenta,
+  RegistrarEmprestimoInput,
+  RegistrarDevolucaoInput,
 } from '../types/material'
 import type {
   AtenderRequisicaoInput,
@@ -337,13 +340,32 @@ export async function updateFerramenta(id: string, dados: AtualizarFerramentaInp
   return response.data
 }
 
-export async function registrarEmprestimoFerramenta(id: string, usuarioId: string): Promise<Ferramenta> {
-  const response = await api.post<Ferramenta>(`/ferramentas/${id}/emprestimo`, { usuarioId })
+export async function registrarEmprestimoFerramenta(
+  id: string,
+  dados: RegistrarEmprestimoInput | string
+): Promise<Ferramenta> {
+  const payload: RegistrarEmprestimoInput =
+    typeof dados === 'string'
+      ? { usuarioId: dados, testadoNaSaida: true }
+      : dados
+  const response = await api.post<Ferramenta>(`/ferramentas/${id}/emprestimo`, payload)
   return response.data
 }
 
-export async function registrarDevolucaoFerramenta(id: string, comDefeito: boolean): Promise<Ferramenta> {
-  const response = await api.post<Ferramenta>(`/ferramentas/${id}/devolucao`, { comDefeito })
+export async function registrarDevolucaoFerramenta(
+  id: string,
+  dados: RegistrarDevolucaoInput | boolean
+): Promise<Ferramenta> {
+  const payload: RegistrarDevolucaoInput =
+    typeof dados === 'boolean'
+      ? { comDefeito: dados, testadoNoRetorno: true }
+      : dados
+  const response = await api.post<Ferramenta>(`/ferramentas/${id}/devolucao`, payload)
+  return response.data
+}
+
+export async function getCautelasFerramenta(id: string): Promise<CautelaFerramenta[]> {
+  const response = await api.get<CautelaFerramenta[]>(`/ferramentas/${id}/cautelas`)
   return response.data
 }
 

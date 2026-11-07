@@ -14,6 +14,35 @@ import {
   NotFoundError,
 } from '../../shared/errors/AppError.js'
 
+const includeFerramentaPadrao = {
+  emprestadoPara: {
+    select: {
+      id: true,
+      nome: true,
+      login: true,
+      perfil: true,
+    },
+  },
+  cautelas: {
+    orderBy: { retiradaEm: 'desc' as const },
+    take: 20,
+    include: {
+      usuario: {
+        select: { id: true, nome: true, login: true, perfil: true },
+      },
+      area: {
+        select: { id: true, nome: true },
+      },
+      entreguePor: {
+        select: { id: true, nome: true, login: true },
+      },
+      recebidoPor: {
+        select: { id: true, nome: true, login: true },
+      },
+    },
+  },
+}
+
 export async function ferramentaRoutes(app: FastifyInstance) {
   // Listar todas as ferramentas (qualquer usuario autenticado)
   app.get(
@@ -51,16 +80,7 @@ export async function ferramentaRoutes(app: FastifyInstance) {
 
       const ferramentas = await prisma.ferramenta.findMany({
         where,
-        include: {
-          emprestadoPara: {
-            select: {
-              id: true,
-              nome: true,
-              login: true,
-              perfil: true,
-            },
-          },
-        },
+        include: includeFerramentaPadrao,
         orderBy: { nome: 'asc' },
       })
 
@@ -84,16 +104,7 @@ export async function ferramentaRoutes(app: FastifyInstance) {
 
       const ferramenta = await prisma.ferramenta.findUnique({
         where: { id },
-        include: {
-          emprestadoPara: {
-            select: {
-              id: true,
-              nome: true,
-              login: true,
-              perfil: true,
-            },
-          },
-        },
+        include: includeFerramentaPadrao,
       })
 
       if (!ferramenta) {
@@ -101,6 +112,48 @@ export async function ferramentaRoutes(app: FastifyInstance) {
       }
 
       return reply.status(200).send(ferramenta)
+    }
+  )
+
+  // Historico completo de cautelas de uma ferramenta
+  app.get(
+    '/ferramentas/:id/cautelas',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Ferramentas'],
+        summary: 'Historico de cautelas (emprestimos e devolucoes) da ferramenta',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      const ferramenta = await prisma.ferramenta.findUnique({ where: { id } })
+      if (!ferramenta) {
+        throw new NotFoundError('Ferramenta nao encontrada')
+      }
+
+      const cautelas = await prisma.cautelaFerramenta.findMany({
+        where: { ferramentaId: id },
+        include: {
+          usuario: {
+            select: { id: true, nome: true, login: true, perfil: true },
+          },
+          area: {
+            select: { id: true, nome: true },
+          },
+          entreguePor: {
+            select: { id: true, nome: true, login: true },
+          },
+          recebidoPor: {
+            select: { id: true, nome: true, login: true },
+          },
+        },
+        orderBy: { retiradaEm: 'desc' },
+      })
+
+      return reply.status(200).send(cautelas)
     }
   )
 
@@ -145,16 +198,7 @@ export async function ferramentaRoutes(app: FastifyInstance) {
           emprestadoParaId: dados.status === 'EMPRESTADO' ? dados.emprestadoParaId : null,
           ativo: dados.ativo,
         },
-        include: {
-          emprestadoPara: {
-            select: {
-              id: true,
-              nome: true,
-              login: true,
-              perfil: true,
-            },
-          },
-        },
+        include: includeFerramentaPadrao,
       })
 
       return reply.status(201).send(ferramenta)
@@ -201,39 +245,37 @@ export async function ferramentaRoutes(app: FastifyInstance) {
           ...(dados.emprestadoParaId !== undefined && { emprestadoParaId: dados.emprestadoParaId }),
           ...(dados.ativo !== undefined && { ativo: dados.ativo }),
         },
-        include: {
-          emprestadoPara: {
-            select: {
-              id: true,
-              nome: true,
-              login: true,
-              perfil: true,
-            },
-          },
-        },
+        include: includeFerramentaPadrao,
       })
 
       return reply.status(200).send(atualizada)
     }
   )
 
-  // Registrar emprestimo da ferramenta para um usuario solicitante
+  // Registrar emprestimo (cautela) da ferramenta - exclusivo ALMOXARIFE e ADMIN
   app.post(
     '/ferramentas/:id/emprestimo',
     {
       preHandler: [
         authenticate,
-        requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA, PerfilUsuario.ALMOXARIFE]),
+        requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ALMOXARIFE]),
       ],
       schema: {
         tags: ['Ferramentas'],
-        summary: 'Registrar emprestimo da ferramenta para um usuario',
+        summary: 'Registrar cautela/emprestimo da ferramenta com flag de teste na saida',
         security: [{ bearerAuth: [] }],
       },
     },
     async (request, reply) => {
       const { id } = request.params as { id: string }
-      const { usuarioId } = registrarEmprestimoSchema.parse(request.body)
+      const {
+        usuarioId,
+        areaId,
+        testadoNaSaida,
+        previsaoDevolucao,
+        observacaoSaida,
+      } = registrarEmprestimoSchema.parse(request.body)
+      const operadorId = (request.user as { sub: string }).sub
 
       const ferramenta = await prisma.ferramenta.findUnique({ where: { id } })
       if (!ferramenta) {
@@ -252,49 +294,85 @@ export async function ferramentaRoutes(app: FastifyInstance) {
         throw new NotFoundError('Usuario solicitante nao encontrado ou inativo')
       }
 
+      if (areaId) {
+        const area = await prisma.areaObra.findUnique({ where: { id: areaId } })
+        if (!area) {
+          throw new NotFoundError('Area da obra nao localizada')
+        }
+      }
+
+      await prisma.cautelaFerramenta.create({
+        data: {
+          ferramentaId: id,
+          usuarioId,
+          areaId: areaId || null,
+          entreguePorId: operadorId,
+          testadoNaSaida,
+          previsaoDevolucao: previsaoDevolucao ? new Date(previsaoDevolucao) : null,
+          observacaoSaida: observacaoSaida || null,
+        },
+      })
+
       const atualizada = await prisma.ferramenta.update({
         where: { id },
         data: {
           status: 'EMPRESTADO',
           emprestadoParaId: usuarioId,
         },
-        include: {
-          emprestadoPara: {
-            select: {
-              id: true,
-              nome: true,
-              login: true,
-              perfil: true,
-            },
-          },
-        },
+        include: includeFerramentaPadrao,
       })
 
       return reply.status(200).send(atualizada)
     }
   )
 
-  // Registrar devolucao da ferramenta
+  // Registrar devolucao da ferramenta - exclusivo ALMOXARIFE e ADMIN
   app.post(
     '/ferramentas/:id/devolucao',
     {
       preHandler: [
         authenticate,
-        requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA, PerfilUsuario.ALMOXARIFE]),
+        requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ALMOXARIFE]),
       ],
       schema: {
         tags: ['Ferramentas'],
-        summary: 'Registrar devolucao da ferramenta ao almoxarifado',
+        summary: 'Registrar devolucao da ferramenta com teste no retorno (exclusivo ALMOXARIFE/ADMIN)',
         security: [{ bearerAuth: [] }],
       },
     },
     async (request, reply) => {
       const { id } = request.params as { id: string }
-      const { comDefeito } = registrarDevolucaoSchema.parse(request.body)
+      const {
+        testadoNoRetorno,
+        comDefeito,
+        observacaoDevolucao,
+      } = registrarDevolucaoSchema.parse(request.body)
+      const operadorId = (request.user as { sub: string }).sub
 
       const ferramenta = await prisma.ferramenta.findUnique({ where: { id } })
       if (!ferramenta) {
         throw new NotFoundError('Ferramenta nao encontrada')
+      }
+
+      const cautelaAtiva = await prisma.cautelaFerramenta.findFirst({
+        where: {
+          ferramentaId: id,
+          devolvidaEm: null,
+        },
+        orderBy: { retiradaEm: 'desc' },
+      })
+
+      if (cautelaAtiva) {
+        await prisma.cautelaFerramenta.update({
+          where: { id: cautelaAtiva.id },
+          data: {
+            devolvidaEm: new Date(),
+            recebidoPorId: operadorId,
+            testadoNoRetorno,
+            comDefeito,
+            observacaoDevolucao: observacaoDevolucao || null,
+          },
+        })
       }
 
       const atualizada = await prisma.ferramenta.update({
@@ -303,16 +381,7 @@ export async function ferramentaRoutes(app: FastifyInstance) {
           status: comDefeito ? 'COM_DEFEITO' : 'DISPONIVEL',
           emprestadoParaId: null,
         },
-        include: {
-          emprestadoPara: {
-            select: {
-              id: true,
-              nome: true,
-              login: true,
-              perfil: true,
-            },
-          },
-        },
+        include: includeFerramentaPadrao,
       })
 
       return reply.status(200).send(atualizada)

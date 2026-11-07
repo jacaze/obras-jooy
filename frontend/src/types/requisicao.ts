@@ -78,6 +78,7 @@ export interface CriarRequisicaoInput {
 export interface AtenderRequisicaoInput {
   retiradoPor: string
   observacao?: string | null
+  testadoNaSaida?: boolean
   itens?: Array<{
     itemId: string
     quantidadeEntregue: number
