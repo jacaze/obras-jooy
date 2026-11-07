@@ -10,6 +10,7 @@ import { authenticate, requireRole } from '../../shared/middlewares/auth.js'
 import {
   atenderRequisicaoSchema,
   criarRequisicaoSchema,
+  exportarAnaliticoEngenhariaSchema,
   exportarSiengeSchema,
   filtrosRequisicaoSchema,
   idRequisicaoParamSchema,
@@ -23,6 +24,13 @@ import {
 
 const PERFIS_ATENDIMENTO_E_SIENGE = [
   PerfilUsuario.ADMIN,
+  PerfilUsuario.ALMOXARIFE,
+]
+
+const PERFIS_ANALITICO_ENGENHARIA = [
+  PerfilUsuario.ADMIN,
+  PerfilUsuario.ENGENHARIA,
+  PerfilUsuario.ADMINISTRACAO,
   PerfilUsuario.ALMOXARIFE,
 ]
 
@@ -81,6 +89,7 @@ const REQUISICAO_INCLUDE = {
         select: {
           id: true,
           codigo: true,
+          codigoSienge: true,
           descricao: true,
           unidadeConsumo: {
             select: {
@@ -482,6 +491,234 @@ export async function requisicaoRoutes(app: FastifyInstance) {
       })
 
       return reply.status(200).send(resultado)
+    }
+  )
+
+  // ----------------------------------------------------
+  // 4. EXPORTACAO ANALITICA PARA ENGENHARIA (CSV) (F04)
+  // ----------------------------------------------------
+  app.post(
+    '/requisicoes/exportar-analitico',
+    {
+      preHandler: [authenticate, requireRole(PERFIS_ANALITICO_ENGENHARIA)],
+      schema: {
+        tags: ['Requisicoes'],
+        summary: 'Exportar relatorio analitico com filtros por data, etapa, obra e material',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const dados = exportarAnaliticoEngenhariaSchema.parse(request.body || {})
+      const usuarioLogado = await prisma.usuario.findUnique({
+        where: { id: request.user.sub },
+        select: { id: true, perfil: true, obraId: true },
+      })
+
+      const where: any = {}
+
+      // Se o usuario tiver obra fixa vinculada, restringe a essa obra
+      if (usuarioLogado?.obraId) {
+        where.area = { obraId: usuarioLogado.obraId }
+      } else if (dados.obraId) {
+        where.area = { obraId: dados.obraId }
+      }
+
+      // Filtro de Area
+      if (dados.areaId) {
+        where.areaId = dados.areaId
+      }
+
+      // Filtro de Etapa (F02/F04)
+      if (dados.etapaId) {
+        where.etapaId = dados.etapaId
+      }
+
+      // Filtro de Status
+      if (dados.status) {
+        where.status = dados.status
+      }
+
+      // Filtro por Periodo de Solicitacao (dataInicio e dataFim)
+      if (dados.dataInicio || dados.dataFim) {
+        where.solicitadaEm = {}
+        if (dados.dataInicio) {
+          const dtInicio = new Date(dados.dataInicio)
+          if (!isNaN(dtInicio.getTime())) {
+            where.solicitadaEm.gte = dtInicio
+          }
+        }
+        if (dados.dataFim) {
+          const dtFim = new Date(dados.dataFim)
+          if (!isNaN(dtFim.getTime())) {
+            if (dados.dataFim.length <= 10) {
+              dtFim.setUTCHours(23, 59, 59, 999)
+            }
+            where.solicitadaEm.lte = dtFim
+          }
+        }
+      }
+
+      // Filtro por Material especifico
+      if (dados.materialId) {
+        where.itens = {
+          some: {
+            materialId: dados.materialId,
+          },
+        }
+      }
+
+      // Filtro por termo de busca geral
+      if (dados.busca && dados.busca.trim().length > 0) {
+        const termo = dados.busca.trim()
+        where.OR = [
+          { observacao: { contains: termo, mode: 'insensitive' } },
+          { retiradoPor: { contains: termo, mode: 'insensitive' } },
+          { requisitante: { nome: { contains: termo, mode: 'insensitive' } } },
+          { etapa: { nome: { contains: termo, mode: 'insensitive' } } },
+          {
+            itens: {
+              some: {
+                OR: [
+                  { material: { descricao: { contains: termo, mode: 'insensitive' } } },
+                  { material: { codigo: { contains: termo, mode: 'insensitive' } } },
+                  { material: { codigoSienge: { contains: termo, mode: 'insensitive' } } },
+                  { ferramenta: { nome: { contains: termo, mode: 'insensitive' } } },
+                  { ferramenta: { codigo: { contains: termo, mode: 'insensitive' } } },
+                ],
+              },
+            },
+          },
+        ]
+      }
+
+      const requisicoes = await prisma.requisicao.findMany({
+        where,
+        orderBy: [{ solicitadaEm: 'desc' }, { numeroSequencial: 'desc' }],
+        include: REQUISICAO_INCLUDE,
+      })
+
+      if (requisicoes.length === 0) {
+        throw new BusinessRuleError(
+          'Nenhuma requisicao encontrada para exportacao com os filtros selecionados'
+        )
+      }
+
+      const cabecalho = [
+        'NUMERO_REQUISICAO',
+        'STATUS_REQUISICAO',
+        'DATA_SOLICITACAO',
+        'DATA_ATENDIMENTO',
+        'CODIGO_OBRA',
+        'NOME_OBRA',
+        'AREA_PAVIMENTO',
+        'ETAPA_EXECUCAO',
+        'STATUS_ETAPA',
+        'TIPO_ITEM',
+        'CODIGO_JOOY',
+        'CODIGO_SIENGE',
+        'DESCRICAO_ITEM',
+        'UNIDADE_MEDIDA',
+        'QTD_SOLICITADA',
+        'QTD_ENTREGUE',
+        'SOLICITANTE',
+        'CARGO_SOLICITANTE',
+        'RETIRADO_POR',
+        'ATENDIDO_POR',
+        'OBSERVACAO',
+      ].join(';')
+
+      const linhas: string[] = [cabecalho]
+      let totalLinhas = 0
+      let totalSolicitado = 0
+      let totalEntregue = 0
+      const materiaisUnicos = new Set<string>()
+      const ferramentasUnicas = new Set<string>()
+
+      for (const req of requisicoes) {
+        const dataSol = req.solicitadaEm ? new Date(req.solicitadaEm).toISOString() : ''
+        const dataAtend = req.atendidoEm
+          ? new Date(req.atendidoEm).toISOString()
+          : req.retiradaEm
+            ? new Date(req.retiradaEm).toISOString()
+            : ''
+
+        for (const item of req.itens) {
+          if (dados.materialId && item.materialId !== dados.materialId) {
+            continue
+          }
+
+          const ehMaterial = Boolean(item.material)
+          const codigoJooy = ehMaterial
+            ? item.material?.codigo || ''
+            : item.ferramenta?.codigo || ''
+          const codigoSienge = ehMaterial
+            ? item.material?.codigoSienge || ''
+            : ''
+          const descricaoItem = ehMaterial
+            ? item.material?.descricao || ''
+            : item.ferramenta?.nome || ''
+          const unidade = ehMaterial
+            ? item.material?.unidadeConsumo?.sigla || 'UN'
+            : 'UN'
+
+          const qtdSol = Number(item.quantidade)
+          const qtdEnt =
+            item.quantidadeEntregue !== null && item.quantidadeEntregue !== undefined
+              ? Number(item.quantidadeEntregue)
+              : req.status === StatusRequisicao.ATENDIDA
+                ? qtdSol
+                : 0
+
+          totalLinhas++
+          totalSolicitado += qtdSol
+          totalEntregue += qtdEnt
+          if (ehMaterial && item.materialId) materiaisUnicos.add(item.materialId)
+          if (!ehMaterial && item.ferramentaId) ferramentasUnicas.add(item.ferramentaId)
+
+          const colunas = [
+            `REQ-${req.numeroSequencial}`,
+            req.status,
+            dataSol,
+            dataAtend,
+            req.area?.obra?.codigo || '',
+            req.area?.obra?.nome || '',
+            req.area?.nome || '',
+            req.etapa?.nome || 'Nao vinculada',
+            req.etapa?.status || '',
+            ehMaterial ? 'MATERIAL' : 'FERRAMENTA',
+            codigoJooy,
+            codigoSienge,
+            descricaoItem,
+            unidade,
+            qtdSol,
+            qtdEnt,
+            req.requisitante?.nome || '',
+            req.requisitante?.cargo?.nome || '',
+            req.retiradoPor || '',
+            req.atendidoPor?.nome || '',
+            req.observacao || '',
+          ].map(escaparCampoCsv)
+
+          linhas.push(colunas.join(';'))
+        }
+      }
+
+      const agora = new Date()
+      const dataCurta = agora.toISOString().slice(0, 10)
+
+      return reply.status(200).send({
+        csv: '\uFEFF' + linhas.join('\r\n'),
+        nomeArquivo: `relatorio-analitico-engenharia-${dataCurta}.csv`,
+        totalRequisicoes: requisicoes.length,
+        totalLinhas,
+        exportadoEm: agora.toISOString(),
+        resumo: {
+          totalSolicitado: Number(totalSolicitado.toFixed(4)),
+          totalEntregue: Number(totalEntregue.toFixed(4)),
+          totalMateriaisDiferentes: materiaisUnicos.size,
+          totalFerramentasDiferentes: ferramentasUnicas.size,
+        },
+      })
     }
   )
 
