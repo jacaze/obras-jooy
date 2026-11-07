@@ -9,10 +9,12 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
   let encarregadoToken: string
   let outroEncarregadoToken: string
   let almoxarifeToken: string
+  let engenhariaToken: string
 
   const encarregadoId = '00000000-0000-0000-0000-000000000001'
   const outroEncarregadoId = '00000000-0000-0000-0000-000000000002'
   const almoxarifeId = '00000000-0000-0000-0000-000000000003'
+  const engenhariaId = '00000000-0000-0000-0000-000000000004'
 
   const obraId = '00000000-0000-0000-0000-000000000010'
   const areaId = '00000000-0000-0000-0000-000000000020'
@@ -49,6 +51,13 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
       login: 'maria.almoxarife',
       nome: 'Maria Almoxarife',
       perfil: PerfilUsuario.ALMOXARIFE,
+    })
+
+    engenhariaToken = app.jwt.sign({
+      sub: engenhariaId,
+      login: 'carlos.engenharia',
+      nome: 'Carlos Engenheiro',
+      perfil: PerfilUsuario.ENGENHARIA,
     })
   })
 
@@ -931,6 +940,161 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
       expect(response.statusCode).toBe(422)
       const body = JSON.parse(response.body)
       expect(body.erro).toContain('ja esta em separacao pelo almoxarifado')
+    })
+  })
+
+  describe('POST /api/requisicoes/exportar-analitico (F04 - Exportacao Analitica para Engenharia)', () => {
+    it('deve permitir que ENGENHARIA exporte relatorio analitico em CSV com filtros por data, etapa e obra (200)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+        obraId: null,
+      } as any)
+
+      vi.spyOn(prisma.requisicao, 'findMany').mockResolvedValueOnce([
+        {
+          id: requisicaoId,
+          numeroSequencial: 101,
+          status: StatusRequisicao.ATENDIDA,
+          solicitadaEm: new Date('2026-11-01T10:00:00Z'),
+          atendidoEm: new Date('2026-11-01T14:30:00Z'),
+          retiradoPor: 'Carlos Mestre',
+          observacao: 'Fase de alvenaria',
+          area: {
+            id: areaId,
+            nome: 'Terreo / Acesso',
+            ordem: 0,
+            obra: { id: obraId, codigo: 'JOOY-01', nome: 'Residencial Jooy Reserva' },
+          },
+          etapa: {
+            id: etapaValidaId,
+            nome: 'Alvenaria Estrutural',
+            ordem: 2,
+            status: 'EM_ANDAMENTO',
+          },
+          requisitante: {
+            id: encarregadoId,
+            nome: 'Joao Encarregado',
+            cargo: { nome: 'Mestre de Obras' },
+          },
+          atendidoPor: {
+            id: almoxarifeId,
+            nome: 'Maria Almoxarife',
+          },
+          itens: [
+            {
+              id: itemMaterialId,
+              materialId,
+              quantidade: 20,
+              quantidadeEntregue: 20,
+              material: {
+                id: materialId,
+                codigo: 'CIM-01',
+                codigoSienge: 'SIENGE-9921',
+                descricao: 'Cimento CP-II',
+                unidadeConsumo: { sigla: 'SC' },
+              },
+            },
+          ],
+        },
+      ] as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes/exportar-analitico',
+        headers: {
+          authorization: `Bearer ${engenhariaToken}`,
+        },
+        payload: {
+          dataInicio: '2026-11-01',
+          dataFim: '2026-11-05',
+          obraId,
+          etapaId: etapaValidaId,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.totalRequisicoes).toBe(1)
+      expect(body.totalLinhas).toBe(1)
+      expect(body.resumo.totalSolicitado).toBe(20)
+      expect(body.resumo.totalEntregue).toBe(20)
+      expect(body.resumo.totalMateriaisDiferentes).toBe(1)
+
+      // Verifica conteudo do CSV
+      expect(body.csv).toContain('CODIGO_JOOY;CODIGO_SIENGE;DESCRICAO_ITEM')
+      expect(body.csv).toContain('ETAPA_EXECUCAO;STATUS_ETAPA')
+      expect(body.csv).toContain('CIM-01;SIENGE-9921;Cimento CP-II')
+      expect(body.csv).toContain('Alvenaria Estrutural;EM_ANDAMENTO')
+      expect(body.csv).toContain('JOOY-01;Residencial Jooy Reserva;Terreo / Acesso')
+    })
+
+    it('deve rejeitar acesso para perfis sem permissao analitica como ENCARREGADO (403)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: encarregadoId,
+        perfil: PerfilUsuario.ENCARREGADO,
+        ativo: true,
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes/exportar-analitico',
+        headers: {
+          authorization: `Bearer ${encarregadoToken}`,
+        },
+        payload: {},
+      })
+
+      expect(response.statusCode).toBe(403)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Acesso negado para este perfil')
+    })
+
+    it('deve rejeitar acesso para perfil ALMOXARIFE com 403', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: almoxarifeId,
+        perfil: PerfilUsuario.ALMOXARIFE,
+        ativo: true,
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes/exportar-analitico',
+        headers: {
+          authorization: `Bearer ${almoxarifeToken}`,
+        },
+        payload: {},
+      })
+
+      expect(response.statusCode).toBe(403)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Acesso negado para este perfil')
+    })
+
+    it('deve retornar 422 quando nenhuma requisicao coincidir com os filtros analiticos', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.requisicao, 'findMany').mockResolvedValueOnce([])
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes/exportar-analitico',
+        headers: {
+          authorization: `Bearer ${engenhariaToken}`,
+        },
+        payload: {
+          obraId,
+        },
+      })
+
+      expect(response.statusCode).toBe(422)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Nenhuma requisicao encontrada para exportacao')
     })
   })
 })

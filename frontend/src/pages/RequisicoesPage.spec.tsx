@@ -25,6 +25,15 @@ const mockAlmoxarife = {
   ativo: true,
 }
 
+const mockEngenheiro = {
+  id: 'eng-id-01',
+  nome: 'Carlos Engenheiro',
+  login: 'carlos',
+  perfil: 'ENGENHARIA' as const,
+  cargo: 'Engenheiro Residente',
+  ativo: true,
+}
+
 const mockObras = [
   { id: 'obra-1', codigo: 'OBRA-01', nome: 'Edificio Horizonte', cidade: 'Campo Grande', ativa: true, criadaEm: '2026-10-28T00:00:00Z' },
 ]
@@ -500,5 +509,76 @@ describe('RequisicoesPage Component', () => {
       ).not.toBeInTheDocument()
     })
     expect(btnEnviar).not.toBeDisabled()
+  })
+
+  it('deve permitir que ENGENHARIA abra modal de exportacao analitica, preencha filtros e baixe o CSV (F04)', async () => {
+    const exportarAnaliticoSpy = vi
+      .spyOn(apiClient, 'exportarAnaliticoEngenharia')
+      .mockResolvedValue({
+        csv: '\uFEFFNUMERO_REQUISICAO;CODIGO_JOOY;ETAPA_EXECUCAO\r\nREQ-101;CIM-01;Alvenaria',
+        nomeArquivo: 'relatorio-analitico-engenharia-2026-11-06.csv',
+        totalRequisicoes: 1,
+        totalLinhas: 1,
+        exportadoEm: '2026-11-06T20:00:00Z',
+        resumo: {
+          totalSolicitado: 10,
+          totalEntregue: 8,
+          totalMateriaisDiferentes: 1,
+          totalFerramentasDiferentes: 0,
+        },
+      })
+
+    renderRequisicoesPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    const btnExportarAnalitico = screen.getByRole('button', {
+      name: /Exportacao Analitica \(Engenharia\)/i,
+    })
+    fireEvent.click(btnExportarAnalitico)
+
+    await waitFor(() => {
+      expect(screen.getByText('Exportacao Analitica para Engenharia')).toBeInTheDocument()
+    })
+
+    // Preenche filtros
+    const inputDataInicio = screen.getByLabelText(/Data Inicial/i)
+    fireEvent.change(inputDataInicio, { target: { value: '2026-11-01' } })
+
+    const inputDataFim = screen.getByLabelText(/Data Final/i)
+    fireEvent.change(inputDataFim, { target: { value: '2026-11-06' } })
+
+    const btnBaixar = screen.getByRole('button', {
+      name: /Baixar Relatorio Analitico \(CSV\)/i,
+    })
+    fireEvent.click(btnBaixar)
+
+    await waitFor(() => {
+      expect(exportarAnaliticoSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataInicio: '2026-11-01',
+          dataFim: '2026-11-06',
+        })
+      )
+      expect(
+        screen.getByText(/relatorio-analitico-engenharia-2026-11-06\.csv gerado com sucesso/i)
+      ).toBeInTheDocument()
+    })
+  })
+
+  it('nao deve exibir o botao de exportacao analitica para o perfil ALMOXARIFE (F04)', async () => {
+    renderRequisicoesPage(mockAlmoxarife)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole('button', {
+        name: /Exportacao Analitica \(Engenharia\)/i,
+      })
+    ).not.toBeInTheDocument()
   })
 })

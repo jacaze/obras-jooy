@@ -99,6 +99,31 @@ export interface ExportarSiengeResponse {
   exportadaEm: string
 }
 
+export interface ExportarAnaliticoEngenhariaInput {
+  dataInicio?: string | null
+  dataFim?: string | null
+  obraId?: string | null
+  areaId?: string | null
+  etapaId?: string | null
+  materialId?: string | null
+  status?: StatusRequisicao | null
+  busca?: string | null
+}
+
+export interface ExportarAnaliticoEngenhariaResponse {
+  csv: string
+  nomeArquivo: string
+  totalRequisicoes: number
+  totalLinhas: number
+  exportadoEm: string
+  resumo: {
+    totalSolicitado: number
+    totalEntregue: number
+    totalMateriaisDiferentes: number
+    totalFerramentasDiferentes: number
+  }
+}
+
 export interface FiltrosRequisicao {
   status?: StatusRequisicao
   areaId?: string

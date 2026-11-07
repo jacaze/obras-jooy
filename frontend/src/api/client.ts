@@ -16,6 +16,8 @@ import type {
 import type {
   AtenderRequisicaoInput,
   CriarRequisicaoInput,
+  ExportarAnaliticoEngenhariaInput,
+  ExportarAnaliticoEngenhariaResponse,
   ExportarSiengeInput,
   ExportarSiengeResponse,
   FiltrosRequisicao,
@@ -382,6 +384,16 @@ export async function atenderRequisicao(id: string, dados: AtenderRequisicaoInpu
 
 export async function exportarRequisicoesSienge(dados?: ExportarSiengeInput): Promise<ExportarSiengeResponse> {
   const response = await api.post<ExportarSiengeResponse>('/requisicoes/exportar-sienge', dados || {})
+  return response.data
+}
+
+export async function exportarAnaliticoEngenharia(
+  dados?: ExportarAnaliticoEngenhariaInput
+): Promise<ExportarAnaliticoEngenhariaResponse> {
+  const response = await api.post<ExportarAnaliticoEngenhariaResponse>(
+    '/requisicoes/exportar-analitico',
+    dados || {}
+  )
   return response.data
 }
 

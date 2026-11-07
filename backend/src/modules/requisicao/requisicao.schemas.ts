@@ -70,3 +70,16 @@ export const exportarSiengeSchema = z.object({
   obraId: z.string().uuid('ID da obra invalido').optional(),
   incluirJaExportadas: z.boolean().optional().default(false),
 })
+
+export const exportarAnaliticoEngenhariaSchema = z.object({
+  dataInicio: z.string().optional().nullable(),
+  dataFim: z.string().optional().nullable(),
+  obraId: z.string().uuid('ID da obra invalido').optional().nullable(),
+  areaId: z.string().uuid('ID da area invalido').optional().nullable(),
+  etapaId: z.string().uuid('ID da etapa invalido').optional().nullable(),
+  materialId: z.string().uuid('ID do material invalido').optional().nullable(),
+  status: z.nativeEnum(StatusRequisicao).optional().nullable(),
+  busca: z.string().trim().max(100).optional().nullable(),
+})
+
+export type ExportarAnaliticoEngenhariaInput = z.infer<typeof exportarAnaliticoEngenhariaSchema>

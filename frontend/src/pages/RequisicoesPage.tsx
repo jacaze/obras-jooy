@@ -4,6 +4,7 @@ import {
   atenderRequisicao,
   cancelarRequisicao,
   createRequisicao,
+  exportarAnaliticoEngenharia,
   exportarRequisicoesSienge,
   getAreasObra,
   getEtapasArea,
@@ -17,6 +18,7 @@ import { useAuth } from '../hooks/useAuth'
 import type {
   AtenderRequisicaoInput,
   CriarRequisicaoInput,
+  ExportarAnaliticoEngenhariaInput,
   Requisicao,
   StatusRequisicao,
 } from '../types/requisicao'
@@ -67,6 +69,10 @@ export function RequisicoesPage() {
   const ehEncarregado = usuario?.perfil === 'ENCARREGADO'
   const podeAtenderEExportar =
     usuario?.perfil === 'ADMIN' || usuario?.perfil === 'ALMOXARIFE'
+  const podeExportarAnalitico =
+    usuario?.perfil === 'ADMIN' ||
+    usuario?.perfil === 'ENGENHARIA' ||
+    usuario?.perfil === 'ADMINISTRACAO'
 
   // Filtros de listagem
   const [busca, setBusca] = useState('')
@@ -87,6 +93,17 @@ export function RequisicoesPage() {
   ])
   const [chaveIdempotencia, setChaveIdempotencia] = useState(gerarChaveIdempotencia())
   const [erroForm, setErroForm] = useState<string | null>(null)
+
+  // Modal: Exportacao Analitica para Engenharia (F04)
+  const [modalExportacaoAnaliticaAberto, setModalExportacaoAnaliticaAberto] = useState(false)
+  const [expObraId, setExpObraId] = useState('')
+  const [expAreaId, setExpAreaId] = useState('')
+  const [expEtapaId, setExpEtapaId] = useState('')
+  const [expDataInicio, setExpDataInicio] = useState('')
+  const [expDataFim, setExpDataFim] = useState('')
+  const [expStatus, setExpStatus] = useState<string>('TODAS')
+  const [expBusca, setExpBusca] = useState('')
+  const [erroExportacaoAnalitica, setErroExportacaoAnalitica] = useState<string | null>(null)
 
   // Modal: Atender Requisicao (Almoxarife / Admin)
   const [requisicaoEmAtendimento, setRequisicaoEmAtendimento] = useState<Requisicao | null>(null)
@@ -119,6 +136,19 @@ export function RequisicoesPage() {
 
   const etapaSelecionada = etapasArea.find((e) => e.id === etapaIdSelecionada)
   const etapaEstaEncerrada = etapaSelecionada?.status === 'ENCERRADA'
+
+  // Queries para o Modal de Exportacao Analitica (F04)
+  const { data: areasExpObra = [] } = useQuery({
+    queryKey: ['areas-obra-exp', expObraId],
+    queryFn: () => (expObraId ? getAreasObra(expObraId, false) : Promise.resolve([])),
+    enabled: Boolean(expObraId && modalExportacaoAnaliticaAberto),
+  })
+
+  const { data: etapasExpArea = [] } = useQuery({
+    queryKey: ['etapas-area-exp', expAreaId],
+    queryFn: () => (expAreaId ? getEtapasArea(expAreaId) : Promise.resolve([])),
+    enabled: Boolean(expAreaId && modalExportacaoAnaliticaAberto),
+  })
 
   const { data: saldosObraModal = [] } = useQuery({
     queryKey: ['estoque-saldos-obra-modal', obraIdSelecionada],
@@ -359,6 +389,49 @@ export function RequisicoesPage() {
     },
   })
 
+  const exportarAnaliticoMutation = useMutation({
+    mutationFn: (dados: ExportarAnaliticoEngenhariaInput) => exportarAnaliticoEngenharia(dados),
+    onSuccess: (res) => {
+      dispararDownloadCsv(res.csv, res.nomeArquivo)
+      setModalExportacaoAnaliticaAberto(false)
+      setErroFeedback(null)
+      setMensagemFeedback(
+        `Relatorio analitico ${res.nomeArquivo} gerado com sucesso (${res.totalLinhas} itens em ${res.totalRequisicoes} requisicao(oes)).`
+      )
+    },
+    onError: (err: any) => {
+      setErroExportacaoAnalitica(extrairErro(err, 'Erro ao exportar relatorio analitico'))
+    },
+  })
+
+  function handleAbrirModalExportacaoAnalitica() {
+    const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '')
+    setExpObraId(obraPadrao)
+    setExpAreaId('')
+    setExpEtapaId('')
+    setExpDataInicio('')
+    setExpDataFim('')
+    setExpStatus('TODAS')
+    setExpBusca('')
+    setErroExportacaoAnalitica(null)
+    setModalExportacaoAnaliticaAberto(true)
+  }
+
+  function handleSubmeterExportacaoAnalitica(e: FormEvent) {
+    e.preventDefault()
+    setErroExportacaoAnalitica(null)
+
+    exportarAnaliticoMutation.mutate({
+      obraId: expObraId || undefined,
+      areaId: expAreaId || undefined,
+      etapaId: expEtapaId || undefined,
+      dataInicio: expDataInicio || undefined,
+      dataFim: expDataFim || undefined,
+      status: expStatus !== 'TODAS' ? (expStatus as StatusRequisicao) : undefined,
+      busca: expBusca.trim() || undefined,
+    })
+  }
+
   const cancelarRequisicaoMutation = useMutation({
     mutationFn: (id: string) => cancelarRequisicao(id),
     onSuccess: () => {
@@ -596,6 +669,17 @@ export function RequisicoesPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {podeExportarAnalitico && (
+              <button
+                type="button"
+                onClick={handleAbrirModalExportacaoAnalitica}
+                className="ob-btn ob-btn--outline ob-btn--sm min-h-[48px]"
+              >
+                <span className="material-symbols-outlined text-[18px]">analytics</span>
+                <span>Exportacao Analitica (Engenharia)</span>
+              </button>
+            )}
+
             {podeAtenderEExportar && (
               <button
                 type="button"
@@ -1368,6 +1452,218 @@ export function RequisicoesPage() {
                   className="ob-btn ob-btn--primary ob-btn--lg"
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL: EXPORTACAO ANALITICA PARA ENGENHARIA (F04) */}
+      {modalExportacaoAnaliticaAberto && (
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-2xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h2 className="ob-heading text-xl sm:text-2xl font-bold text-on-surface">
+                  Exportacao Analitica para Engenharia
+                </h2>
+                <p className="text-xs sm:text-sm text-on-surface-variant mt-1 font-body">
+                  Gere e baixe a planilha analitica consolidada em formato CSV com filtros por periodo, obra, area, etapa de execucao e insumo.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalExportacaoAnaliticaAberto(false)}
+                className="text-on-surface-variant hover:text-on-surface text-xl font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            {erroExportacaoAnalitica && (
+              <div className="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl my-4 text-sm font-body">
+                {erroExportacaoAnalitica}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmeterExportacaoAnalitica} className="flex flex-col gap-4 mt-4">
+              {/* Filtro: Obra, Area e Etapa */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Obra
+                  </label>
+                  {usuario?.obraId || obras.length === 1 ? (
+                    <div className="ob-input w-full text-xs font-body py-2 px-3 bg-surface-container text-on-surface font-semibold flex items-center justify-between">
+                      <span className="truncate">
+                        {usuario?.obra
+                          ? `${usuario.obra.codigo} - ${usuario.obra.nome}`
+                          : obras[0]
+                            ? `${obras[0].codigo} - ${obras[0].nome}`
+                            : 'Obra'}
+                      </span>
+                      <span className="text-[10px] text-secondary font-normal">(Fixa)</span>
+                    </div>
+                  ) : (
+                    <select
+                      value={expObraId}
+                      onChange={(e) => {
+                        setExpObraId(e.target.value)
+                        setExpAreaId('')
+                        setExpEtapaId('')
+                      }}
+                      className="ob-input w-full text-xs font-body"
+                    >
+                      <option value="">Todas as Obras</option>
+                      {obras.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.codigo} - {o.nome}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Area / Pavimento
+                  </label>
+                  <select
+                    value={expAreaId}
+                    onChange={(e) => {
+                      setExpAreaId(e.target.value)
+                      setExpEtapaId('')
+                    }}
+                    disabled={!expObraId}
+                    className="ob-input w-full text-xs disabled:opacity-50 font-body"
+                  >
+                    <option value="">
+                      {!expObraId ? 'Selecione a obra primeiro' : 'Todas as Areas'}
+                    </option>
+                    {areasExpObra.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Etapa de Execucao
+                  </label>
+                  <select
+                    value={expEtapaId}
+                    onChange={(e) => setExpEtapaId(e.target.value)}
+                    disabled={!expAreaId || etapasExpArea.length === 0}
+                    className="ob-input w-full text-xs disabled:opacity-50 font-body"
+                  >
+                    <option value="">
+                      {!expAreaId
+                        ? 'Selecione a area primeiro'
+                        : etapasExpArea.length === 0
+                          ? 'Nenhuma etapa cadastrada'
+                          : 'Todas as Etapas'}
+                    </option>
+                    {etapasExpArea.map((et) => (
+                      <option key={et.id} value={et.id}>
+                        {et.nome} {et.status === 'ENCERRADA' ? '(Encerrada)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Filtro: Periodo (Data Inicio e Fim) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="exp-data-inicio" className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Data Inicial (Solicitada a partir de)
+                  </label>
+                  <input
+                    id="exp-data-inicio"
+                    type="date"
+                    value={expDataInicio}
+                    onChange={(e) => setExpDataInicio(e.target.value)}
+                    className="ob-input w-full text-xs font-body"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="exp-data-fim" className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Data Final (Solicitada ate)
+                  </label>
+                  <input
+                    id="exp-data-fim"
+                    type="date"
+                    value={expDataFim}
+                    onChange={(e) => setExpDataFim(e.target.value)}
+                    className="ob-input w-full text-xs font-body"
+                  />
+                </div>
+              </div>
+
+              {/* Filtro: Status e Busca */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Status da Requisicao
+                  </label>
+                  <select
+                    value={expStatus}
+                    onChange={(e) => setExpStatus(e.target.value)}
+                    className="ob-input w-full text-xs font-body"
+                  >
+                    <option value="TODAS">Todos os Status</option>
+                    <option value="ATENDIDA">Apenas Atendidas (Entregues)</option>
+                    <option value="SOLICITADA">Solicitadas (Pendentes)</option>
+                    <option value="EM_SEPARACAO">Em Separacao</option>
+                    <option value="PRONTA">Prontas para Retirada</option>
+                    <option value="CANCELADA">Canceladas</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface mb-1 font-body">
+                    Filtro por Insumo ou Solicitante
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ex: Cimento, Furadeira, Carlos..."
+                    value={expBusca}
+                    onChange={(e) => setExpBusca(e.target.value)}
+                    className="ob-input w-full text-xs font-body"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-surface-container-low p-3.5 rounded-xl border border-surface-container text-xs text-on-surface-variant flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-primary">info</span>
+                <span>
+                  O arquivo CSV gerado contera codigo Jooy, codigo SIENGE, etapa da obra, quantidades solicitadas vs entregues, datas e responsaveis.
+                </span>
+              </div>
+
+              {/* Botoes do Modal */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalExportacaoAnaliticaAberto(false)}
+                  className="ob-btn ob-btn--outline"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={exportarAnaliticoMutation.isPending}
+                  className="ob-btn ob-btn--primary ob-btn--lg"
+                >
+                  <span className="material-symbols-outlined text-[18px]">download</span>
+                  <span>
+                    {exportarAnaliticoMutation.isPending
+                      ? 'Processando Planilha...'
+                      : 'Baixar Relatorio Analitico (CSV)'}
+                  </span>
                 </button>
               </div>
             </form>
