@@ -3,6 +3,7 @@ import {
   PerfilUsuario,
   StatusRequisicao,
   TipoMovimentacao,
+  StatusEtapa,
 } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { env } from '../src/config/env.js'
@@ -139,6 +140,78 @@ export async function seedDatabase() {
       },
     })
     areasMap[area.nome] = areaCriada.id
+  }
+
+  // Seed de Etapas Demonstrativas por Area (F02)
+  if (areasMap['Terreo / Acesso']) {
+    const terreoId = areasMap['Terreo / Acesso']
+    await prisma.etapaArea.upsert({
+      where: {
+        etapa_area_nome_unico: {
+          areaId: terreoId,
+          nome: 'Fundacao e Baldrames',
+        },
+      },
+      update: {},
+      create: {
+        areaId: terreoId,
+        nome: 'Fundacao e Baldrames',
+        ordem: 1,
+        status: StatusEtapa.ENCERRADA,
+        encerradaEm: new Date(),
+      },
+    })
+
+    await prisma.etapaArea.upsert({
+      where: {
+        etapa_area_nome_unico: {
+          areaId: terreoId,
+          nome: 'Alvenaria Estrutural',
+        },
+      },
+      update: {},
+      create: {
+        areaId: terreoId,
+        nome: 'Alvenaria Estrutural',
+        ordem: 2,
+        status: StatusEtapa.EM_ANDAMENTO,
+      },
+    })
+
+    await prisma.etapaArea.upsert({
+      where: {
+        etapa_area_nome_unico: {
+          areaId: terreoId,
+          nome: 'Pisos e Revestimentos',
+        },
+      },
+      update: {},
+      create: {
+        areaId: terreoId,
+        nome: 'Pisos e Revestimentos',
+        ordem: 3,
+        status: StatusEtapa.EM_ANDAMENTO,
+      },
+    })
+  }
+
+  if (areasMap['1o Pavimento']) {
+    const pav1Id = areasMap['1o Pavimento']
+    await prisma.etapaArea.upsert({
+      where: {
+        etapa_area_nome_unico: {
+          areaId: pav1Id,
+          nome: 'Concretagem e Lajes',
+        },
+      },
+      update: {},
+      create: {
+        areaId: pav1Id,
+        nome: 'Concretagem e Lajes',
+        ordem: 1,
+        status: StatusEtapa.EM_ANDAMENTO,
+      },
+    })
   }
 
   // 4. Seed de Unidades de Medida (T07)

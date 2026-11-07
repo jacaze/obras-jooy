@@ -1,4 +1,4 @@
-import type { AreaObra } from './obra'
+import type { AreaObra, EtapaArea } from './obra'
 import type { Material, Ferramenta } from './material'
 
 export type StatusRequisicao =
@@ -38,6 +38,8 @@ export interface Requisicao {
   prontaEm?: string | null
   retiradaEm?: string | null
   area: AreaObra
+  etapaId?: string | null
+  etapa?: EtapaArea | null
   requisitante: {
     id: string
     nome: string
@@ -67,6 +69,7 @@ export interface ItemRequisicaoInput {
 
 export interface CriarRequisicaoInput {
   areaId: string
+  etapaId?: string | null
   observacao?: string
   chaveIdempotencia?: string
   itens: ItemRequisicaoInput[]
@@ -99,6 +102,7 @@ export interface ExportarSiengeResponse {
 export interface FiltrosRequisicao {
   status?: StatusRequisicao
   areaId?: string
+  etapaId?: string
   obraId?: string
   requisitanteId?: string
   exportadaSienge?: boolean

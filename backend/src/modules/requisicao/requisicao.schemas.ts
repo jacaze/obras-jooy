@@ -25,6 +25,7 @@ export const criarRequisicaoSchema = z.object({
   areaId: z
     .string({ required_error: 'A area de aplicacao da obra e obrigatoria' })
     .uuid('Identificador da area invalido'),
+  etapaId: z.string().uuid('Identificador da etapa invalido').optional().nullable(),
   observacao: z.string().max(255, 'Observacao nao pode exceder 255 caracteres').optional().nullable(),
   chaveIdempotencia: z.string().max(100).optional().nullable(),
   itens: z
@@ -35,6 +36,7 @@ export const criarRequisicaoSchema = z.object({
 export const filtrosRequisicaoSchema = z.object({
   status: z.nativeEnum(StatusRequisicao).optional(),
   areaId: z.string().uuid().optional(),
+  etapaId: z.string().uuid().optional(),
   obraId: z.string().uuid().optional(),
   requisitanteId: z.string().uuid().optional(),
   exportadaSienge: z

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { Cargo, PerfilUsuario, UsuarioAuth, UsuarioListagem } from '../types/auth'
-import type { AreaObra, Obra } from '../types/obra'
+import type { AreaObra, Obra, EtapaArea, StatusEtapa, CriarEtapaAreaInput, AtualizarEtapaAreaInput } from '../types/obra'
 import type {
   CategoriaMaterial,
   CriarMaterialInput,
@@ -208,6 +208,31 @@ export async function deleteAreaObra(id: string): Promise<void> {
   await api.delete(`/areas/${id}`)
 }
 
+export async function getEtapasArea(areaId: string, status?: StatusEtapa): Promise<EtapaArea[]> {
+  const url = status ? `/areas/${areaId}/etapas?status=${status}` : `/areas/${areaId}/etapas`
+  const response = await api.get<EtapaArea[]>(url)
+  return response.data
+}
+
+export async function createEtapaArea(areaId: string, dados: CriarEtapaAreaInput): Promise<EtapaArea> {
+  const response = await api.post<EtapaArea>(`/areas/${areaId}/etapas`, dados)
+  return response.data
+}
+
+export async function updateEtapaArea(id: string, dados: AtualizarEtapaAreaInput): Promise<EtapaArea> {
+  const response = await api.patch<EtapaArea>(`/etapas/${id}`, dados)
+  return response.data
+}
+
+export async function alterarStatusEtapa(id: string, status: StatusEtapa): Promise<EtapaArea> {
+  const response = await api.patch<EtapaArea>(`/etapas/${id}/status`, { status })
+  return response.data
+}
+
+export async function deleteEtapaArea(id: string): Promise<void> {
+  await api.delete(`/etapas/${id}`)
+}
+
 // ----------------------------------------------------
 // CATALOGO DE MATERIAIS, UNIDADES E CATEGORIAS (T07)
 // ----------------------------------------------------
@@ -328,6 +353,7 @@ export async function getRequisicoes(filtros?: FiltrosRequisicao): Promise<Requi
   const params = new URLSearchParams()
   if (filtros?.status) params.append('status', filtros.status)
   if (filtros?.areaId) params.append('areaId', filtros.areaId)
+  if (filtros?.etapaId) params.append('etapaId', filtros.etapaId)
   if (filtros?.obraId) params.append('obraId', filtros.obraId)
   if (filtros?.requisitanteId) params.append('requisitanteId', filtros.requisitanteId)
   if (filtros?.exportadaSienge !== undefined) {

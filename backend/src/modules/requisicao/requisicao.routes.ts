@@ -41,6 +41,14 @@ const REQUISICAO_INCLUDE = {
       },
     },
   },
+  etapa: {
+    select: {
+      id: true,
+      nome: true,
+      ordem: true,
+      status: true,
+    },
+  },
   requisitante: {
     select: {
       id: true,
@@ -159,6 +167,10 @@ export async function requisicaoRoutes(app: FastifyInstance) {
         where.areaId = filtros.areaId
       }
 
+      if (filtros.etapaId) {
+        where.etapaId = filtros.etapaId
+      }
+
       if (filtros.obraId) {
         where.area = {
           obraId: filtros.obraId,
@@ -216,6 +228,27 @@ export async function requisicaoRoutes(app: FastifyInstance) {
 
       if (!area || !area.ativa || !area.obra.ativa) {
         throw new BusinessRuleError('Area informada nao existe ou esta inativa na obra')
+      }
+
+      // Valida etapa da obra se informada (F02)
+      if (dados.etapaId) {
+        const etapa = await prisma.etapaArea.findUnique({
+          where: { id: dados.etapaId },
+        })
+
+        if (!etapa) {
+          throw new NotFoundError('Etapa informada nao existe')
+        }
+
+        if (etapa.areaId !== dados.areaId) {
+          throw new BusinessRuleError('A etapa informada nao pertence a area selecionada')
+        }
+
+        if (etapa.status === 'ENCERRADA') {
+          throw new BusinessRuleError(
+            `A etapa "${etapa.nome}" esta encerrada e nao aceita novos pedidos de material`
+          )
+        }
       }
 
       // Consolida quantidades por materialId para impedir que linhas duplicadas burlem o saldo
@@ -295,6 +328,7 @@ export async function requisicaoRoutes(app: FastifyInstance) {
       const novaRequisicao = await prisma.requisicao.create({
         data: {
           areaId: dados.areaId,
+          etapaId: dados.etapaId || null,
           requisitanteId,
           chaveIdempotencia: dados.chaveIdempotencia || null,
           observacao: dados.observacao ? dados.observacao.trim() : null,

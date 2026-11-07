@@ -35,3 +35,37 @@ export const listarAreasQuerySchema = z.object({
     .optional()
     .transform((val) => val !== 'false'),
 })
+
+// ----------------------------------------------------
+// ETAPAS POR LOCAL / PAVIMENTO (F02)
+// ----------------------------------------------------
+export const criarEtapaAreaSchema = z.object({
+  nome: z
+    .string({ required_error: 'O nome da etapa e obrigatorio' })
+    .trim()
+    .min(2, 'O nome da etapa deve ter no minimo 2 caracteres')
+    .max(80, 'O nome da etapa deve ter no maximo 80 caracteres'),
+  ordem: z
+    .number({ invalid_type_error: 'A ordem deve ser um numero inteiro' })
+    .int('A ordem deve ser um numero inteiro')
+    .default(0),
+})
+
+export const atualizarEtapaAreaSchema = z.object({
+  nome: z
+    .string()
+    .trim()
+    .min(2, 'O nome da etapa deve ter no minimo 2 caracteres')
+    .max(80, 'O nome da etapa deve ter no maximo 80 caracteres')
+    .optional(),
+  ordem: z
+    .number({ invalid_type_error: 'A ordem deve ser um numero inteiro' })
+    .int('A ordem deve ser um numero inteiro')
+    .optional(),
+})
+
+export const alterarStatusEtapaSchema = z.object({
+  status: z.enum(['EM_ANDAMENTO', 'ENCERRADA'], {
+    required_error: 'O status da etapa e obrigatorio (EM_ANDAMENTO ou ENCERRADA)',
+  }),
+})

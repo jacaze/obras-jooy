@@ -425,4 +425,176 @@ describe('Modulo de Areas da Obra (Rotas e Regras de Negocio)', () => {
       expect(body.erro).toContain('Nao e possivel excluir esta area')
     })
   })
+
+  // ----------------------------------------------------
+  // TESTES DE ETAPAS POR LOCAL / PAVIMENTO (F02)
+  // ----------------------------------------------------
+  describe('Etapas por Local / Pavimento (F02)', () => {
+    const areaId = 'area-etapa-1'
+    const etapaId = 'etapa-id-1'
+
+    it('deve listar etapas de uma area para usuario autenticado', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: almoxarifeId,
+        perfil: PerfilUsuario.ALMOXARIFE,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: areaId,
+        nome: 'Pavimento 01',
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findMany').mockResolvedValueOnce([
+        {
+          id: etapaId,
+          areaId,
+          nome: 'Concretagem',
+          ordem: 1,
+          status: 'EM_ANDAMENTO',
+          criadaEm: new Date(),
+          encerradaEm: null,
+        },
+      ] as any)
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/areas/${areaId}/etapas`,
+        headers: { authorization: `Bearer ${almoxarifeToken}` },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(Array.isArray(body)).toBe(true)
+      expect(body[0].nome).toBe('Concretagem')
+      expect(body[0].status).toBe('EM_ANDAMENTO')
+    })
+
+    it('deve permitir que ENGENHARIA crie nova etapa para uma area', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: areaId,
+        nome: 'Pavimento 01',
+        ativa: true,
+        obra: { id: obraId, ativa: true },
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findFirst').mockResolvedValueOnce(null)
+
+      vi.spyOn(prisma.etapaArea, 'create').mockResolvedValueOnce({
+        id: etapaId,
+        areaId,
+        nome: 'Alvenaria',
+        ordem: 2,
+        status: 'EM_ANDAMENTO',
+        criadaEm: new Date(),
+        encerradaEm: null,
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/api/areas/${areaId}/etapas`,
+        headers: { authorization: `Bearer ${engenhariaToken}` },
+        payload: { nome: 'Alvenaria', ordem: 2 },
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = JSON.parse(response.body)
+      expect(body.nome).toBe('Alvenaria')
+      expect(body.status).toBe('EM_ANDAMENTO')
+    })
+
+    it('deve rejeitar criacao de etapa com nome duplicado na mesma area (409)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: areaId,
+        nome: 'Pavimento 01',
+        ativa: true,
+        obra: { id: obraId, ativa: true },
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findFirst').mockResolvedValueOnce({
+        id: 'outra-etapa',
+        nome: 'Alvenaria',
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/api/areas/${areaId}/etapas`,
+        headers: { authorization: `Bearer ${engenhariaToken}` },
+        payload: { nome: 'Alvenaria' },
+      })
+
+      expect(response.statusCode).toBe(409)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Ja existe uma etapa com este nome nesta area')
+    })
+
+    it('deve permitir que ENGENHARIA altere o status de uma etapa para ENCERRADA', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findUnique').mockResolvedValueOnce({
+        id: etapaId,
+        nome: 'Concretagem',
+        status: 'EM_ANDAMENTO',
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'update').mockResolvedValueOnce({
+        id: etapaId,
+        nome: 'Concretagem',
+        status: 'ENCERRADA',
+        encerradaEm: new Date(),
+      } as any)
+
+      const response = await app.inject({
+        method: 'PATCH',
+        url: `/api/etapas/${etapaId}/status`,
+        headers: { authorization: `Bearer ${engenhariaToken}` },
+        payload: { status: 'ENCERRADA' },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.status).toBe('ENCERRADA')
+    })
+
+    it('deve impedir exclusao de etapa que possua requisicoes vinculadas (422)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: engenhariaId,
+        perfil: PerfilUsuario.ENGENHARIA,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findUnique').mockResolvedValueOnce({
+        id: etapaId,
+        nome: 'Concretagem',
+      } as any)
+
+      vi.spyOn(prisma.requisicao, 'count').mockResolvedValueOnce(3)
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/api/etapas/${etapaId}`,
+        headers: { authorization: `Bearer ${engenhariaToken}` },
+      })
+
+      expect(response.statusCode).toBe(422)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Nao e possivel excluir uma etapa com requisicoes vinculadas')
+    })
+  })
 })

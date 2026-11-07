@@ -1,17 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  alterarStatusEtapa,
   createAreaObra,
+  createEtapaArea,
   createObra,
   deleteAreaObra,
+  deleteEtapaArea,
   getAreasObra,
+  getEtapasArea,
   getObras,
   toggleAreaSituacao,
   toggleObraSituacao,
   updateAreaObra,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import type { AreaObra } from '../types/obra'
+import type { AreaObra, StatusEtapa } from '../types/obra'
 
 function extrairErro(err: any, fallback: string): string {
   const data = err.response?.data
@@ -61,6 +65,13 @@ export function ObrasPage() {
 
   // Mensagem de erro geral para exclusao
   const [erroExclusaoArea, setErroExclusaoArea] = useState<string | null>(null)
+
+  // Modal e Gestao de Etapas da Area (F02)
+  const [modalEtapasAberto, setModalEtapasAberto] = useState(false)
+  const [areaEtapasSelecionada, setAreaEtapasSelecionada] = useState<AreaObra | null>(null)
+  const [novoNomeEtapa, setNovoNomeEtapa] = useState('')
+  const [novaOrdemEtapa, setNovaOrdemEtapa] = useState<number>(1)
+  const [erroEtapa, setErroEtapa] = useState<string | null>(null)
 
   // Queries
   const { data: obras = [], isLoading: carregandoObras } = useQuery({
@@ -152,6 +163,69 @@ export function ObrasPage() {
       setErroExclusaoArea(extrairErro(err, 'Nao e possivel excluir esta area pois existem registros vinculados'))
     },
   })
+
+  // Queries e Mutations para Etapas da Area (F02)
+  const { data: etapasArea = [], isLoading: carregandoEtapas } = useQuery({
+    queryKey: ['etapas', areaEtapasSelecionada?.id],
+    queryFn: () =>
+      areaEtapasSelecionada ? getEtapasArea(areaEtapasSelecionada.id) : Promise.resolve([]),
+    enabled: Boolean(areaEtapasSelecionada?.id && modalEtapasAberto),
+  })
+
+  const criarEtapaMutation = useMutation({
+    mutationFn: (dados: { nome: string; ordem?: number }) =>
+      createEtapaArea(areaEtapasSelecionada!.id, dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['etapas', areaEtapasSelecionada?.id] })
+      setNovoNomeEtapa('')
+      setNovaOrdemEtapa((etapasArea.length || 0) + 2)
+      setErroEtapa(null)
+    },
+    onError: (err: any) => {
+      setErroEtapa(extrairErro(err, 'Erro ao criar etapa'))
+    },
+  })
+
+  const alterarStatusEtapaMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: StatusEtapa }) =>
+      alterarStatusEtapa(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['etapas', areaEtapasSelecionada?.id] })
+      setErroEtapa(null)
+    },
+    onError: (err: any) => {
+      setErroEtapa(extrairErro(err, 'Erro ao alterar status da etapa'))
+    },
+  })
+
+  const excluirEtapaMutation = useMutation({
+    mutationFn: (id: string) => deleteEtapaArea(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['etapas', areaEtapasSelecionada?.id] })
+      setErroEtapa(null)
+    },
+    onError: (err: any) => {
+      setErroEtapa(extrairErro(err, 'Nao e possivel excluir esta etapa'))
+    },
+  })
+
+  function handleAbrirModalEtapas(area: AreaObra) {
+    setAreaEtapasSelecionada(area)
+    setNovoNomeEtapa('')
+    setNovaOrdemEtapa(1)
+    setErroEtapa(null)
+    setModalEtapasAberto(true)
+  }
+
+  function handleCriarEtapa(e: FormEvent) {
+    e.preventDefault()
+    if (!areaEtapasSelecionada) return
+    setErroEtapa(null)
+    criarEtapaMutation.mutate({
+      nome: novoNomeEtapa.trim(),
+      ordem: Number(novaOrdemEtapa),
+    })
+  }
 
   function handleCriarObra(e: FormEvent) {
     e.preventDefault()
@@ -367,7 +441,7 @@ export function ObrasPage() {
                       <th>Nome da Area / Pavimento</th>
                       <th>Situacao</th>
                       <th>Cadastrada Em</th>
-                      {podeGerenciarAreas && <th style={{ textAlign: 'right' }}>Acoes</th>}
+                      <th style={{ textAlign: 'right' }}>Acoes</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -393,42 +467,52 @@ export function ObrasPage() {
                         <td className="text-on-surface-variant font-mono tabular-nums text-xs">
                           {new Date(a.criadaEm).toLocaleDateString('pt-BR')}
                         </td>
-                        {podeGerenciarAreas && (
-                          <td style={{ textAlign: 'right' }}>
-                            <div className="inline-flex items-center gap-2 justify-end">
-                              <button
-                                type="button"
-                                onClick={() => abrirModalEditar(a)}
-                                className="ob-btn ob-btn--outline ob-btn--sm"
-                              >
-                                Editar
-                              </button>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="inline-flex items-center gap-2 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleAbrirModalEtapas(a)}
+                              className="ob-btn ob-btn--outline ob-btn--sm"
+                            >
+                              Etapas
+                            </button>
 
-                              <button
-                                type="button"
-                                disabled={toggleAreaMutation.isPending}
-                                onClick={() => toggleAreaMutation.mutate({ id: a.id, ativa: !a.ativa })}
-                                className="ob-btn ob-btn--outline ob-btn--sm"
-                              >
-                                {a.ativa ? 'Desativar' : 'Ativar'}
-                              </button>
+                            {podeGerenciarAreas && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => abrirModalEditar(a)}
+                                  className="ob-btn ob-btn--outline ob-btn--sm"
+                                >
+                                  Editar
+                                </button>
 
-                              <button
-                                type="button"
-                                disabled={excluirAreaMutation.isPending}
-                                onClick={() => handleConfirmarExclusao(a)}
-                                className="ob-btn ob-btn--outline ob-btn--sm text-error border-error/30 hover:bg-error-container/20"
-                              >
-                                Excluir
-                              </button>
-                            </div>
-                          </td>
-                        )}
+                                <button
+                                  type="button"
+                                  disabled={toggleAreaMutation.isPending}
+                                  onClick={() => toggleAreaMutation.mutate({ id: a.id, ativa: !a.ativa })}
+                                  className="ob-btn ob-btn--outline ob-btn--sm"
+                                >
+                                  {a.ativa ? 'Desativar' : 'Ativar'}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  disabled={excluirAreaMutation.isPending}
+                                  onClick={() => handleConfirmarExclusao(a)}
+                                  className="ob-btn ob-btn--outline ob-btn--sm text-error border-error/30 hover:bg-error-container/20"
+                                >
+                                  Excluir
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                     {areasFiltradas.length === 0 && (
                       <tr>
-                        <td colSpan={podeGerenciarAreas ? 5 : 4} className="p-8 text-center text-on-surface-variant font-body">
+                        <td colSpan={5} className="p-8 text-center text-on-surface-variant font-body">
                           Nenhuma area cadastrada ou encontrada para esta obra.
                         </td>
                       </tr>
@@ -650,6 +734,183 @@ export function ObrasPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Gerenciar Etapas da Area (F02) */}
+      {modalEtapasAberto && areaEtapasSelecionada && (
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-2xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="ob-heading text-xl font-bold text-on-surface">
+                  Etapas de Execucao &mdash; {areaEtapasSelecionada.nome}
+                </h2>
+                <p className="text-xs text-on-surface-variant mt-1">
+                  Obra: {obraAtual?.codigo} - {obraAtual?.nome}.
+                  Etapas encerradas bloqueiam novos pedidos de material nesta area.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalEtapasAberto(false)}
+                className="text-on-surface-variant hover:text-on-surface text-lg font-bold"
+              >
+                &times;
+              </button>
+            </div>
+
+            {erroEtapa && (
+              <div className="bg-error-container text-on-error-container border border-error/20 p-3 rounded-xl mb-4 text-xs font-body">
+                {erroEtapa}
+              </div>
+            )}
+
+            {podeGerenciarAreas && (
+              <form onSubmit={handleCriarEtapa} className="bg-surface-container-low p-4 rounded-xl border border-surface-container mb-6">
+                <h3 className="text-sm font-semibold text-on-surface mb-3">
+                  Adicionar Nova Etapa
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_100px_auto] gap-3 items-end">
+                  <div>
+                    <label className="block text-xs font-medium text-on-surface mb-1">
+                      Nome da Etapa
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: Fundacao, Alvenaria, Concretagem..."
+                      value={novoNomeEtapa}
+                      onChange={(e) => setNovoNomeEtapa(e.target.value)}
+                      className="ob-input w-full text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-on-surface mb-1">
+                      Ordem
+                    </label>
+                    <input
+                      type="number"
+                      value={novaOrdemEtapa}
+                      onChange={(e) => setNovaOrdemEtapa(Number(e.target.value))}
+                      className="ob-input w-full text-xs"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={criarEtapaMutation.isPending || !novoNomeEtapa.trim()}
+                      className="ob-btn ob-btn--primary ob-btn--sm w-full"
+                    >
+                      {criarEtapaMutation.isPending ? 'Salvando...' : 'Adicionar'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            <div className="overflow-x-auto">
+              <table className="ob-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '60px' }}>Ordem</th>
+                    <th>Etapa</th>
+                    <th>Status</th>
+                    {podeGerenciarAreas && <th style={{ textAlign: 'right' }}>Acoes</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {carregandoEtapas ? (
+                    <tr>
+                      <td colSpan={podeGerenciarAreas ? 4 : 3} className="p-4 text-center text-xs text-on-surface-variant">
+                        Carregando etapas...
+                      </td>
+                    </tr>
+                  ) : etapasArea.length === 0 ? (
+                    <tr>
+                      <td colSpan={podeGerenciarAreas ? 4 : 3} className="p-4 text-center text-xs text-on-surface-variant">
+                        Nenhuma etapa cadastrada para esta area.
+                      </td>
+                    </tr>
+                  ) : (
+                    etapasArea.map((et) => {
+                      const encerrada = et.status === 'ENCERRADA'
+                      return (
+                        <tr key={et.id}>
+                          <td>
+                            <span className="ob-mono text-xs font-semibold px-2 py-0.5 rounded bg-surface-container text-on-surface">
+                              {et.ordem}
+                            </span>
+                          </td>
+                          <td className="font-medium text-on-surface text-sm">
+                            {et.nome}
+                          </td>
+                          <td>
+                            <span
+                              className={`ob-badge ${
+                                encerrada ? 'ob-badge--crit' : 'ob-badge--ok'
+                              }`}
+                            >
+                              {encerrada ? 'Encerrada' : 'Em Andamento'}
+                            </span>
+                            {encerrada && (
+                              <span className="block text-[11px] text-error font-medium mt-0.5">
+                                Pedidos Bloqueados
+                              </span>
+                            )}
+                          </td>
+                          {podeGerenciarAreas && (
+                            <td style={{ textAlign: 'right' }}>
+                              <div className="inline-flex items-center gap-2 justify-end">
+                                <button
+                                  type="button"
+                                  disabled={alterarStatusEtapaMutation.isPending}
+                                  onClick={() => {
+                                    const novoStatus = encerrada ? 'EM_ANDAMENTO' : 'ENCERRADA'
+                                    const confirmMsg = encerrada
+                                      ? `Deseja reabrir a etapa "${et.nome}" para receber pedidos de material?`
+                                      : `Deseja encerrar a etapa "${et.nome}"? Novos pedidos de materiais ficarao BLOQUEADOS para esta etapa.`
+                                    if (window.confirm(confirmMsg)) {
+                                      alterarStatusEtapaMutation.mutate({ id: et.id, status: novoStatus })
+                                    }
+                                  }}
+                                  className="ob-btn ob-btn--outline ob-btn--sm text-xs"
+                                >
+                                  {encerrada ? 'Reabrir' : 'Encerrar'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={excluirEtapaMutation.isPending}
+                                  onClick={() => {
+                                    if (window.confirm(`Deseja excluir a etapa "${et.nome}"?`)) {
+                                      excluirEtapaMutation.mutate(et.id)
+                                    }
+                                  }}
+                                  className="ob-btn ob-btn--outline ob-btn--sm text-xs text-error border-error/30 hover:bg-error-container/20"
+                                >
+                                  Excluir
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      )
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                type="button"
+                onClick={() => setModalEtapasAberto(false)}
+                className="ob-btn ob-btn--outline"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
