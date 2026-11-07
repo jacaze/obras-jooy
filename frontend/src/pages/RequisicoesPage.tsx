@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useMemo, useEffect, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   atenderRequisicao,
@@ -15,6 +15,15 @@ import {
   getSaldosEstoque,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
+import type { AreaObra } from '../types/obra'
+import { useOfflineSync } from '../hooks/useOfflineSync'
+import {
+  salvarRequisicaoOffline,
+  salvarCacheObras,
+  obterCacheObras,
+  salvarCacheEtapas,
+  obterCacheEtapas,
+} from '../services/offlineStorage'
 import type {
   AtenderRequisicaoInput,
   CriarRequisicaoInput,
@@ -111,28 +120,149 @@ export function RequisicoesPage() {
   const [qtdsEntreguesMap, setQtdsEntreguesMap] = useState<Record<string, string>>({})
   const [erroAtendimento, setErroAtendimento] = useState<string | null>(null)
 
+  // Integracao com Modo Offline e PWA (F05)
+  const { pendentes } = useOfflineSync()
+
   // Queries
-  const { data: requisicoes = [], isLoading: carregandoRequisicoes } = useQuery({
+  const { data: requisicoesServidor = [], isLoading: carregandoRequisicoes } = useQuery({
     queryKey: ['requisicoes'],
     queryFn: () => getRequisicoes(),
   })
 
-  const { data: obras = [] } = useQuery({
+  // Converte requisicoes offline em cards visiveis na interface
+  const requisicoesOfflineParaExibicao: Requisicao[] = useMemo(() => {
+    return pendentes.map((reqOff) => ({
+      id: reqOff.idLocal,
+      numeroSequencial: 0,
+      areaId: reqOff.dados.areaId,
+      etapaId: reqOff.dados.etapaId,
+      status: 'PENDENTE_SINCRONIZACAO' as any,
+      observacao: reqOff.dados.observacao || null,
+      chaveIdempotencia: reqOff.dados.chaveIdempotencia,
+      solicitadaEm: reqOff.criadaEm,
+      atualizadaEm: reqOff.criadaEm,
+      atendidaEm: null,
+      atendidaPorId: null,
+      exportadaSienge: false,
+      exportadaSiengeEm: null,
+      retiradoPor: null,
+      requisitanteId: usuario?.id || '',
+      requisitante: {
+        id: usuario?.id || '',
+        nome: reqOff.dadosExibicao.solicitanteNome || usuario?.nome || 'Encarregado',
+        login: usuario?.login || 'encarregado',
+        cargo: {
+          nome: usuario?.cargo || 'Encarregado',
+        },
+      },
+      area: {
+        id: reqOff.dados.areaId,
+        obraId: '',
+        nome: reqOff.dadosExibicao.areaNome || 'Area',
+        ordem: 1,
+        ativa: true,
+        criadaEm: reqOff.criadaEm,
+        obra: {
+          id: '',
+          nome: reqOff.dadosExibicao.obraNome || 'Obra Canteiro',
+          codigo: 'OFFLINE',
+        },
+      },
+      etapa: reqOff.dados.etapaId
+        ? {
+            id: reqOff.dados.etapaId,
+            areaId: reqOff.dados.areaId,
+            nome: reqOff.dadosExibicao.etapaNome || 'Etapa',
+            ordem: 1,
+            status: 'EM_ANDAMENTO',
+            criadaEm: reqOff.criadaEm,
+          }
+        : null,
+      itens: reqOff.dadosExibicao.itens.map((it, idx) => ({
+        id: `${reqOff.idLocal}-item-${idx}`,
+        requisicaoId: reqOff.idLocal,
+        tipoItem: 'MATERIAL' as any,
+        materialId: null,
+        ferramentaId: null,
+        quantidade: it.quantidade,
+        quantidadeSolicitada: it.quantidade,
+        quantidadeEntregue: 0,
+        material: {
+          id: '',
+          codigo: it.codigo,
+          descricao: it.descricao,
+          unidadeConsumo: {
+            id: '',
+            sigla: it.unidadeMedida || 'UN',
+            nome: it.unidadeMedida || 'UN',
+          },
+        } as any,
+      })),
+    }))
+  }, [pendentes, usuario])
+
+  const requisicoes = useMemo(() => {
+    return [...requisicoesOfflineParaExibicao, ...requisicoesServidor]
+  }, [requisicoesOfflineParaExibicao, requisicoesServidor])
+
+  const { data: obrasServidor = [] } = useQuery({
     queryKey: ['obras'],
     queryFn: () => getObras(true),
   })
 
-  const { data: areas = [] } = useQuery({
+  useEffect(() => {
+    if (obrasServidor.length > 0) {
+      salvarCacheObras(obrasServidor)
+    }
+  }, [obrasServidor])
+
+  const obras = obrasServidor.length > 0 ? obrasServidor : obterCacheObras()
+
+  const { data: areasServidor = [] } = useQuery({
     queryKey: ['areas-obra', obraIdSelecionada],
     queryFn: () => getAreasObra(obraIdSelecionada, true),
     enabled: !!obraIdSelecionada,
   })
 
-  const { data: etapasArea = [] } = useQuery({
+  useEffect(() => {
+    if (areasServidor.length > 0 && obraIdSelecionada) {
+      try {
+        localStorage.setItem(`obras_offline_areas_${obraIdSelecionada}`, JSON.stringify(areasServidor))
+      } catch (e) {}
+    }
+  }, [areasServidor, obraIdSelecionada])
+
+  const areas: AreaObra[] =
+    areasServidor.length > 0
+      ? areasServidor
+      : (() => {
+          if (!obraIdSelecionada) return []
+          try {
+            const raw = localStorage.getItem(`obras_offline_areas_${obraIdSelecionada}`)
+            return raw ? JSON.parse(raw) : []
+          } catch {
+            return []
+          }
+        })()
+
+  const { data: etapasAreaServidor = [] } = useQuery({
     queryKey: ['etapas-area', areaIdSelecionada],
     queryFn: () => (areaIdSelecionada ? getEtapasArea(areaIdSelecionada) : Promise.resolve([])),
     enabled: !!areaIdSelecionada,
   })
+
+  useEffect(() => {
+    if (etapasAreaServidor.length > 0 && areaIdSelecionada) {
+      salvarCacheEtapas(areaIdSelecionada, etapasAreaServidor)
+    }
+  }, [etapasAreaServidor, areaIdSelecionada])
+
+  const etapasArea =
+    etapasAreaServidor.length > 0
+      ? etapasAreaServidor
+      : areaIdSelecionada
+      ? obterCacheEtapas(areaIdSelecionada)
+      : []
 
   const etapaSelecionada = etapasArea.find((e) => e.id === etapaIdSelecionada)
   const etapaEstaEncerrada = etapaSelecionada?.status === 'ENCERRADA'
@@ -150,11 +280,32 @@ export function RequisicoesPage() {
     enabled: Boolean(expAreaId && modalExportacaoAnaliticaAberto),
   })
 
-  const { data: saldosObraModal = [] } = useQuery({
+  const { data: saldosServidor = [] } = useQuery({
     queryKey: ['estoque-saldos-obra-modal', obraIdSelecionada],
     queryFn: () => getSaldosEstoque({ obraId: obraIdSelecionada }),
     enabled: !!obraIdSelecionada,
   })
+
+  useEffect(() => {
+    if (saldosServidor.length > 0 && obraIdSelecionada) {
+      try {
+        localStorage.setItem(`obras_offline_saldos_${obraIdSelecionada}`, JSON.stringify(saldosServidor))
+      } catch (e) {}
+    }
+  }, [saldosServidor, obraIdSelecionada])
+
+  const saldosObraModal =
+    saldosServidor.length > 0
+      ? saldosServidor
+      : (() => {
+          if (!obraIdSelecionada) return []
+          try {
+            const raw = localStorage.getItem(`obras_offline_saldos_${obraIdSelecionada}`)
+            return raw ? JSON.parse(raw) : []
+          } catch {
+            return []
+          }
+        })()
 
   const { data: limitesOrcamentoObra = [] } = useQuery({
     queryKey: ['limites-orcamento-obra', obraIdSelecionada],
@@ -338,6 +489,50 @@ export function RequisicoesPage() {
     return { listaEstouroOrcamento, listaFaltaEstoque }
   })()
 
+  function salvarLocalmenteOffline(payload: CriarRequisicaoInput) {
+    const obraObj = obras.find((o) => o.id === obraIdSelecionada)
+    const areaObj = areas.find((a) => a.id === areaIdSelecionada)
+    const etapaObj = etapasArea.find((e) => e.id === etapaIdSelecionada)
+
+    const itensExibicao = itensForm.map((it) => {
+      if (it.tipo === 'MATERIAL') {
+        const mat = mapaSaldoFisicoModal.get(it.materialId)?.material
+        return {
+          codigo: mat?.codigo || 'MAT',
+          descricao: mat?.descricao || 'Material',
+          quantidade: Number(it.quantidade),
+          unidadeMedida: mat?.unidadeConsumo?.sigla || 'UN',
+        }
+      } else {
+        const ferr = ferramentas.find((f) => f.id === it.ferramentaId)
+        return {
+          codigo: ferr?.codigo || 'FERR',
+          descricao: ferr?.nome || 'Ferramenta',
+          quantidade: Number(it.quantidade),
+          unidadeMedida: 'UN',
+        }
+      }
+    })
+
+    salvarRequisicaoOffline({
+      dados: payload,
+      dadosExibicao: {
+        obraNome: obraObj?.nome || obraObj?.codigo || 'Obra Canteiro',
+        areaNome: areaObj?.nome || 'Area',
+        etapaNome: etapaObj?.nome || 'Etapa',
+        solicitanteNome: usuario?.nome || 'Encarregado',
+        itens: itensExibicao,
+      },
+    })
+
+    window.dispatchEvent(new Event('obras-offline-change'))
+    setModalNovaRequisicaoAberto(false)
+    limparForm()
+    setMensagemFeedback(
+      'Pedido salvo no dispositivo (Modo Offline). Sera sincronizado automaticamente assim que conectar.'
+    )
+  }
+
   // Mutations
   const criarRequisicaoMutation = useMutation({
     mutationFn: (dados: CriarRequisicaoInput) => createRequisicao(dados),
@@ -345,8 +540,14 @@ export function RequisicoesPage() {
       queryClient.invalidateQueries({ queryKey: ['requisicoes'] })
       setModalNovaRequisicaoAberto(false)
       limparForm()
+      setMensagemFeedback('Requisicao enviada com sucesso!')
     },
-    onError: (err: any) => {
+    onError: (err: any, variables: CriarRequisicaoInput) => {
+      // Se falhar por queda de rede ou servidor inacessivel, salva localmente
+      if (!err?.response || err?.code === 'ERR_NETWORK') {
+        salvarLocalmenteOffline(variables)
+        return
+      }
       setErroForm(extrairErro(err, 'Erro ao criar requisicao'))
     },
   })
@@ -575,7 +776,7 @@ export function RequisicoesPage() {
       return
     }
 
-    criarRequisicaoMutation.mutate({
+    const payload: CriarRequisicaoInput = {
       areaId: areaIdSelecionada,
       etapaId: etapaIdSelecionada,
       observacao: observacao.trim() || undefined,
@@ -585,7 +786,15 @@ export function RequisicoesPage() {
         ferramentaId: it.tipo === 'FERRAMENTA' ? it.ferramentaId : null,
         quantidade: Number(it.quantidade),
       })),
-    })
+    }
+
+    // Se estiver explicitamente offline pelo navegador
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      salvarLocalmenteOffline(payload)
+      return
+    }
+
+    criarRequisicaoMutation.mutate(payload)
   }
 
   // Contagem de atendidas pendentes de exportacao para o SIENGE
@@ -634,8 +843,13 @@ export function RequisicoesPage() {
     )
   })
 
-  function badgeStatus(status: StatusRequisicao) {
+  function badgeStatus(status: StatusRequisicao): { badgeClass: string; texto: string } {
     switch (status) {
+      case 'PENDENTE_SINCRONIZACAO' as any:
+        return {
+          badgeClass: 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40',
+          texto: 'Offline (Pendente Sync)',
+        }
       case 'SOLICITADA':
         return { badgeClass: 'ob-badge--low', texto: 'Pendente (Aguardando Almoxarifado)' }
       case 'EM_SEPARACAO':
@@ -646,6 +860,8 @@ export function RequisicoesPage() {
         return { badgeClass: 'ob-badge--ok', texto: 'Atendida / Entregue' }
       case 'CANCELADA':
         return { badgeClass: 'ob-badge--crit', texto: 'Cancelada' }
+      default:
+        return { badgeClass: 'ob-badge--low', texto: String(status) }
     }
   }
 
@@ -843,7 +1059,7 @@ export function RequisicoesPage() {
                   <div className="flex flex-wrap justify-between items-center gap-2">
                     <div className="flex items-center gap-2.5">
                       <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-accent-text tracking-tight">
-                        #{r.numeroSequencial}
+                        {r.numeroSequencial > 0 ? `#${r.numeroSequencial}` : '#OFFLINE'}
                       </span>
                       <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
                       <span className={`ob-badge ${statusConfig.badgeClass}`}>
