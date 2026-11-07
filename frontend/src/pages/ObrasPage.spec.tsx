@@ -273,4 +273,111 @@ describe('ObrasPage Component', () => {
       expect(deleteSpy).toHaveBeenCalledWith('area-1')
     })
   })
+
+  it('deve abrir modal de etapas da area e listar etapas cadastradas com status (F02)', async () => {
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Fundacao e Baldrame',
+        ordem: 1,
+        status: 'ENCERRADA',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+      {
+        id: 'etapa-2',
+        areaId: 'area-1',
+        nome: 'Alvenaria',
+        ordem: 2,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnEtapas = screen.getAllByRole('button', { name: /^Etapas$/i })[0]
+    fireEvent.click(btnEtapas)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Etapas de Execucao/i)).toBeInTheDocument()
+      expect(screen.getByText('Fundacao e Baldrame')).toBeInTheDocument()
+      expect(screen.getByText('Alvenaria')).toBeInTheDocument()
+      expect(screen.getByText('Pedidos Bloqueados')).toBeInTheDocument()
+    })
+  })
+
+  it('deve permitir que perfil ENGENHARIA adicione nova etapa e altere status para ENCERRADA (F02)', async () => {
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Concretagem',
+        ordem: 1,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+
+    const createEtapaSpy = vi.spyOn(apiClient, 'createEtapaArea').mockResolvedValue({
+      id: 'etapa-2',
+      areaId: 'area-1',
+      nome: 'Pisos e Revestimentos',
+      ordem: 2,
+      status: 'EM_ANDAMENTO',
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    const alterarStatusSpy = vi.spyOn(apiClient, 'alterarStatusEtapa').mockResolvedValue({
+      id: 'etapa-1',
+      areaId: 'area-1',
+      nome: 'Concretagem',
+      ordem: 1,
+      status: 'ENCERRADA',
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnEtapas = screen.getAllByRole('button', { name: /^Etapas$/i })[0]
+    fireEvent.click(btnEtapas)
+
+    await waitFor(() => {
+      expect(screen.getByText('Concretagem')).toBeInTheDocument()
+    })
+
+    // Adiciona nova etapa
+    const inputNome = screen.getByPlaceholderText(/Fundacao, Alvenaria, Concretagem/i)
+    fireEvent.change(inputNome, { target: { value: 'Pisos e Revestimentos' } })
+
+    const btnAdicionar = screen.getByRole('button', { name: /^Adicionar$/i })
+    fireEvent.click(btnAdicionar)
+
+    await waitFor(() => {
+      expect(createEtapaSpy).toHaveBeenCalledWith(
+        'area-1',
+        expect.objectContaining({
+          nome: 'Pisos e Revestimentos',
+        })
+      )
+    })
+
+    // Clica para encerrar etapa
+    const btnEncerrar = screen.getByRole('button', { name: /^Encerrar$/i })
+    fireEvent.click(btnEncerrar)
+
+    await waitFor(() => {
+      expect(alterarStatusSpy).toHaveBeenCalledWith('etapa-1', 'ENCERRADA')
+    })
+  })
 })

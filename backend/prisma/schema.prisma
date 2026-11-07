@@ -93,11 +93,33 @@ model AreaObra {
   criadaEm      DateTime              @default(now()) @map("criada_em")
 
   obra          Obra                  @relation(fields: [obraId], references: [id], onDelete: Restrict)
+  etapas        EtapaArea[]
   requisicoes   Requisicao[]
   movimentacoes MovimentacaoEstoque[]
 
   @@unique([obraId, nome], name: "area_obra_nome_unico")
   @@map("area_obra")
+}
+
+enum StatusEtapa {
+  EM_ANDAMENTO
+  ENCERRADA
+}
+
+model EtapaArea {
+  id            String         @id @default(uuid()) @db.Uuid
+  areaId        String         @map("area_id") @db.Uuid
+  nome          String         @db.VarChar(80)
+  ordem         Int            @default(0)
+  status        StatusEtapa    @default(EM_ANDAMENTO)
+  criadaEm      DateTime       @default(now()) @map("criada_em")
+  encerradaEm   DateTime?      @map("encerrada_em")
+
+  area          AreaObra       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  requisicoes   Requisicao[]
+
+  @@unique([areaId, nome], name: "etapa_area_nome_unico")
+  @@map("etapa_area")
 }
 
 // ----------------------------------------------------
@@ -189,6 +211,7 @@ model Requisicao {
   id                String                @id @default(uuid()) @db.Uuid
   numeroSequencial  Int                   @default(autoincrement()) @map("numero_sequencial")
   areaId            String                @map("area_id") @db.Uuid
+  etapaId           String?               @map("etapa_id") @db.Uuid
   requisitanteId    String                @map("requisitante_id") @db.Uuid
   status            StatusRequisicao      @default(SOLICITADA)
   codigoRetirada    String?               @unique @map("codigo_retirada") @db.VarChar(12)
@@ -205,6 +228,7 @@ model Requisicao {
   retiradaEm        DateTime?             @map("retirada_em")
 
   area              AreaObra              @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  etapa             EtapaArea?            @relation(fields: [etapaId], references: [id], onDelete: SetNull)
   requisitante      Usuario               @relation("RequisicaoSolicitante", fields: [requisitanteId], references: [id], onDelete: Restrict)
   atendidoPor       Usuario?              @relation("RequisicaoAtendidaPor", fields: [atendidoPorId], references: [id], onDelete: SetNull)
   exportadaPor      Usuario?              @relation("RequisicaoExportadaPor", fields: [exportadaPorId], references: [id], onDelete: SetNull)

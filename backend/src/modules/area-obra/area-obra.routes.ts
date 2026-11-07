@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { PerfilUsuario } from '@prisma/client'
+import { PerfilUsuario, StatusEtapa } from '@prisma/client'
 import { prisma } from '../../shared/database/prisma.js'
 import { authenticate, requireRole } from '../../shared/middlewares/auth.js'
 import {
@@ -7,6 +7,9 @@ import {
   atualizarSituacaoAreaObraSchema,
   criarAreaObraSchema,
   listarAreasQuerySchema,
+  criarEtapaAreaSchema,
+  atualizarEtapaAreaSchema,
+  alterarStatusEtapaSchema,
 } from './area-obra.schemas.js'
 import {
   BusinessRuleError,
@@ -223,6 +226,220 @@ export async function areaObraRoutes(app: FastifyInstance) {
         }
         throw err
       }
+
+      return reply.status(204).send()
+    }
+  )
+
+  // ----------------------------------------------------
+  // ROTAS DE ETAPAS POR LOCAL / PAVIMENTO (F02)
+  // ----------------------------------------------------
+
+  // Listar etapas de uma area (qualquer usuario autenticado)
+  app.get(
+    '/areas/:areaId/etapas',
+    {
+      preHandler: [authenticate],
+      schema: {
+        tags: ['Etapas da Area'],
+        summary: 'Listar etapas de execucao de uma area/pavimento',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { areaId } = request.params as { areaId: string }
+
+      const area = await prisma.areaObra.findUnique({
+        where: { id: areaId },
+      })
+
+      if (!area) {
+        throw new NotFoundError('Area nao localizada')
+      }
+
+      const etapas = await prisma.etapaArea.findMany({
+        where: { areaId },
+        orderBy: [{ ordem: 'asc' }, { nome: 'asc' }],
+      })
+
+      return reply.status(200).send(etapas)
+    }
+  )
+
+  // Criar nova etapa para uma area (exclusivo ADMIN e ENGENHARIA)
+  app.post(
+    '/areas/:areaId/etapas',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA])],
+      schema: {
+        tags: ['Etapas da Area'],
+        summary: 'Criar nova etapa para uma area da obra (exclusivo ADMIN ou ENGENHARIA)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { areaId } = request.params as { areaId: string }
+      const { nome, ordem } = criarEtapaAreaSchema.parse(request.body)
+
+      const area = await prisma.areaObra.findUnique({
+        where: { id: areaId },
+        include: { obra: true },
+      })
+
+      if (!area) {
+        throw new NotFoundError('Area nao localizada')
+      }
+
+      if (!area.ativa || !area.obra.ativa) {
+        throw new BusinessRuleError('Nao e possivel cadastrar etapas em uma area ou obra inativa')
+      }
+
+      const existente = await prisma.etapaArea.findFirst({
+        where: {
+          areaId,
+          nome: {
+            equals: nome,
+            mode: 'insensitive',
+          },
+        },
+      })
+
+      if (existente) {
+        throw new ConflictError('Ja existe uma etapa com este nome nesta area')
+      }
+
+      const novaEtapa = await prisma.etapaArea.create({
+        data: {
+          areaId,
+          nome,
+          ordem,
+          status: StatusEtapa.EM_ANDAMENTO,
+        },
+      })
+
+      return reply.status(201).send(novaEtapa)
+    }
+  )
+
+  // Atualizar dados de uma etapa (nome e ordem - exclusivo ADMIN e ENGENHARIA)
+  app.patch(
+    '/etapas/:id',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA])],
+      schema: {
+        tags: ['Etapas da Area'],
+        summary: 'Atualizar dados de uma etapa (exclusivo ADMIN ou ENGENHARIA)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const dados = atualizarEtapaAreaSchema.parse(request.body)
+
+      const etapa = await prisma.etapaArea.findUnique({
+        where: { id },
+      })
+
+      if (!etapa) {
+        throw new NotFoundError('Etapa nao localizada')
+      }
+
+      if (dados.nome && dados.nome.toLowerCase() !== etapa.nome.toLowerCase()) {
+        const nomeConflito = await prisma.etapaArea.findFirst({
+          where: {
+            areaId: etapa.areaId,
+            nome: {
+              equals: dados.nome,
+              mode: 'insensitive',
+            },
+            id: { not: id },
+          },
+        })
+
+        if (nomeConflito) {
+          throw new ConflictError('Ja existe uma etapa com este nome nesta area')
+        }
+      }
+
+      const etapaAtualizada = await prisma.etapaArea.update({
+        where: { id },
+        data: dados,
+      })
+
+      return reply.status(200).send(etapaAtualizada)
+    }
+  )
+
+  // Alterar status de uma etapa (EM_ANDAMENTO ou ENCERRADA - exclusivo ADMIN e ENGENHARIA)
+  app.patch(
+    '/etapas/:id/status',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA])],
+      schema: {
+        tags: ['Etapas da Area'],
+        summary: 'Alterar status da etapa para EM_ANDAMENTO ou ENCERRADA (exclusivo ADMIN ou ENGENHARIA)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const { status } = alterarStatusEtapaSchema.parse(request.body)
+
+      const etapa = await prisma.etapaArea.findUnique({
+        where: { id },
+      })
+
+      if (!etapa) {
+        throw new NotFoundError('Etapa nao localizada')
+      }
+
+      const etapaAtualizada = await prisma.etapaArea.update({
+        where: { id },
+        data: {
+          status,
+          encerradaEm: status === StatusEtapa.ENCERRADA ? new Date() : null,
+        },
+      })
+
+      return reply.status(200).send(etapaAtualizada)
+    }
+  )
+
+  // Excluir etapa (exclusivo ADMIN e ENGENHARIA)
+  app.delete(
+    '/etapas/:id',
+    {
+      preHandler: [authenticate, requireRole([PerfilUsuario.ADMIN, PerfilUsuario.ENGENHARIA])],
+      schema: {
+        tags: ['Etapas da Area'],
+        summary: 'Excluir etapa caso nao possua requisicoes vinculadas (exclusivo ADMIN ou ENGENHARIA)',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      const etapa = await prisma.etapaArea.findUnique({
+        where: { id },
+      })
+
+      if (!etapa) {
+        throw new NotFoundError('Etapa nao localizada')
+      }
+
+      const totalRequisicoes = await prisma.requisicao.count({
+        where: { etapaId: id },
+      })
+
+      if (totalRequisicoes > 0) {
+        throw new BusinessRuleError(
+          'Nao e possivel excluir uma etapa com requisicoes vinculadas. Em vez disso, altere seu status para ENCERRADA.'
+        )
+      }
+
+      await prisma.etapaArea.delete({
+        where: { id },
+      })
 
       return reply.status(204).send()
     }

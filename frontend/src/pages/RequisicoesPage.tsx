@@ -6,6 +6,7 @@ import {
   createRequisicao,
   exportarRequisicoesSienge,
   getAreasObra,
+  getEtapasArea,
   getFerramentas,
   getLimitesOrcamentoObra,
   getObras,
@@ -79,6 +80,7 @@ export function RequisicoesPage() {
   const [modalNovaRequisicaoAberto, setModalNovaRequisicaoAberto] = useState(false)
   const [obraIdSelecionada, setObraIdSelecionada] = useState('')
   const [areaIdSelecionada, setAreaIdSelecionada] = useState('')
+  const [etapaIdSelecionada, setEtapaIdSelecionada] = useState('')
   const [observacao, setObservacao] = useState('')
   const [itensForm, setItensForm] = useState<ItemLinhaForm[]>([
     { tipo: 'MATERIAL', materialId: '', ferramentaId: '', quantidade: 1 },
@@ -108,6 +110,15 @@ export function RequisicoesPage() {
     queryFn: () => getAreasObra(obraIdSelecionada, true),
     enabled: !!obraIdSelecionada,
   })
+
+  const { data: etapasArea = [] } = useQuery({
+    queryKey: ['etapas-area', areaIdSelecionada],
+    queryFn: () => (areaIdSelecionada ? getEtapasArea(areaIdSelecionada) : Promise.resolve([])),
+    enabled: !!areaIdSelecionada,
+  })
+
+  const etapaSelecionada = etapasArea.find((e) => e.id === etapaIdSelecionada)
+  const etapaEstaEncerrada = etapaSelecionada?.status === 'ENCERRADA'
 
   const { data: saldosObraModal = [] } = useQuery({
     queryKey: ['estoque-saldos-obra-modal', obraIdSelecionada],
@@ -362,6 +373,7 @@ export function RequisicoesPage() {
     const obraPadrao = usuario?.obraId || (obras.length === 1 ? obras[0].id : '')
     setObraIdSelecionada(obraPadrao)
     setAreaIdSelecionada('')
+    setEtapaIdSelecionada('')
     setObservacao('')
     setItensForm([{ tipo: 'MATERIAL', materialId: '', ferramentaId: '', quantidade: 1 }])
     setChaveIdempotencia(gerarChaveIdempotencia())
@@ -459,6 +471,11 @@ export function RequisicoesPage() {
       return
     }
 
+    if (!etapaIdSelecionada) {
+      setErroForm('Selecione a etapa de execucao da obra')
+      return
+    }
+
     if (itensForm.length === 0) {
       setErroForm('Adicione ao menos um item a requisicao')
       return
@@ -480,8 +497,14 @@ export function RequisicoesPage() {
       }
     }
 
+    if (etapaEstaEncerrada) {
+      setErroForm(`A etapa "${etapaSelecionada?.nome}" esta encerrada e nao aceita novos pedidos de material`)
+      return
+    }
+
     criarRequisicaoMutation.mutate({
       areaId: areaIdSelecionada,
+      etapaId: etapaIdSelecionada,
       observacao: observacao.trim() || undefined,
       chaveIdempotencia,
       itens: itensForm.map((it) => ({
@@ -522,6 +545,7 @@ export function RequisicoesPage() {
     const num = `#${r.numeroSequencial}`
     const obraNome = r.area?.obra?.nome?.toLowerCase() || ''
     const areaNome = r.area?.nome?.toLowerCase() || ''
+    const etapaNome = r.etapa?.nome?.toLowerCase() || ''
     const reqNome = r.requisitante?.nome?.toLowerCase() || ''
     const retiradoNome = r.retiradoPor?.toLowerCase() || ''
     const obs = r.observacao?.toLowerCase() || ''
@@ -530,6 +554,7 @@ export function RequisicoesPage() {
       num.includes(termo) ||
       obraNome.includes(termo) ||
       areaNome.includes(termo) ||
+      etapaNome.includes(termo) ||
       reqNome.includes(termo) ||
       retiradoNome.includes(termo) ||
       obs.includes(termo)
@@ -767,6 +792,15 @@ export function RequisicoesPage() {
                       <strong className="text-on-surface truncate">
                         {r.area?.obra?.codigo} &bull; {r.area?.nome}
                       </strong>
+                      {r.etapa && (
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium ${
+                          r.etapa.status === 'ENCERRADA'
+                            ? 'bg-surface-container-high text-on-surface-variant'
+                            : 'bg-primary-container text-on-primary-container'
+                        }`}>
+                          Etapa: {r.etapa.nome}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 truncate">
@@ -1040,8 +1074,8 @@ export function RequisicoesPage() {
             )}
 
             <form onSubmit={handleCriarRequisicao} className="flex flex-col gap-4">
-              {/* Selecao da Obra e Area */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Selecao da Obra, Area e Etapa */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
                     Obra
@@ -1063,6 +1097,7 @@ export function RequisicoesPage() {
                       onChange={(e) => {
                         setObraIdSelecionada(e.target.value)
                         setAreaIdSelecionada('')
+                        setEtapaIdSelecionada('')
                       }}
                       required
                       className="ob-input w-full text-sm font-body"
@@ -1083,7 +1118,10 @@ export function RequisicoesPage() {
                   </label>
                   <select
                     value={areaIdSelecionada}
-                    onChange={(e) => setAreaIdSelecionada(e.target.value)}
+                    onChange={(e) => {
+                      setAreaIdSelecionada(e.target.value)
+                      setEtapaIdSelecionada('')
+                    }}
                     required
                     disabled={!obraIdSelecionada}
                     className="ob-input w-full text-sm disabled:opacity-50 font-body"
@@ -1098,7 +1136,42 @@ export function RequisicoesPage() {
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-on-surface mb-1.5 font-body">
+                    Etapa de Execucao <span className="text-error">*</span>
+                  </label>
+                  <select
+                    value={etapaIdSelecionada}
+                    onChange={(e) => setEtapaIdSelecionada(e.target.value)}
+                    required
+                    disabled={!areaIdSelecionada || etapasArea.length === 0}
+                    className="ob-input w-full text-sm disabled:opacity-50 font-body"
+                  >
+                    <option value="">
+                      {!areaIdSelecionada
+                        ? 'Selecione a area primeiro'
+                        : etapasArea.length === 0
+                          ? 'Nenhuma etapa cadastrada nesta area'
+                          : 'Selecione a etapa...'}
+                    </option>
+                    {etapasArea.map((et) => (
+                      <option key={et.id} value={et.id}>
+                        {et.nome} {et.status === 'ENCERRADA' ? '(Encerrada - Bloqueada)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+
+              {etapaEstaEncerrada && (
+                <div className="bg-error-container text-on-error-container border border-error/30 p-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base">lock</span>
+                  <span>
+                    A etapa &quot;{etapaSelecionada?.nome}&quot; foi marcada como ENCERRADA pela Engenharia. O envio de novos pedidos para esta etapa esta bloqueado.
+                  </span>
+                </div>
+              )}
 
               {/* Itens do Pedido */}
               <div>
@@ -1291,7 +1364,7 @@ export function RequisicoesPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={criarRequisicaoMutation.isPending}
+                  disabled={criarRequisicaoMutation.isPending || !etapaIdSelecionada || etapaEstaEncerrada}
                   className="ob-btn ob-btn--primary ob-btn--lg"
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}

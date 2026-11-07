@@ -22,6 +22,9 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
   const requisicaoId = '00000000-0000-0000-0000-000000000050'
   const requisicaoOutroId = '00000000-0000-0000-0000-000000000051'
   const itemMaterialId = '00000000-0000-0000-0000-000000000060'
+  const etapaValidaId = '00000000-0000-0000-0000-000000000071'
+  const etapaEncerradaId = '00000000-0000-0000-0000-000000000072'
+  const etapaOutraAreaId = '00000000-0000-0000-0000-000000000073'
 
   beforeAll(async () => {
     app = await buildApp()
@@ -47,6 +50,16 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
       nome: 'Maria Almoxarife',
       perfil: PerfilUsuario.ALMOXARIFE,
     })
+  })
+
+  beforeEach(() => {
+    vi.spyOn(prisma.etapaArea, 'findUnique').mockResolvedValue({
+      id: etapaValidaId,
+      areaId,
+      nome: 'Concretagem',
+      ordem: 1,
+      status: 'EM_ANDAMENTO',
+    } as any)
   })
 
   afterAll(async () => {
@@ -157,6 +170,7 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         },
         payload: {
           areaId,
+          etapaId: etapaValidaId,
           chaveIdempotencia: 'chave-uuid-001',
           observacao: 'Para concretagem da laje',
           itens: [
@@ -216,6 +230,7 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         },
         payload: {
           areaId,
+          etapaId: etapaValidaId,
           itens: [{ materialId, quantidade: 20 }],
         },
       })
@@ -248,6 +263,7 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         },
         payload: {
           areaId,
+          etapaId: etapaValidaId,
           chaveIdempotencia: 'chave-repetida-999',
           itens: [{ materialId, quantidade: 5 }],
         },
@@ -256,6 +272,171 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
       expect(response.statusCode).toBe(200)
       const body = JSON.parse(response.body)
       expect(body.id).toBe(requisicaoId)
+    })
+
+    it('deve permitir criar requisicao com etapa em andamento e salvar etapaId (201)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: encarregadoId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: areaId,
+        obraId,
+        ativa: true,
+        obra: { id: obraId, ativa: true },
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findUnique').mockResolvedValueOnce({
+        id: etapaValidaId,
+        areaId,
+        nome: 'Concretagem',
+        status: 'EM_ANDAMENTO',
+      } as any)
+
+      vi.spyOn(prisma.material, 'findUnique').mockResolvedValueOnce({
+        id: materialId,
+        descricao: 'Cimento CP-II',
+        ativo: true,
+        unidadeConsumo: { sigla: 'SC' },
+      } as any)
+
+      vi.spyOn(prisma.estoqueSaldo, 'findMany').mockResolvedValueOnce([
+        {
+          localId,
+          materialId,
+          quantidade: 50,
+          reservado: 0,
+          versao: 1,
+        },
+      ] as any)
+
+      const createSpy = vi.spyOn(prisma.requisicao, 'create').mockResolvedValueOnce({
+        id: requisicaoId,
+        numeroSequencial: 102,
+        areaId,
+        etapaId: etapaValidaId,
+        requisitanteId: encarregadoId,
+        status: StatusRequisicao.SOLICITADA,
+        solicitadaEm: new Date(),
+        area: { id: areaId, nome: 'Pavimento 02', obra: { codigo: 'JOOY-01' } },
+        etapa: { id: etapaValidaId, nome: 'Concretagem', status: 'EM_ANDAMENTO' },
+        requisitante: { id: encarregadoId, nome: 'Encarregado', cargo: { nome: 'Mestre' } },
+        itens: [
+          {
+            id: 'item-1',
+            materialId,
+            quantidade: 5,
+            material: { id: materialId, codigo: 'CIM-01', descricao: 'Cimento', unidadeConsumo: { sigla: 'SC' } },
+          },
+        ],
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes',
+        headers: {
+          authorization: `Bearer ${encarregadoToken}`,
+        },
+        payload: {
+          areaId,
+          etapaId: etapaValidaId,
+          itens: [{ materialId, quantidade: 5 }],
+        },
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = JSON.parse(response.body)
+      expect(body.etapaId).toBe(etapaValidaId)
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            etapaId: etapaValidaId,
+          }),
+        })
+      )
+    })
+
+    it('deve bloquear criacao de requisicao quando a etapa selecionada estiver ENCERRADA (422)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: encarregadoId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: areaId,
+        obraId,
+        ativa: true,
+        obra: { id: obraId, ativa: true },
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findUnique').mockResolvedValueOnce({
+        id: etapaEncerradaId,
+        areaId,
+        nome: 'Fundacao',
+        status: 'ENCERRADA',
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes',
+        headers: {
+          authorization: `Bearer ${encarregadoToken}`,
+        },
+        payload: {
+          areaId,
+          etapaId: etapaEncerradaId,
+          itens: [{ materialId, quantidade: 5 }],
+        },
+      })
+
+      expect(response.statusCode).toBe(422)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('esta encerrada e nao aceita novos pedidos de material')
+    })
+
+    it('deve rejeitar requisicao se a etapa informada nao pertencer a area selecionada (422)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: encarregadoId,
+        ativo: true,
+      } as any)
+
+      vi.spyOn(prisma.requisicao, 'findUnique').mockResolvedValueOnce(null)
+
+      vi.spyOn(prisma.areaObra, 'findUnique').mockResolvedValueOnce({
+        id: areaId,
+        obraId,
+        ativa: true,
+        obra: { id: obraId, ativa: true },
+      } as any)
+
+      vi.spyOn(prisma.etapaArea, 'findUnique').mockResolvedValueOnce({
+        id: etapaOutraAreaId,
+        areaId: '00000000-0000-0000-0000-000000000099',
+        nome: 'Pintura',
+        status: 'EM_ANDAMENTO',
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes',
+        headers: {
+          authorization: `Bearer ${encarregadoToken}`,
+        },
+        payload: {
+          areaId,
+          etapaId: etapaOutraAreaId,
+          itens: [{ materialId, quantidade: 5 }],
+        },
+      })
+
+      expect(response.statusCode).toBe(422)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toBe('A etapa informada nao pertence a area selecionada')
     })
 
     it('deve rejeitar requisicao com area inativa ou inexistente (422)', async () => {
@@ -280,6 +461,7 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         },
         payload: {
           areaId,
+          etapaId: etapaValidaId,
           itens: [{ materialId, quantidade: 2 }],
         },
       })
@@ -316,6 +498,7 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
         },
         payload: {
           areaId,
+          etapaId: etapaValidaId,
           itens: [{ materialId, quantidade: 2 }],
         },
       })
@@ -324,6 +507,29 @@ describe('Modulo de Requisicoes de Obra, Atendimento de Estoque e Exportacao SIE
       const body = JSON.parse(response.body)
       expect(body.erro).toContain('Material informado')
       expect(body.erro).toContain('inativo')
+    })
+
+    it('deve rejeitar criacao de requisicao sem informar etapa de execucao obrigatoria (400)', async () => {
+      vi.spyOn(prisma.usuario, 'findUnique').mockResolvedValue({
+        id: encarregadoId,
+        ativo: true,
+      } as any)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/requisicoes',
+        headers: {
+          authorization: `Bearer ${encarregadoToken}`,
+        },
+        payload: {
+          areaId,
+          itens: [{ materialId, quantidade: 2 }],
+        },
+      })
+
+      expect(response.statusCode).toBe(400)
+      const body = JSON.parse(response.body)
+      expect(body.erro).toContain('Dados invalidos')
     })
   })
 

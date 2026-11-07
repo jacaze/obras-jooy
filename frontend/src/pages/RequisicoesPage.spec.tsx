@@ -170,6 +170,16 @@ describe('RequisicoesPage Component', () => {
         quantidadeOrcada: 200,
       },
     ])
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Alvenaria',
+        ordem: 1,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
   })
 
   it('deve listar as requisicoes do Encarregado com historico de solicitada vs entregue e ocultar opcoes de almoxarife', async () => {
@@ -232,6 +242,14 @@ describe('RequisicoesPage Component', () => {
       target: { value: 'area-1' },
     })
 
+    await waitFor(() => {
+      expect(screen.getByText('Alvenaria')).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByDisplayValue('Selecione a etapa...'), {
+      target: { value: 'etapa-1' },
+    })
+
     // Selecionar material pelo SeletorItemPesquisavel (puxando itens em estoque)
     const inputBuscaMaterial = screen.getByPlaceholderText('Digite codigo ou descricao do material em estoque...')
     fireEvent.change(inputBuscaMaterial, { target: { value: 'CIM' } })
@@ -256,6 +274,7 @@ describe('RequisicoesPage Component', () => {
       expect(createReqSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           areaId: 'area-1',
+          etapaId: 'etapa-1',
           observacao: 'Material para inicio da alvenaria',
           itens: [
             expect.objectContaining({
@@ -410,5 +429,76 @@ describe('RequisicoesPage Component', () => {
         screen.getByText(/Saldo fisico insuficiente no estoque da obra/i)
       ).toBeInTheDocument()
     })
+  })
+
+  it('deve bloquear envio de requisicao quando a etapa selecionada estiver ENCERRADA (F02)', async () => {
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-encerrada',
+        areaId: 'area-1',
+        nome: 'Fundacao e Baldrame',
+        ordem: 1,
+        status: 'ENCERRADA',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+      {
+        id: 'etapa-ativa',
+        areaId: 'area-1',
+        nome: 'Alvenaria',
+        ordem: 2,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+
+    renderRequisicoesPage(mockEncarregado)
+
+    await waitFor(() => {
+      expect(screen.getByText('#101')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /\+ Nova Requisicao/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Pavimento 02')).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByDisplayValue('Selecione a area...'), {
+      target: { value: 'area-1' },
+    })
+
+    // Aguarda carregar as etapas da area selecionada
+    await waitFor(() => {
+      expect(screen.getByText(/Fundacao e Baldrame \(Encerrada - Bloqueada\)/i)).toBeInTheDocument()
+    })
+
+    // Seleciona a etapa ENCERRADA
+    const selectEtapa = screen.getByDisplayValue('Selecione a etapa...')
+    fireEvent.change(selectEtapa, {
+      target: { value: 'etapa-encerrada' },
+    })
+
+    // Verifica que o alerta de bloqueio e exibido
+    await waitFor(() => {
+      expect(
+        screen.getByText(/foi marcada como ENCERRADA pela Engenharia\. O envio de novos pedidos para esta etapa esta bloqueado/i)
+      ).toBeInTheDocument()
+    })
+
+    // Verifica que o botao de enviar fica desabilitado
+    const btnEnviar = screen.getByRole('button', { name: /Enviar Requisicao/i })
+    expect(btnEnviar).toBeDisabled()
+
+    // Alterna para etapa ativa
+    fireEvent.change(selectEtapa, {
+      target: { value: 'etapa-ativa' },
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/foi marcada como ENCERRADA pela Engenharia/i)
+      ).not.toBeInTheDocument()
+    })
+    expect(btnEnviar).not.toBeDisabled()
   })
 })
