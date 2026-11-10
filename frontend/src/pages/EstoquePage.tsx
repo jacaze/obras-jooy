@@ -13,6 +13,7 @@ import {
   toggleLocalEstoqueSituacao,
   updateLocalEstoque,
 } from '../api/client'
+import { SeletorItemPesquisavel } from '../components/SeletorItemPesquisavel'
 import { useAuth } from '../hooks/useAuth'
 import type { LocalEstoque, RegistrarMovimentacaoInput, TipoMovimentacao } from '../types/estoque'
 
@@ -953,22 +954,24 @@ export function EstoquePage() {
 
               <div>
                 <label className="ob-label">Material</label>
-                <select
-                  value={movMaterialId}
-                  onChange={(e) => {
-                    setMovMaterialId(e.target.value)
+                <SeletorItemPesquisavel
+                  itens={materiais.map((m) => ({
+                    id: m.id,
+                    codigo: m.codigo,
+                    codigoSienge: m.codigoSienge,
+                    descricao: m.descricao,
+                    unidade: m.unidadeConsumo?.sigla,
+                    detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
+                  }))}
+                  valorSelecionadoId={movMaterialId}
+                  onSelecionar={(id) => {
+                    setMovMaterialId(id)
                     setMovUsarUnidadeCompra(false)
                   }}
-                  required
-                  className="ob-input"
-                >
-                  <option value="">Selecione o material...</option>
-                  {materiais.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.codigo} - {m.descricao} ({m.unidadeConsumo.sigla})
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Buscar material por codigo, codigo SIENGE ou descricao..."
+                  obrigatorio
+                  labelAria="Selecionar material da movimentacao"
+                />
               </div>
 
               {permiteConversaoCompra && materialSelecionadoNoModal && (
