@@ -14,6 +14,7 @@ import { RequisicoesPage } from './pages/RequisicoesPage'
 import { EstoquePage } from './pages/EstoquePage'
 import { OrcamentoObraPage } from './pages/OrcamentoObraPage'
 import { SemPermissaoPage } from './pages/SemPermissaoPage'
+import { FEATURE_ORCAMENTO_ATIVO } from './config/features'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,17 +57,19 @@ export function App() {
               <Route path="/ferramentas" element={<FerramentasPage />} />
             </Route>
 
-            {/* Rotas Exclusivas para Engenharia, Administracao e Admin (T13) */}
-            <Route
-              element={
-                <ProtectedRoute
-                  perfisPermitidos={['ADMIN', 'ENGENHARIA', 'ADMINISTRACAO']}
-                />
-              }
-            >
-              <Route path="/orcamento" element={<OrcamentoObraPage />} />
-              <Route path="/orcamento-obra" element={<OrcamentoObraPage />} />
-            </Route>
+            {/* Rotas Exclusivas para Engenharia, Administracao e Admin (Isoladas via Feature Flag) */}
+            {FEATURE_ORCAMENTO_ATIVO && (
+              <Route
+                element={
+                  <ProtectedRoute
+                    perfisPermitidos={['ADMIN', 'ENGENHARIA', 'ADMINISTRACAO']}
+                  />
+                }
+              >
+                <Route path="/orcamento" element={<OrcamentoObraPage />} />
+                <Route path="/orcamento-obra" element={<OrcamentoObraPage />} />
+              </Route>
+            )}
 
             {/* Rotas Restritas Exclusivas para ADMIN */}
             <Route element={<ProtectedRoute perfisPermitidos={['ADMIN']} />}>

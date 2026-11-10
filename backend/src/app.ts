@@ -62,7 +62,11 @@ export async function buildApp() {
   await app.register(ferramentaRoutes, { prefix: '/api' })
   await app.register(requisicaoRoutes, { prefix: '/api' })
   await app.register(estoqueRoutes, { prefix: '/api' })
-  await app.register(orcamentoObraRoutes, { prefix: '/api' })
+
+  // Modulo de Orcamento (Isolado via Feature Flag; ativo em testes ou se explicitamente habilitado)
+  if (env.FEATURE_ORCAMENTO_ENABLED || env.NODE_ENV === 'test') {
+    await app.register(orcamentoObraRoutes, { prefix: '/api' })
+  }
 
   return app
 }

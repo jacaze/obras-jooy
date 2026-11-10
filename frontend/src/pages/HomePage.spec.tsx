@@ -221,9 +221,12 @@ describe('HomePage Component', () => {
       expect(screen.getByText('#205')).toBeInTheDocument()
       expect(screen.getByText('Marcos Encarregado')).toBeInTheDocument()
       expect(screen.getByText('Martelete 800W')).toBeInTheDocument()
-      expect(screen.getByText(/1 item\(ns\) com estouro de orçamento/i)).toBeInTheDocument()
       expect(screen.getByText('Ver Torres')).toBeInTheDocument()
     })
+
+    // Modulo de orcamento isolado por feature flag: nao deve renderizar controle de orcamento
+    expect(screen.queryByText(/Controle de Orçamento/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Orçamento vs Consumido/i)).not.toBeInTheDocument()
   })
 
   it('deve ocultar metricas operacionais globais e ferramentas para perfil ENCARREGADO, exibindo resumo dos pedidos de canteiro', async () => {

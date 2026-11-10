@@ -96,7 +96,28 @@ describe('LoginPage Component', () => {
     })
   })
 
-  it('deve permitir acesso rapido de demonstracao ao clicar em um perfil do MVP', async () => {
+  it('nao deve exibir botoes de acesso rapido de teste por padrao em producao', () => {
+    render(
+      <AuthContext.Provider
+        value={{
+          usuario: null,
+          token: null,
+          carregando: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>
+      </AuthContext.Provider>
+    )
+
+    expect(screen.queryByText(/Acesso Rapido de Demonstracao/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Admin Geral/i })).not.toBeInTheDocument()
+  })
+
+  it('deve permitir acesso rapido de demonstracao quando exibirAcessoRapido estiver ativo', async () => {
     const mockLogin = vi.fn().mockResolvedValue(undefined)
 
     render(
@@ -110,7 +131,7 @@ describe('LoginPage Component', () => {
         }}
       >
         <MemoryRouter>
-          <LoginPage />
+          <LoginPage exibirAcessoRapido={true} />
         </MemoryRouter>
       </AuthContext.Provider>
     )

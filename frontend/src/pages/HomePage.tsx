@@ -8,6 +8,7 @@ import {
   getLimitesOrcamentoObra,
 } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
+import { FEATURE_ORCAMENTO_ATIVO } from '../config/features'
 
 export function HomePage() {
   const { usuario } = useAuth()
@@ -39,7 +40,7 @@ export function HomePage() {
   const { data: limitesOrcamento = [] } = useQuery({
     queryKey: ['dashboard-limites-orcamento'],
     queryFn: () => getLimitesOrcamentoObra(),
-    enabled: Boolean(usuario) && !isEncarregado,
+    enabled: Boolean(usuario) && !isEncarregado && FEATURE_ORCAMENTO_ATIVO,
   })
 
   // Indicadores Operacionais Gerais (Almoxarifado / Engenharia / Administracao)
@@ -71,9 +72,10 @@ export function HomePage() {
   const minhasCanceladas = minhasRequisicoes.filter((r) => r.status === 'CANCELADA')
 
   const podeVerOrcamento =
-    usuario?.perfil === 'ADMIN' ||
-    usuario?.perfil === 'ENGENHARIA' ||
-    usuario?.perfil === 'ADMINISTRACAO'
+    FEATURE_ORCAMENTO_ATIVO &&
+    (usuario?.perfil === 'ADMIN' ||
+      usuario?.perfil === 'ENGENHARIA' ||
+      usuario?.perfil === 'ADMINISTRACAO')
 
   const podeVerEstoque =
     usuario?.perfil === 'ADMIN' ||
@@ -232,7 +234,11 @@ export function HomePage() {
               <span className="text-xs text-primary font-semibold">Hoje • Tempo Real</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 ${
+                FEATURE_ORCAMENTO_ATIVO ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
+              } gap-3`}
+            >
               {/* Card 1: Requisições Pendentes */}
               <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start justify-between">
@@ -310,46 +316,48 @@ export function HomePage() {
                 </div>
               </div>
 
-              {/* Card 4: Controle de Orçamento */}
-              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
-                <div className="flex items-start justify-between">
-                  <span
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
-                      itensComEstouroOrcamento.length > 0
-                        ? 'bg-error-container text-on-error-container'
-                        : 'bg-secondary-fixed text-on-secondary-fixed'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-[20px]">query_stats</span>
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                      itensComEstouroOrcamento.length > 0
-                        ? 'bg-error-container text-on-error-container animate-pulse'
-                        : 'bg-secondary-container text-on-secondary-container'
-                    }`}
-                  >
-                    {itensComEstouroOrcamento.length > 0 ? 'Alerta Crítico' : 'No Limite'}
-                  </span>
+              {/* Card 4: Controle de Orçamento (Isolado via Feature Flag) */}
+              {FEATURE_ORCAMENTO_ATIVO && (
+                <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                  <div className="flex items-start justify-between">
+                    <span
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
+                        itensComEstouroOrcamento.length > 0
+                          ? 'bg-error-container text-on-error-container'
+                          : 'bg-secondary-fixed text-on-secondary-fixed'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[20px]">query_stats</span>
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                        itensComEstouroOrcamento.length > 0
+                          ? 'bg-error-container text-on-error-container animate-pulse'
+                          : 'bg-secondary-container text-on-secondary-container'
+                      }`}
+                    >
+                      {itensComEstouroOrcamento.length > 0 ? 'Alerta Crítico' : 'No Limite'}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <span
+                      className={`text-3xl font-bold leading-none tracking-tight ${
+                        itensComEstouroOrcamento.length > 0 ? 'text-error' : 'text-secondary'
+                      }`}
+                    >
+                      {itensComEstouroOrcamento.length}
+                    </span>
+                    <p className="text-xs font-semibold text-on-surface mt-1">
+                      Controle de Orçamento ({totalObrasAtivas} Obra(s))
+                    </p>
+                    <p className="text-[11px] text-on-surface-variant">
+                      {itensComEstouroOrcamento.length > 0
+                        ? `${itensComEstouroOrcamento.length} item(ns) com estouro de orçamento`
+                        : `${limitesOrcamento.length} limites monitorados dentro da meta`}
+                    </p>
+                  </div>
                 </div>
-                <div className="mt-4">
-                  <span
-                    className={`text-3xl font-bold leading-none tracking-tight ${
-                      itensComEstouroOrcamento.length > 0 ? 'text-error' : 'text-secondary'
-                    }`}
-                  >
-                    {itensComEstouroOrcamento.length}
-                  </span>
-                  <p className="text-xs font-semibold text-on-surface mt-1">
-                    Controle de Orçamento ({totalObrasAtivas} Obra(s))
-                  </p>
-                  <p className="text-[11px] text-on-surface-variant">
-                    {itensComEstouroOrcamento.length > 0
-                      ? `${itensComEstouroOrcamento.length} item(ns) com estouro de orçamento`
-                      : `${limitesOrcamento.length} limites monitorados dentro da meta`}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           </section>
         )}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
+import { FEATURE_ORCAMENTO_ATIVO } from '../config/features'
 
 export function Navbar() {
   const { usuario, logout } = useAuth()
@@ -44,13 +45,19 @@ export function Navbar() {
   const podeVerEstoque = usuario.perfil !== 'ENCARREGADO'
   const podeVerFerramentas = usuario.perfil !== 'ENCARREGADO'
   const podeVerOrcamento =
-    usuario.perfil === 'ADMIN' ||
-    usuario.perfil === 'ENGENHARIA' ||
-    usuario.perfil === 'ADMINISTRACAO'
+    FEATURE_ORCAMENTO_ATIVO &&
+    (usuario.perfil === 'ADMIN' ||
+      usuario.perfil === 'ENGENHARIA' ||
+      usuario.perfil === 'ADMINISTRACAO')
   const podeVerUsuarios = usuario.perfil === 'ADMIN'
   const temItensGestao = podeVerEstoque || podeVerOrcamento || podeVerUsuarios
 
-  const rotasGestao = ['/obras', '/materiais', '/orcamento', '/orcamento-obra', '/usuarios']
+  const rotasGestao = [
+    '/obras',
+    '/materiais',
+    ...(FEATURE_ORCAMENTO_ATIVO ? ['/orcamento', '/orcamento-obra'] : []),
+    '/usuarios',
+  ]
   const isGestaoAtiva = rotasGestao.some((r) => location.pathname.startsWith(r))
 
   return (
