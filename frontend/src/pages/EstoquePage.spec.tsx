@@ -194,9 +194,18 @@ describe('EstoquePage Component', () => {
     // Com apenas 1 obra mockada ou obra fixa, o elemento exibe a obra fixada diretamente
     expect(screen.getAllByText(/OBRA-01 - Residencial Horizonte/i).length).toBeGreaterThan(0)
 
-    fireEvent.change(screen.getByDisplayValue('Selecione o material...'), {
-      target: { value: 'mat-1' },
+    // Seleciona material via SeletorItemPesquisavel
+    const inputBuscaMaterial = screen.getByPlaceholderText(
+      'Buscar material por codigo, codigo SIENGE ou descricao...'
+    )
+    fireEvent.change(inputBuscaMaterial, { target: { value: 'Silicone' } })
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Silicone Tubo 280g').length).toBeGreaterThanOrEqual(2)
     })
+
+    const opcoes = screen.getAllByText('Silicone Tubo 280g')
+    fireEvent.click(opcoes[opcoes.length - 1])
 
     // Deve exibir opcao de conversao pela unidade de compra (CX)
     await waitFor(() => {
