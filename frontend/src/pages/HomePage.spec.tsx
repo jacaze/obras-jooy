@@ -34,7 +34,7 @@ function renderHomePage(usuarioLogado: UsuarioAuth | null = null) {
 }
 
 describe('HomePage Component', () => {
-  it('deve renderizar informacoes de status quando a API responder com sucesso', async () => {
+  it('deve renderizar status no topo e nao deve renderizar secao tecnica de debug no rodape', async () => {
     vi.spyOn(apiClient, 'fetchHealth').mockResolvedValueOnce({
       status: 'UP',
       servico: 'obras-jooy-backend',
@@ -47,9 +47,12 @@ describe('HomePage Component', () => {
     expect(screen.getByText('Obras Jooy - Almoxarifado')).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(screen.getByText('Status do Back-end:')).toBeInTheDocument()
-      expect(screen.getByText('obras-jooy-backend')).toBeInTheDocument()
+      expect(screen.getByText(/Servidor Online \(UP\)/i)).toBeInTheDocument()
     })
+
+    // Secao antiga de debug/integracao com a API foi removida
+    expect(screen.queryByText('Status de Integracao com a API')).not.toBeInTheDocument()
+    expect(screen.queryByText('Status do Back-end:')).not.toBeInTheDocument()
   })
 
   it('deve exibir mensagem de erro quando a chamada da API falhar', async () => {
@@ -58,7 +61,7 @@ describe('HomePage Component', () => {
     renderHomePage()
 
     await waitFor(() => {
-      expect(screen.getByText(/Falha na conexao com a API/)).toBeInTheDocument()
+      expect(screen.getByText(/API Indisponível/i)).toBeInTheDocument()
     })
   })
 
@@ -82,7 +85,8 @@ describe('HomePage Component', () => {
     expect(screen.getByText(/Bem-vindo\(a\), Administrador Geral!/)).toBeInTheDocument()
     expect(screen.getByText(/Cargo:/)).toBeInTheDocument()
     expect(screen.getByText('Engenheiro Chefe')).toBeInTheDocument()
-    expect(screen.getByText('Gerenciar Usuarios e Cargos')).toBeInTheDocument()
+    expect(screen.getByText('Gerenciar Usuários e Cargos')).toBeInTheDocument()
+    expect(screen.getByText('Controle de Ferramentas')).toBeInTheDocument()
   })
 
   it('nao deve exibir botao de gestao de usuarios para perfil ALMOXARIFE', async () => {
@@ -103,10 +107,11 @@ describe('HomePage Component', () => {
     })
 
     expect(screen.getByText(/Bem-vindo\(a\), Joao Almoxarife!/)).toBeInTheDocument()
-    expect(screen.queryByText('Gerenciar Usuarios e Cargos')).not.toBeInTheDocument()
+    expect(screen.queryByText('Gerenciar Usuários e Cargos')).not.toBeInTheDocument()
+    expect(screen.getByText('Controle de Ferramentas')).toBeInTheDocument()
   })
 
-  it('deve exibir indicadores operacionais, fila de requisicoes pendentes e alertas de orcamento no dashboard', async () => {
+  it('deve exibir indicadores operacionais, fila de requisicoes pendentes e ferramentas para perfil ENGENHARIA / ALMOXARIFE', async () => {
     vi.spyOn(apiClient, 'fetchHealth').mockResolvedValueOnce({
       status: 'UP',
       servico: 'obras-jooy-backend',
@@ -211,10 +216,112 @@ describe('HomePage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Painel Operacional e Executivo/i)).toBeInTheDocument()
+      expect(screen.getByText('Métricas de Turno & Operação')).toBeInTheDocument()
+      expect(screen.getByText('Fila de Requisições Pendentes')).toBeInTheDocument()
       expect(screen.getByText('#205')).toBeInTheDocument()
       expect(screen.getByText('Marcos Encarregado')).toBeInTheDocument()
       expect(screen.getByText('Martelete 800W')).toBeInTheDocument()
-      expect(screen.getByText(/1 item\(ns\) com estouro de orcamento/i)).toBeInTheDocument()
+      expect(screen.getByText(/1 item\(ns\) com estouro de orçamento/i)).toBeInTheDocument()
+      expect(screen.getByText('Ver Torres')).toBeInTheDocument()
     })
+  })
+
+  it('deve ocultar metricas operacionais globais e ferramentas para perfil ENCARREGADO, exibindo resumo dos pedidos de canteiro', async () => {
+    vi.spyOn(apiClient, 'fetchHealth').mockResolvedValueOnce({
+      status: 'UP',
+      servico: 'obras-jooy-backend',
+      versao: '1.0.0',
+      timestamp: '2026-10-27T21:00:00.000Z',
+    })
+    vi.spyOn(apiClient, 'getObras').mockResolvedValueOnce([
+      {
+        id: 'obra-1',
+        codigo: 'JOOY-01',
+        nome: 'Residencial Jooy Reserva',
+        cidade: 'Campo Grande',
+        ativa: true,
+        criadaEm: '2026-10-27T00:00:00Z',
+        _count: { areas: 8 },
+      },
+    ])
+    vi.spyOn(apiClient, 'getRequisicoes').mockResolvedValueOnce([
+      {
+        id: 'req-1',
+        numeroSequencial: 10,
+        areaId: 'area-1',
+        requisitanteId: 'enc-1',
+        status: 'SOLICITADA',
+        solicitadaEm: '2026-11-01T10:00:00Z',
+        exportadaSienge: false,
+        area: {
+          id: 'area-1',
+          obraId: 'obra-1',
+          nome: 'Subsolo 02',
+          ordem: 1,
+          ativa: true,
+          criadaEm: '',
+          obra: { id: 'obra-1', codigo: 'JOOY-01', nome: 'Residencial Jooy Reserva' },
+        },
+        requisitante: {
+          id: 'enc-1',
+          nome: 'Marcos Oliveira',
+          login: 'marcos',
+          cargo: { nome: 'Encarregado de Obras' },
+        },
+        itens: [
+          {
+            id: 'item-1',
+            requisicaoId: 'req-1',
+            materialId: 'mat-1',
+            quantidade: 10,
+            material: {
+              id: 'mat-1',
+              codigo: 'MAT-001',
+              descricao: 'Cimento CP-II',
+              unidadeConsumo: { sigla: 'SC', descricao: 'Saco' },
+            } as any,
+          },
+        ],
+      },
+    ])
+
+    renderHomePage({
+      id: 'enc-1',
+      nome: 'Marcos Oliveira',
+      login: 'marcos',
+      perfil: 'ENCARREGADO',
+      cargo: 'Encarregado de Obras',
+      ativo: true,
+    } as any)
+
+    await waitFor(() => {
+      // Titulo exclusivo de canteiro
+      expect(screen.getByText('Obras Jooy - Canteiro')).toBeInTheDocument()
+      expect(screen.getByText('Canteiro de Obras')).toBeInTheDocument()
+      expect(
+        screen.getByText('Solicitação de materiais e acompanhamento de pedidos para sua equipe')
+      ).toBeInTheDocument()
+      expect(screen.getByText('#10')).toBeInTheDocument()
+      expect(screen.getByText(/Cimento CP-II/)).toBeInTheDocument()
+    })
+
+    // NAO deve exibir métricas operacionais globais
+    expect(screen.queryByText('Métricas de Turno & Operação')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pendentes Exportação SIENGE')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ferramentas em Campo')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Controle de Orçamento/i)).not.toBeInTheDocument()
+    expect(screen.queryByText('Fila de Requisições Pendentes')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ferramentas Emprestadas e em Manutenção')).not.toBeInTheDocument()
+
+    // NAO deve exibir botao de ferramentas nos atalhos nem link para Ver Torres
+    expect(screen.queryByText('Controle de Ferramentas')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ver Torres')).not.toBeInTheDocument()
+
+    // DEVE exibir resumo de canteiro e pedidos recentes do encarregado
+    expect(screen.getByText('Resumo dos Meus Pedidos')).toBeInTheDocument()
+    expect(screen.getAllByText('Aguardando Almoxarifado')[0]).toBeInTheDocument()
+    expect(screen.getByText('Meus Pedidos Recentes de Obra')).toBeInTheDocument()
+    expect(screen.getByText('Novo Pedido de Obra')).toBeInTheDocument()
+    expect(screen.getByText('Minhas Requisições')).toBeInTheDocument()
   })
 })
