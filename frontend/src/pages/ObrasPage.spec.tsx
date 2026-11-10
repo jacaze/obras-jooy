@@ -1,0 +1,383 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
+import { ObrasPage } from './ObrasPage'
+import * as apiClient from '../api/client'
+import { AuthContext } from '../contexts/auth-context'
+import type { UsuarioAuth } from '../types/auth'
+
+const mockEngenheiro: UsuarioAuth = {
+  id: 'eng-1',
+  nome: 'Carlos Engenheiro',
+  login: 'eng.carlos',
+  perfil: 'ENGENHARIA',
+  cargo: 'Engenheiro Residente',
+}
+
+const mockAlmoxarife: UsuarioAuth = {
+  id: 'almox-1',
+  nome: 'Joao Almoxarife',
+  login: 'joao.almox',
+  perfil: 'ALMOXARIFE',
+  cargo: 'Almoxarife',
+}
+
+const mockAdmin: UsuarioAuth = {
+  id: 'admin-1',
+  nome: 'Administrador Master',
+  login: 'admin',
+  perfil: 'ADMIN',
+  cargo: 'Engenheiro Chefe',
+}
+
+const mockObras = [
+  {
+    id: 'obra-1',
+    codigo: 'JOOY-01',
+    nome: 'Residencial Jooy Reserva',
+    cidade: 'Campo Grande',
+    ativa: true,
+    criadaEm: '2026-10-28T00:00:00Z',
+    _count: { areas: 3 },
+  },
+]
+
+const mockAreas = [
+  { id: 'area-1', obraId: 'obra-1', nome: 'Subsolo 01', ordem: -1, ativa: true, criadaEm: '2026-10-28T00:00:00Z' },
+  { id: 'area-2', obraId: 'obra-1', nome: 'Terreo / Acesso', ordem: 0, ativa: true, criadaEm: '2026-10-28T00:00:00Z' },
+  { id: 'area-3', obraId: 'obra-1', nome: '1o Pavimento', ordem: 1, ativa: true, criadaEm: '2026-10-28T00:00:00Z' },
+]
+
+function renderObrasPage(usuarioLogado: UsuarioAuth = mockEngenheiro) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  })
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider
+        value={{
+          usuario: usuarioLogado,
+          token: 'token-teste',
+          carregando: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter>
+          <ObrasPage />
+        </MemoryRouter>
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  )
+}
+
+describe('ObrasPage Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.spyOn(apiClient, 'getObras').mockResolvedValue(mockObras)
+    vi.spyOn(apiClient, 'getAreasObra').mockResolvedValue(mockAreas)
+  })
+
+  it('deve listar dados da obra selecionada e seus pavimentos/areas', async () => {
+    renderObrasPage(mockEngenheiro)
+
+    expect(screen.getByText('Obras e Pavimentos')).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.getByText('JOOY-01')).toBeInTheDocument()
+      expect(screen.getByText('Residencial Jooy Reserva')).toBeInTheDocument()
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+      expect(screen.getByText('Terreo / Acesso')).toBeInTheDocument()
+      expect(screen.getByText('1o Pavimento')).toBeInTheDocument()
+    })
+  })
+
+  it('deve permitir que perfil ENGENHARIA cadastre nova area na obra', async () => {
+    const createAreaSpy = vi.spyOn(apiClient, 'createAreaObra').mockResolvedValue({
+      id: 'area-4',
+      obraId: 'obra-1',
+      nome: '2o Pavimento',
+      ordem: 2,
+      ativa: true,
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnNovaArea = screen.getByRole('button', { name: /\+ Nova Area/i })
+    fireEvent.click(btnNovaArea)
+
+    expect(screen.getByText('Cadastrar Nova Area')).toBeInTheDocument()
+
+    const inputNome = screen.getByPlaceholderText('ex: 4o Pavimento ou Garagem')
+    fireEvent.change(inputNome, { target: { value: '2o Pavimento' } })
+
+    const form = inputNome.closest('form')!
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(createAreaSpy).toHaveBeenCalledWith(
+        'obra-1',
+        expect.objectContaining({
+          nome: '2o Pavimento',
+        })
+      )
+    })
+  })
+
+  it('nao deve exibir botoes de criacao e gestao de areas para perfil ALMOXARIFE', async () => {
+    renderObrasPage(mockAlmoxarife)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByRole('button', { name: /\+ Nova Area/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Desativar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Editar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Excluir/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /\+ Nova Obra/i })).not.toBeInTheDocument()
+  })
+
+  it('deve permitir que ADMIN cadastre uma nova obra', async () => {
+    const createObraSpy = vi.spyOn(apiClient, 'createObra').mockResolvedValue({
+      id: 'obra-2',
+      codigo: 'JOOY-02',
+      nome: 'Residencial Jooy Horizonte',
+      cidade: 'Dourados',
+      ativa: true,
+      criadaEm: '2026-10-28T00:00:00Z',
+      _count: { areas: 0 },
+    })
+
+    renderObrasPage(mockAdmin)
+
+    await waitFor(() => {
+      expect(screen.getByText('JOOY-01')).toBeInTheDocument()
+    })
+
+    const btnNovaObra = screen.getByRole('button', { name: /\+ Nova Obra/i })
+    fireEvent.click(btnNovaObra)
+
+    expect(screen.getByText('Cadastrar Nova Obra')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText('ex: JOOY-02'), {
+      target: { value: 'JOOY-02' },
+    })
+    fireEvent.change(screen.getByPlaceholderText('ex: Residencial Jooy Horizonte'), {
+      target: { value: 'Residencial Jooy Horizonte' },
+    })
+    fireEvent.change(screen.getByPlaceholderText('ex: Campo Grande'), {
+      target: { value: 'Dourados' },
+    })
+
+    const formObra = screen.getByPlaceholderText('ex: JOOY-02').closest('form')!
+    fireEvent.submit(formObra)
+
+    await waitFor(() => {
+      expect(createObraSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          codigo: 'JOOY-02',
+          nome: 'Residencial Jooy Horizonte',
+          cidade: 'Dourados',
+        }),
+        expect.anything()
+      )
+    })
+  })
+
+  it('deve permitir que ADMIN desative ou ative uma area da obra', async () => {
+    const toggleAreaSpy = vi.spyOn(apiClient, 'toggleAreaSituacao').mockResolvedValue({
+      id: 'area-1',
+      obraId: 'obra-1',
+      nome: 'Subsolo 01',
+      ordem: -1,
+      ativa: false,
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    renderObrasPage(mockAdmin)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnDesativar = screen.getByRole('button', { name: 'Desativar Obra' }) ? screen.getAllByRole('button', { name: /^Desativar$/i })[0] : screen.getAllByRole('button', { name: /Desativar/i })[0]
+    fireEvent.click(btnDesativar)
+
+    await waitFor(() => {
+      expect(toggleAreaSpy).toHaveBeenCalledWith('area-1', false)
+    })
+  })
+
+  it('deve permitir que ENGENHARIA edite o nome e ordem de uma area existente', async () => {
+    const updateAreaSpy = vi.spyOn(apiClient, 'updateAreaObra').mockResolvedValue({
+      id: 'area-1',
+      obraId: 'obra-1',
+      nome: 'Subsolo 01 Atualizado',
+      ordem: -1,
+      ativa: true,
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnEditar = screen.getAllByRole('button', { name: /Editar/i })[0]
+    fireEvent.click(btnEditar)
+
+    expect(screen.getByText('Editar Area / Pavimento')).toBeInTheDocument()
+
+    const inputNome = screen.getByPlaceholderText('ex: 1o Pavimento Torre A')
+    fireEvent.change(inputNome, { target: { value: 'Subsolo 01 Atualizado' } })
+
+    const form = inputNome.closest('form')!
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(updateAreaSpy).toHaveBeenCalledWith(
+        'area-1',
+        expect.objectContaining({
+          nome: 'Subsolo 01 Atualizado',
+          ordem: -1,
+        })
+      )
+    })
+  })
+
+  it('deve permitir que ADMIN exclua uma area sem vinculos operacionais', async () => {
+    const deleteSpy = vi.spyOn(apiClient, 'deleteAreaObra').mockResolvedValue(undefined)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderObrasPage(mockAdmin)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnExcluir = screen.getAllByRole('button', { name: /Excluir/i })[0]
+    fireEvent.click(btnExcluir)
+
+    await waitFor(() => {
+      expect(deleteSpy).toHaveBeenCalledWith('area-1')
+    })
+  })
+
+  it('deve abrir modal de etapas da area e listar etapas cadastradas com status (F02)', async () => {
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Fundacao e Baldrame',
+        ordem: 1,
+        status: 'ENCERRADA',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+      {
+        id: 'etapa-2',
+        areaId: 'area-1',
+        nome: 'Alvenaria',
+        ordem: 2,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnEtapas = screen.getAllByRole('button', { name: /^Etapas$/i })[0]
+    fireEvent.click(btnEtapas)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Etapas de Execucao/i)).toBeInTheDocument()
+      expect(screen.getByText('Fundacao e Baldrame')).toBeInTheDocument()
+      expect(screen.getByText('Alvenaria')).toBeInTheDocument()
+      expect(screen.getByText('Pedidos Bloqueados')).toBeInTheDocument()
+    })
+  })
+
+  it('deve permitir que perfil ENGENHARIA adicione nova etapa e altere status para ENCERRADA (F02)', async () => {
+    vi.spyOn(apiClient, 'getEtapasArea').mockResolvedValue([
+      {
+        id: 'etapa-1',
+        areaId: 'area-1',
+        nome: 'Concretagem',
+        ordem: 1,
+        status: 'EM_ANDAMENTO',
+        criadaEm: '2026-10-28T00:00:00Z',
+      },
+    ])
+
+    const createEtapaSpy = vi.spyOn(apiClient, 'createEtapaArea').mockResolvedValue({
+      id: 'etapa-2',
+      areaId: 'area-1',
+      nome: 'Pisos e Revestimentos',
+      ordem: 2,
+      status: 'EM_ANDAMENTO',
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    const alterarStatusSpy = vi.spyOn(apiClient, 'alterarStatusEtapa').mockResolvedValue({
+      id: 'etapa-1',
+      areaId: 'area-1',
+      nome: 'Concretagem',
+      ordem: 1,
+      status: 'ENCERRADA',
+      criadaEm: '2026-10-28T00:00:00Z',
+    })
+
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderObrasPage(mockEngenheiro)
+
+    await waitFor(() => {
+      expect(screen.getByText('Subsolo 01')).toBeInTheDocument()
+    })
+
+    const btnEtapas = screen.getAllByRole('button', { name: /^Etapas$/i })[0]
+    fireEvent.click(btnEtapas)
+
+    await waitFor(() => {
+      expect(screen.getByText('Concretagem')).toBeInTheDocument()
+    })
+
+    // Adiciona nova etapa
+    const inputNome = screen.getByPlaceholderText(/Fundacao, Alvenaria, Concretagem/i)
+    fireEvent.change(inputNome, { target: { value: 'Pisos e Revestimentos' } })
+
+    const btnAdicionar = screen.getByRole('button', { name: /^Adicionar$/i })
+    fireEvent.click(btnAdicionar)
+
+    await waitFor(() => {
+      expect(createEtapaSpy).toHaveBeenCalledWith(
+        'area-1',
+        expect.objectContaining({
+          nome: 'Pisos e Revestimentos',
+        })
+      )
+    })
+
+    // Clica para encerrar etapa
+    const btnEncerrar = screen.getByRole('button', { name: /^Encerrar$/i })
+    fireEvent.click(btnEncerrar)
+
+    await waitFor(() => {
+      expect(alterarStatusSpy).toHaveBeenCalledWith('etapa-1', 'ENCERRADA')
+    })
+  })
+})

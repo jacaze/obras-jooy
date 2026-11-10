@@ -1,0 +1,371 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// ENUMS DE ACESSO E SEGURANCA
+// ----------------------------------------------------
+enum PerfilUsuario {
+  ADMIN
+  ALMOXARIFE
+  ENGENHARIA
+  ADMINISTRACAO
+  ENCARREGADO
+}
+
+// ----------------------------------------------------
+// TABELAS DE USUARIO E CARGO
+// ----------------------------------------------------
+model Cargo {
+  id        String    @id @default(uuid()) @db.Uuid
+  nome      String    @unique @db.VarChar(80)
+  ativo     Boolean   @default(true)
+  criadoEm  DateTime  @default(now()) @map("criado_em")
+
+  usuarios  Usuario[]
+
+  @@map("cargo")
+}
+
+model Usuario {
+  id        String        @id @default(uuid()) @db.Uuid
+  nome      String        @db.VarChar(120)
+  login     String        @unique @db.VarChar(60)
+  senhaHash String        @map("senha_hash") @db.VarChar(255)
+  perfil    PerfilUsuario
+  cargoId   String        @map("cargo_id") @db.Uuid
+  obraId    String?       @map("obra_id") @db.Uuid
+  ativo     Boolean       @default(true)
+  criadoEm  DateTime      @default(now()) @map("criado_em")
+
+  cargo     Cargo         @relation(fields: [cargoId], references: [id])
+  obra      Obra?         @relation(fields: [obraId], references: [id])
+  ferramentasEmprestadas   Ferramenta[]
+  cautelasRetiradas        CautelaFerramenta[]   @relation("CautelaResponsavel")
+  cautelasEntregues        CautelaFerramenta[]   @relation("CautelaEntreguePor")
+  cautelasRecebidas        CautelaFerramenta[]   @relation("CautelaRecebidoPor")
+  requisicoesFeitas        Requisicao[]          @relation("RequisicaoSolicitante")
+  requisicoesAtendidas     Requisicao[]          @relation("RequisicaoAtendidaPor")
+  requisicoesExportadas    Requisicao[]          @relation("RequisicaoExportadaPor")
+  movimentacoesRegistradas MovimentacaoEstoque[]
+
+  @@map("usuario")
+}
+
+// ----------------------------------------------------
+// MODELO DE VERIFICACAO DE SAUDE DA INFRAESTRUTURA
+// ----------------------------------------------------
+model HealthCheck {
+  id        String   @id @default(uuid()) @db.Uuid
+  status    String   @default("ok")
+  checkedAt DateTime @default(now()) @map("checked_at")
+
+  @@map("health_check")
+}
+
+// ----------------------------------------------------
+// ESTRUTURA DA OBRA E AREAS (T05)
+// ----------------------------------------------------
+model Obra {
+  id            String         @id @default(uuid()) @db.Uuid
+  codigo        String         @unique @db.VarChar(30)
+  nome          String         @db.VarChar(120)
+  cidade        String         @db.VarChar(80)
+  ativa         Boolean        @default(true)
+  criadaEm      DateTime       @default(now()) @map("criada_em")
+
+  areas              AreaObra[]
+  locaisEstoque      LocalEstoque[]
+  usuarios           Usuario[]
+  orcamentosMaterial OrcamentoObraMaterial[]
+
+  @@map("obra")
+}
+
+model AreaObra {
+  id            String                @id @default(uuid()) @db.Uuid
+  obraId        String                @map("obra_id") @db.Uuid
+  nome          String                @db.VarChar(80)
+  ordem         Int                   @default(0)
+  ativa         Boolean               @default(true)
+  criadaEm      DateTime              @default(now()) @map("criada_em")
+
+  obra          Obra                  @relation(fields: [obraId], references: [id], onDelete: Restrict)
+  etapas        EtapaArea[]
+  requisicoes   Requisicao[]
+  movimentacoes MovimentacaoEstoque[]
+  cautelas      CautelaFerramenta[]
+
+  @@unique([obraId, nome], name: "area_obra_nome_unico")
+  @@map("area_obra")
+}
+
+enum StatusEtapa {
+  EM_ANDAMENTO
+  ENCERRADA
+}
+
+model EtapaArea {
+  id            String         @id @default(uuid()) @db.Uuid
+  areaId        String         @map("area_id") @db.Uuid
+  nome          String         @db.VarChar(80)
+  ordem         Int            @default(0)
+  status        StatusEtapa    @default(EM_ANDAMENTO)
+  criadaEm      DateTime       @default(now()) @map("criada_em")
+  encerradaEm   DateTime?      @map("encerrada_em")
+
+  area          AreaObra       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  requisicoes   Requisicao[]
+
+  @@unique([areaId, nome], name: "etapa_area_nome_unico")
+  @@map("etapa_area")
+}
+
+// ----------------------------------------------------
+// CATALOGO DE MATERIAIS, CATEGORIAS E UNIDADES (T07)
+// ----------------------------------------------------
+model UnidadeMedida {
+  id               String     @id @default(uuid()) @db.Uuid
+  sigla            String     @unique @db.VarChar(10)
+  descricao        String     @db.VarChar(60)
+  criadaEm         DateTime   @default(now()) @map("criada_em")
+
+  materiaisCompra  Material[] @relation("MaterialUnidadeCompra")
+  materiaisConsumo Material[] @relation("MaterialUnidadeConsumo")
+
+  @@map("unidade_medida")
+}
+
+model CategoriaMaterial {
+  id          String     @id @default(uuid()) @db.Uuid
+  nome        String     @unique @db.VarChar(80)
+  criadaEm    DateTime   @default(now()) @map("criada_em")
+
+  materiais   Material[]
+
+  @@map("categoria_material")
+}
+
+model Material {
+  id                  String             @id @default(uuid()) @db.Uuid
+  codigo              String             @unique @db.VarChar(50)
+  codigoSienge        String?            @map("codigo_sienge") @db.VarChar(50)
+  descricao           String             @db.VarChar(180)
+  categoriaId         String             @map("categoria_id") @db.Uuid
+  unidadeCompraId     String?            @map("unidade_compra_id") @db.Uuid
+  unidadeConsumoId    String             @map("unidade_consumo_id") @db.Uuid
+  fatorConversao      Decimal            @default(1.0000) @map("fator_conversao") @db.Decimal(12, 4)
+  ehKit               Boolean            @default(false) @map("eh_kit")
+  exigeTesteQualidade Boolean            @default(false) @map("exige_teste_qualidade")
+  ativo               Boolean            @default(true)
+  criadoEm            DateTime           @default(now()) @map("criado_em")
+
+  categoria           CategoriaMaterial     @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+  unidadeCompra       UnidadeMedida?        @relation("MaterialUnidadeCompra", fields: [unidadeCompraId], references: [id], onDelete: Restrict)
+  unidadeConsumo      UnidadeMedida         @relation("MaterialUnidadeConsumo", fields: [unidadeConsumoId], references: [id], onDelete: Restrict)
+  itensRequisicao     RequisicaoItem[]
+  saldos              EstoqueSaldo[]
+  movimentacoes       MovimentacaoEstoque[]
+  orcamentosObra      OrcamentoObraMaterial[]
+
+  @@map("material")
+}
+
+// ----------------------------------------------------
+// FERRAMENTAS E ATIVOS INDIVIDUAIS RASTREAVEIS
+// ----------------------------------------------------
+enum StatusFerramenta {
+  DISPONIVEL
+  EMPRESTADO
+  COM_DEFEITO
+}
+
+model Ferramenta {
+  id                String              @id @default(uuid()) @db.Uuid
+  codigo            String              @unique @db.VarChar(50)
+  nome              String              @db.VarChar(120)
+  status            StatusFerramenta    @default(DISPONIVEL)
+  emprestadoParaId  String?             @map("emprestado_para_id") @db.Uuid
+  ativo             Boolean             @default(true)
+  criadaEm          DateTime            @default(now()) @map("criada_em")
+
+  emprestadoPara    Usuario?            @relation(fields: [emprestadoParaId], references: [id], onDelete: SetNull)
+  itensRequisicao   RequisicaoItem[]
+  cautelas          CautelaFerramenta[]
+
+  @@map("ferramenta")
+}
+
+model CautelaFerramenta {
+  id                  String      @id @default(uuid()) @db.Uuid
+  ferramentaId        String      @map("ferramenta_id") @db.Uuid
+  usuarioId           String      @map("usuario_id") @db.Uuid
+  areaId              String?     @map("area_id") @db.Uuid
+  entreguePorId       String      @map("entregue_por_id") @db.Uuid
+  testadoNaSaida      Boolean     @default(true) @map("testado_na_saida")
+  observacaoSaida     String?     @map("observacao_saida") @db.VarChar(255)
+  previsaoDevolucao   DateTime?   @map("previsao_devolucao")
+  retiradaEm          DateTime    @default(now()) @map("retirada_em")
+
+  devolvidaEm         DateTime?   @map("devolvida_em")
+  recebidoPorId       String?     @map("recebido_por_id") @db.Uuid
+  testadoNoRetorno    Boolean?    @map("testado_no_retorno")
+  comDefeito          Boolean?    @map("com_defeito")
+  observacaoDevolucao String?     @map("observacao_devolucao") @db.VarChar(255)
+
+  ferramenta          Ferramenta  @relation(fields: [ferramentaId], references: [id], onDelete: Cascade)
+  usuario             Usuario     @relation("CautelaResponsavel", fields: [usuarioId], references: [id], onDelete: Restrict)
+  area                AreaObra?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  entreguePor         Usuario     @relation("CautelaEntreguePor", fields: [entreguePorId], references: [id], onDelete: Restrict)
+  recebidoPor         Usuario?    @relation("CautelaRecebidoPor", fields: [recebidoPorId], references: [id], onDelete: SetNull)
+
+  @@map("cautela_ferramenta")
+}
+
+// ----------------------------------------------------
+// REQUISICOES DE OBRA (T11)
+// ----------------------------------------------------
+enum StatusRequisicao {
+  SOLICITADA
+  EM_SEPARACAO
+  PRONTA
+  ATENDIDA
+  CANCELADA
+}
+
+model Requisicao {
+  id                String                @id @default(uuid()) @db.Uuid
+  numeroSequencial  Int                   @default(autoincrement()) @map("numero_sequencial")
+  areaId            String                @map("area_id") @db.Uuid
+  etapaId           String?               @map("etapa_id") @db.Uuid
+  requisitanteId    String                @map("requisitante_id") @db.Uuid
+  status            StatusRequisicao      @default(SOLICITADA)
+  codigoRetirada    String?               @unique @map("codigo_retirada") @db.VarChar(12)
+  chaveIdempotencia String?               @unique @map("chave_idempotencia") @db.VarChar(100)
+  observacao        String?               @db.VarChar(255)
+  retiradoPor       String?               @map("retirado_por") @db.VarChar(120)
+  atendidoPorId     String?               @map("atendido_por_id") @db.Uuid
+  atendidoEm        DateTime?             @map("atendido_em")
+  exportadaSienge   Boolean               @default(false) @map("exportada_sienge")
+  exportadaEm       DateTime?             @map("exportada_em")
+  exportadaPorId    String?               @map("exportada_por_id") @db.Uuid
+  solicitadaEm      DateTime              @default(now()) @map("solicitada_em")
+  prontaEm          DateTime?             @map("pronta_em")
+  retiradaEm        DateTime?             @map("retirada_em")
+
+  area              AreaObra              @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  etapa             EtapaArea?            @relation(fields: [etapaId], references: [id], onDelete: SetNull)
+  requisitante      Usuario               @relation("RequisicaoSolicitante", fields: [requisitanteId], references: [id], onDelete: Restrict)
+  atendidoPor       Usuario?              @relation("RequisicaoAtendidaPor", fields: [atendidoPorId], references: [id], onDelete: SetNull)
+  exportadaPor      Usuario?              @relation("RequisicaoExportadaPor", fields: [exportadaPorId], references: [id], onDelete: SetNull)
+  itens             RequisicaoItem[]
+  movimentacoes     MovimentacaoEstoque[]
+
+  @@map("requisicao")
+}
+
+model RequisicaoItem {
+  id                 String      @id @default(uuid()) @db.Uuid
+  requisicaoId       String      @map("requisicao_id") @db.Uuid
+  materialId         String?     @map("material_id") @db.Uuid
+  ferramentaId       String?     @map("ferramenta_id") @db.Uuid
+  quantidade         Decimal     @default(1.0) @db.Decimal(12, 4)
+  quantidadeEntregue Decimal?    @map("quantidade_entregue") @db.Decimal(12, 4)
+
+  requisicao         Requisicao  @relation(fields: [requisicaoId], references: [id], onDelete: Cascade)
+  material           Material?   @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  ferramenta         Ferramenta? @relation(fields: [ferramentaId], references: [id], onDelete: Restrict)
+
+  @@map("requisicao_item")
+}
+
+// ----------------------------------------------------
+// ESTOQUE FISICO, SALDOS E LIVRO-RAZAO IMUTAVEL (T08)
+// ----------------------------------------------------
+enum TipoMovimentacao {
+  ENTRADA_RECEB
+  SAIDA_REQ
+  ENTRADA_DEVOL
+  SAIDA_TRANSF
+  ENTRADA_TRANSF
+  AJUSTE_INV
+  ESTORNO
+}
+
+model LocalEstoque {
+  id            String                @id @default(uuid()) @db.Uuid
+  obraId        String                @map("obra_id") @db.Uuid
+  nome          String                @db.VarChar(80)
+  ativo         Boolean               @default(true)
+  criadoEm      DateTime              @default(now()) @map("criado_em")
+
+  obra          Obra                  @relation(fields: [obraId], references: [id], onDelete: Restrict)
+  saldos        EstoqueSaldo[]
+  movimentacoes MovimentacaoEstoque[]
+
+  @@unique([obraId, nome], name: "local_estoque_obra_nome_unico")
+  @@map("local_estoque")
+}
+
+model EstoqueSaldo {
+  localId       String       @map("local_id") @db.Uuid
+  materialId    String       @map("material_id") @db.Uuid
+  quantidade    Decimal      @default(0.0000) @db.Decimal(12, 4)
+  reservado     Decimal      @default(0.0000) @db.Decimal(12, 4)
+  versao        Int          @default(1)
+  atualizadoEm  DateTime     @updatedAt @map("atualizado_em")
+
+  local         LocalEstoque @relation(fields: [localId], references: [id], onDelete: Restrict)
+  material      Material     @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@id([localId, materialId])
+  @@map("estoque_saldo")
+}
+
+model MovimentacaoEstoque {
+  id                String           @id @default(uuid()) @db.Uuid
+  localId           String           @map("local_id") @db.Uuid
+  materialId        String           @map("material_id") @db.Uuid
+  tipo              TipoMovimentacao
+  quantidade        Decimal          @db.Decimal(12, 4)
+  areaId            String?          @map("area_id") @db.Uuid
+  requisicaoId      String?          @map("requisicao_id") @db.Uuid
+  usuarioId         String           @map("usuario_id") @db.Uuid
+  estornoDeId       String?          @map("estorno_de_id") @db.Uuid
+  chaveIdempotencia String?          @unique @map("chave_idempotencia") @db.VarChar(100)
+  observacao        String?          @db.VarChar(255)
+  ocorridaEm        DateTime         @default(now()) @map("ocorrida_em")
+  registradaEm      DateTime         @default(now()) @map("registrada_em")
+
+  local             LocalEstoque     @relation(fields: [localId], references: [id], onDelete: Restrict)
+  material          Material         @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  area              AreaObra?        @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  requisicao        Requisicao?      @relation(fields: [requisicaoId], references: [id], onDelete: Restrict)
+  usuario           Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@map("movimentacao_estoque")
+}
+
+// ----------------------------------------------------
+// ORCAMENTO E LIMITES DE MATERIAL POR OBRA (T13)
+// ----------------------------------------------------
+model OrcamentoObraMaterial {
+  id               String   @id @default(uuid()) @db.Uuid
+  obraId           String   @map("obra_id") @db.Uuid
+  materialId       String   @map("material_id") @db.Uuid
+  quantidadeOrcada Decimal  @map("quantidade_orcada") @db.Decimal(12, 4)
+  observacao       String?  @db.VarChar(255)
+  criadoEm         DateTime @default(now()) @map("criado_em")
+  atualizadoEm     DateTime @updatedAt @map("atualizado_em")
+
+  obra             Obra     @relation(fields: [obraId], references: [id], onDelete: Restrict)
+  material         Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@unique([obraId, materialId], name: "orcamento_obra_material_unico")
+  @@map("orcamento_obra_material")
+}

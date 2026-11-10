@@ -72,7 +72,7 @@ flowchart TD
   - **Como testar:** instruções reproduzíveis passo a passo.
   - **Evidências:** checklist com `[x]` estritamente nas provas obtidas.
   - **Riscos e Observações:** impactos colaterais ou pendências.
-- 🛑 **Parada Obrigatória:** O agente **NÃO realiza o merge** por conta própria. O PR é submetido e o agente aguarda a validação e autorização explícita do usuário.
+- **Parada Obrigatória:** O agente **NÃO realiza o merge** por conta própria. O PR é submetido e o agente aguarda a validação e autorização explícita do usuário.
 
 ---
 
@@ -85,22 +85,28 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **SETUP-01** | `main` / `develop` | Inicialização do Git, .gitignore, README e plano base | N/A (Setup) | Concluído | Sim |
 | **SETUP-02** | `main` / `develop` | Criação da pasta `documentos/` e transposição da stack para Node.js + Prisma | N/A (Documentação) | Concluído | Sim |
 | **SEC-01** | `main` / `develop` | Criação dos guias de segurança e fluxo operacional dos agentes | N/A (Documentação) | Concluído | Aguardando validação |
-| **T01** | *(a criar)* | Docker Compose (PostgreSQL 16 porta 5433) e ambiente | Integrado | Pendente | Não |
-| **T02** | *(a criar)* | Setup backend Node.js, Fastify, Prisma, Zod, Health e Swagger | Vitest | Pendente | Não |
-| **T03** | *(a criar)* | Setup frontend React + Vite + TS e proxy de API | Vitest / Lint | Pendente | Não |
-| **T04** | *(a criar)* | Autenticação JWT, Usuários e RBAC | Vitest | Pendente | Não |
-| **T05** | *(a criar)* | Gestão de Obra e Áreas da Obra | Vitest | Pendente | Não |
-| **T06** | *(a criar)* | Empresas e Pessoas | Vitest | Pendente | Não |
-| **T07** | *(a criar)* | Catálogo de Materiais e Unidades com Conversão | Vitest | Pendente | Não |
-| **T08** | *(a criar)* | Estoque Base, Saldos e Livro-Razão Imutável | Vitest (Concorrência) | Pendente | Não |
+| **T01** | `feature/T01-docker-compose` | Docker Compose seguro (PostgreSQL 16 porta 5433), .env.example e .gitignore | Teste de interpolação e falha | Concluído | Sim (PR #1 mergeado) |
+| **T02** | `feature/T02-backend-setup` | Setup backend Node.js, Fastify, Prisma, Zod, Health e Swagger | 12 testes Vitest | Concluido | Sim (PR #2 mergeado) |
+| **T03** | `feature/T03-frontend-setup` | Setup frontend React + Vite + TS, TanStack Query, Axios e proxy /api | 2 testes Vitest | Concluido | Sim (PR #3 mergeado) |
+| **T04** | `feature/T04-autenticacao-usuarios` | Autenticacao JWT, Tabela de Cargos, Gestao de Usuarios e RBAC | 42 testes Vitest (26 backend + 16 frontend) | Concluido | Sim (PR #4 mergeado) |
+| **T05** | `feature/T05-obras-areas` | Cadastro de Obra, Cidade e Gestao de Areas (RBAC Engenharia e Admin) | 29 testes Vitest (22 backend + 7 frontend) | Concluido | Sim (PR #5 mergeado) |
+| **T06** | *(descartada)* | Empresas e Pessoas | N/A | Descartada | Sim (Responsavel textual na baixa/emprestimo) |
+| **T07** | `feature/T07-catalogo-materiais` | Catalogo de Materiais, Unidades e Categorias com Fator de Conversao | 24 testes Vitest (16 backend + 8 frontend) | Concluido | Sim (PR #6 mergeado) |
+| **AJUSTE-USER** | `feature/ajustes-gestao-usuarios` | Edicao e exclusao segura de usuarios com bloqueio por historico | 7 testes Vitest (3 backend + 4 frontend) | Concluido | Sim (PR #7 mergeado) |
+| **T11** | `feature/T11-requisicoes-obra` | Modulo de Requisicoes de Obra e Isolamento de Acesso para Encarregado | 12 testes Vitest (9 backend + 3 frontend) | Concluido | Sim (PR #8 mergeado) |
+| **T08** | `feature/T08-estoque-livro-razao` | Estoque Fisico, Saldos, Locacoes Opcionais e Livro-Razao Imutavel (Kardex) | 19 testes Vitest (15 backend + 4 frontend) | Concluido | Sim (PR #9 mergeado) |
+| **T12** | `feature/T12-atendimento-requisicoes-sienge` | Validacao de Saldo na Requisicao, Atendimento com Baixa Atomica no Estoque e Exportacao CSV para SIENGE | 19 testes Vitest (14 backend + 5 frontend) | Concluido | Sim (PR #10 mergeado) |
+| **T13** | `feature/T13-orcamento-obra` | Orcamento e Limites de Material por Obra, Exibicao de Limite na Requisicao e Painel Grafico para Engenharia/Administracao | 9 testes Vitest (7 backend + 2 frontend) | Concluido | Sim (PR #11 mergeado - preservado em branch de portfolio) |
+| **F01** | `feature/F01-vinculo-usuario-obra` | Vinculo de usuario a obra (lotação fixa para Encarregado e Almoxarife sem seleção manual) | Vitest | Pendente | Não |
+| **F02** | `feature/F02-etapas-por-local` | Etapas de execucao por pavimento/area com bloqueio de requisicoes quando encerradas | Vitest | Pendente | Não |
+| **F03** | `feature/F03-codigo-sienge-opcional` | Codigo proprio do material obrigatorio e codigo SIENGE opcional e editavel | Vitest | Pendente | Não |
+| **F04** | `feature/F04-exportacao-analitica-engenharia` | Relatorio analitico e exportacao CSV com filtros por data, material, codigo e etapa | Vitest | Pendente | Não |
 | **T09** | *(a criar)* | Recebimento com conversão e controle sem documento | Vitest | Pendente | Não |
 | **T10** | *(a criar)* | Parâmetros de Estoque Mínimo e Máximo | Vitest | Pendente | Não |
-| **T11** | *(a criar)* | Requisição com Idempotência e validações | Vitest | Pendente | Não |
-| **T12** | *(a criar)* | Separação, Reserva Atômica e Baixa com Código | Vitest (Atômico) | Pendente | Não |
-| **T13** | *(a criar)* | Limites de Material por Obra e Área | Vitest | Pendente | Não |
 | **T14** | *(a criar)* | Ativos e Ferramentas (próprias, locadas, terceiros) | Vitest | Pendente | Não |
 | **T15** | *(a criar)* | Empréstimo e Teste de Saída da Ferramenta | Vitest | Pendente | Não |
 | **T16** | *(a criar)* | Devolução, Teste Pós-Retorno e Ocorrências | Vitest | Pendente | Não |
+| **F05** | `feature/F05-pwa-offline` | Modo Offline PWA para requisicoes sem conexao e sincronizacao automatica em background | Vitest / E2E | Pendente | Não |
 | **T17** | *(a criar)* | Relatórios Operacionais e Kardex | Vitest | Pendente | Não |
 | **T18** | *(a criar)* | Auditoria e Rate Limiting avançado | Vitest | Pendente | Não |
 | **T19** | *(a criar)* | Testes de Integração Ponta a Ponta | E2E | Pendente | Não |

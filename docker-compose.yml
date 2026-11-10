@@ -1,0 +1,28 @@
+name: obras-jooy
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: almoxarifado-db
+    restart: unless-stopped
+    environment:
+      # SINTAXE DE SEGURANÇA: Se qualquer variável estiver ausente no .env, o Docker Compose aborta
+      POSTGRES_DB: ${POSTGRES_DB:?Variavel de ambiente POSTGRES_DB obrigatoria no .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Variavel de ambiente POSTGRES_USER obrigatoria no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Variavel de ambiente POSTGRES_PASSWORD obrigatoria no .env}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      # Mapeamento: ${HOST_PORT:-5433}:5432 (porta interna do container sempre 5432)
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    name: almoxarifado_postgres_data
