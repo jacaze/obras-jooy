@@ -11,8 +11,9 @@ import { useAuth } from '../hooks/useAuth'
 
 export function HomePage() {
   const { usuario } = useAuth()
+  const isEncarregado = usuario?.perfil === 'ENCARREGADO'
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['health'],
     queryFn: fetchHealth,
   })
@@ -32,16 +33,16 @@ export function HomePage() {
   const { data: ferramentas = [] } = useQuery({
     queryKey: ['dashboard-ferramentas'],
     queryFn: () => getFerramentas({ somenteAtivas: true }),
-    enabled: Boolean(usuario),
+    enabled: Boolean(usuario) && !isEncarregado,
   })
 
   const { data: limitesOrcamento = [] } = useQuery({
     queryKey: ['dashboard-limites-orcamento'],
     queryFn: () => getLimitesOrcamentoObra(),
-    enabled: Boolean(usuario),
+    enabled: Boolean(usuario) && !isEncarregado,
   })
 
-  // Indicadores Operacionais
+  // Indicadores Operacionais Gerais (Almoxarifado / Engenharia / Administracao)
   const totalObrasAtivas = obras.length
   const requisicoesPendentes = requisicoes.filter((r) => r.status === 'SOLICITADA')
   const requisicoesAtendidas = requisicoes.filter((r) => r.status === 'ATENDIDA')
@@ -56,6 +57,19 @@ export function HomePage() {
     return consumido > Number(lim.quantidadeOrcada)
   })
 
+  // Indicadores Exclusivos do Encarregado (Canteiro de Obras)
+  const minhasRequisicoes = requisicoes.filter(
+    (r) =>
+      r.requisitanteId === usuario?.id ||
+      r.requisitante?.id === usuario?.id ||
+      r.requisitante?.login === usuario?.login
+  )
+  const minhasPendentes = minhasRequisicoes.filter(
+    (r) => r.status === 'SOLICITADA' || r.status === 'EM_SEPARACAO' || r.status === 'PRONTA'
+  )
+  const minhasAtendidas = minhasRequisicoes.filter((r) => r.status === 'ATENDIDA')
+  const minhasCanceladas = minhasRequisicoes.filter((r) => r.status === 'CANCELADA')
+
   const podeVerOrcamento =
     usuario?.perfil === 'ADMIN' ||
     usuario?.perfil === 'ENGENHARIA' ||
@@ -67,6 +81,9 @@ export function HomePage() {
     usuario?.perfil === 'ENGENHARIA' ||
     usuario?.perfil === 'ADMINISTRACAO'
 
+  const podeVerFerramentas = usuario?.perfil !== 'ENCARREGADO'
+  const podeVerObras = usuario?.perfil !== 'ENCARREGADO'
+
   const obraPrincipalNome = obras.length > 0 ? obras[0].nome : 'Residencial Jooy Ilhas'
 
   return (
@@ -76,13 +93,15 @@ export function HomePage() {
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div>
             <span className="text-xs uppercase tracking-wider font-semibold text-primary">
-              Painel Operacional e Executivo
+              {isEncarregado ? 'Canteiro de Obras' : 'Painel Operacional e Executivo'}
             </span>
             <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-0.5">
-              Obras Jooy - Almoxarifado
+              {isEncarregado ? 'Obras Jooy - Canteiro' : 'Obras Jooy - Almoxarifado'}
             </h1>
             <p className="text-sm text-on-surface-variant">
-              Gestão de insumos, ferramentas e controle orçamentário de canteiro
+              {isEncarregado
+                ? 'Solicitação de materiais e acompanhamento de pedidos para sua equipe'
+                : 'Gestão de insumos, ferramentas e controle orçamentário de canteiro'}
             </p>
           </div>
 
@@ -143,11 +162,21 @@ export function HomePage() {
                   to="/requisicoes"
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-xs sm:text-sm font-semibold shadow-sm hover:bg-primary-container active:scale-95 transition-all"
                 >
-                  <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                  {usuario.perfil === 'ENCARREGADO'
-                    ? 'Minhas Requisicoes / Novo Pedido'
-                    : 'Atender Requisicoes de Obra'}
+                  <span className="material-symbols-outlined text-[18px]">
+                    {isEncarregado ? 'add_circle' : 'assignment'}
+                  </span>
+                  {isEncarregado ? 'Novo Pedido de Obra' : 'Atender Requisições de Obra'}
                 </Link>
+
+                {isEncarregado && (
+                  <Link
+                    to="/requisicoes"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">history</span>
+                    Minhas Requisições
+                  </Link>
+                )}
 
                 {podeVerEstoque && (
                   <Link
@@ -155,17 +184,19 @@ export function HomePage() {
                     className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all"
                   >
                     <span className="material-symbols-outlined text-[18px]">inventory_2</span>
-                    Saldos e Movimentacoes
+                    Saldos e Movimentações
                   </Link>
                 )}
 
-                <Link
-                  to="/ferramentas"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all"
-                >
-                  <span className="material-symbols-outlined text-[18px]">construction</span>
-                  Controle de Ferramentas
-                </Link>
+                {podeVerFerramentas && (
+                  <Link
+                    to="/ferramentas"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">construction</span>
+                    Controle de Ferramentas
+                  </Link>
+                )}
 
                 {podeVerOrcamento && (
                   <Link
@@ -173,7 +204,7 @@ export function HomePage() {
                     className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed text-xs sm:text-sm font-semibold shadow-sm hover:bg-tertiary-container hover:text-on-tertiary-container active:scale-95 transition-all"
                   >
                     <span className="material-symbols-outlined text-[18px]">query_stats</span>
-                    Orcamento vs Consumido
+                    Orçamento vs Consumido
                   </Link>
                 )}
 
@@ -183,7 +214,7 @@ export function HomePage() {
                     className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-variant text-on-surface text-xs sm:text-sm font-semibold shadow-sm hover:bg-surface-container-highest active:scale-95 transition-all"
                   >
                     <span className="material-symbols-outlined text-[18px]">group</span>
-                    Gerenciar Usuarios e Cargos
+                    Gerenciar Usuários e Cargos
                   </Link>
                 )}
               </div>
@@ -191,8 +222,8 @@ export function HomePage() {
           </section>
         )}
 
-        {/* 2x2 KPI Executive Grid (Stitch Styled) */}
-        {usuario && (
+        {/* 2x2 KPI Executive Grid para Almoxarifado / Engenharia / Administracao */}
+        {usuario && !isEncarregado && (
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between px-1">
               <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
@@ -225,10 +256,10 @@ export function HomePage() {
                     {requisicoesPendentes.length}
                   </span>
                   <p className="text-xs font-semibold text-on-surface mt-1">
-                    Requisicoes Pendentes
+                    Requisições Pendentes
                   </p>
                   <p className="text-[11px] text-on-surface-variant">
-                    Aguardando separacao e entrega no almoxarifado
+                    Aguardando separação e entrega no almoxarifado
                   </p>
                 </div>
               </div>
@@ -248,10 +279,10 @@ export function HomePage() {
                     {pendentesExportacaoSienge.length}
                   </span>
                   <p className="text-xs font-semibold text-on-surface mt-1">
-                    Pendentes Exportacao SIENGE
+                    Pendentes Exportação SIENGE
                   </p>
                   <p className="text-[11px] text-on-surface-variant">
-                    {requisicoesAtendidas.length} requisicao(oes) atendida(s) no total
+                    {requisicoesAtendidas.length} requisição(ões) atendida(s) no total
                   </p>
                 </div>
               </div>
@@ -310,11 +341,11 @@ export function HomePage() {
                     {itensComEstouroOrcamento.length}
                   </span>
                   <p className="text-xs font-semibold text-on-surface mt-1">
-                    Controle de Orcamento ({totalObrasAtivas} Obra(s))
+                    Controle de Orçamento ({totalObrasAtivas} Obra(s))
                   </p>
                   <p className="text-[11px] text-on-surface-variant">
                     {itensComEstouroOrcamento.length > 0
-                      ? `${itensComEstouroOrcamento.length} item(ns) com estouro de orcamento`
+                      ? `${itensComEstouroOrcamento.length} item(ns) com estouro de orçamento`
                       : `${limitesOrcamento.length} limites monitorados dentro da meta`}
                   </p>
                 </div>
@@ -323,14 +354,107 @@ export function HomePage() {
           </section>
         )}
 
-        {/* Inset Grouped Section: Fila de Requisições e Ferramentas */}
-        {usuario && (
+        {/* Resumo de Pedidos para o ENCARREGADO (Canteiro de Obras) */}
+        {usuario && isEncarregado && (
+          <section className="flex flex-col gap-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
+                Resumo dos Meus Pedidos
+              </span>
+              <span className="text-xs text-primary font-semibold">Canteiro • Tempo Real</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Card 1: Aguardando Separação */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span className="w-9 h-9 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[20px]">pending_actions</span>
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      minhasPendentes.length > 0
+                        ? 'bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant'
+                        : 'bg-surface-container text-on-surface-variant'
+                    }`}
+                  >
+                    {minhasPendentes.length > 0
+                      ? `${minhasPendentes.length} pendente(s)`
+                      : 'Sem pendências'}
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-on-surface leading-none tracking-tight">
+                    {minhasPendentes.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Aguardando Almoxarifado
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    Pedidos em separação ou aguardando entrega no balcão
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 2: Entregues / Atendidas */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span className="w-9 h-9 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[11px] font-bold">
+                    Entregue
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-on-surface leading-none tracking-tight">
+                    {minhasAtendidas.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Pedidos Atendidos
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    Materiais e ferramentas recebidos na obra
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3: Total Solicitado */}
+              <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+                <div className="flex items-start justify-between">
+                  <span className="w-9 h-9 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shadow-sm">
+                    <span className="material-symbols-outlined text-[20px]">assignment</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-primary-fixed-dim/40 text-on-primary-fixed-variant text-[11px] font-bold">
+                    Histórico
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-on-surface leading-none tracking-tight">
+                    {minhasRequisicoes.length}
+                  </span>
+                  <p className="text-xs font-semibold text-on-surface mt-1">
+                    Total de Pedidos
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    {minhasCanceladas.length > 0
+                      ? `${minhasCanceladas.length} pedido(s) cancelado(s)`
+                      : 'Requisições abertas por você nesta obra'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Fila de Requisições e Ferramentas para Almoxarifado / Engenharia / Administracao */}
+        {usuario && !isEncarregado && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* Coluna 1: Fila de Requisições Pendentes */}
             <section className="flex flex-col gap-2">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
-                  Fila de Requisicoes Pendentes
+                  Fila de Requisições Pendentes
                 </span>
                 <Link
                   to="/requisicoes"
@@ -343,7 +467,7 @@ export function HomePage() {
               <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container divide-y divide-surface-container overflow-hidden">
                 {requisicoesPendentes.length === 0 ? (
                   <div className="p-6 text-center text-sm text-on-surface-variant">
-                    Nenhuma requisicao pendente de atendimento no momento.
+                    Nenhuma requisição pendente de atendimento no momento.
                   </div>
                 ) : (
                   requisicoesPendentes.slice(0, 4).map((req) => (
@@ -396,7 +520,7 @@ export function HomePage() {
             <section className="flex flex-col gap-2">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
-                  Ferramentas Emprestadas e em Manutencao
+                  Ferramentas Emprestadas e em Manutenção
                 </span>
                 <Link
                   to="/ferramentas"
@@ -409,7 +533,7 @@ export function HomePage() {
               <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container divide-y divide-surface-container overflow-hidden">
                 {ferramentasEmprestadas.length === 0 && ferramentasComDefeito.length === 0 ? (
                   <div className="p-6 text-center text-sm text-on-surface-variant">
-                    Todas as ferramentas ativas estao disponiveis no almoxarifado.
+                    Todas as ferramentas ativas estão disponíveis no almoxarifado.
                   </div>
                 ) : (
                   [...ferramentasEmprestadas, ...ferramentasComDefeito].slice(0, 4).map((fer) => (
@@ -464,6 +588,102 @@ export function HomePage() {
           </div>
         )}
 
+        {/* Seção de Pedidos Recentes do Encarregado */}
+        {usuario && isEncarregado && (
+          <section className="flex flex-col gap-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs uppercase font-bold tracking-wider text-on-surface-variant">
+                Meus Pedidos Recentes de Obra
+              </span>
+              <Link
+                to="/requisicoes"
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                Ver todos
+              </Link>
+            </div>
+
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container divide-y divide-surface-container overflow-hidden">
+              {minhasRequisicoes.length === 0 ? (
+                <div className="p-8 text-center flex flex-col items-center justify-center gap-3">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">
+                    assignment_late
+                  </span>
+                  <p className="text-sm font-semibold text-on-surface">
+                    Você ainda não fez nenhum pedido de material ou ferramenta.
+                  </p>
+                  <p className="text-xs text-on-surface-variant max-w-sm">
+                    Clique no botão abaixo para abrir uma nova requisição para a área ou pavimento onde você está trabalhando.
+                  </p>
+                  <Link
+                    to="/requisicoes"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-sm hover:bg-primary-container transition-all mt-1"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                    Fazer Novo Pedido
+                  </Link>
+                </div>
+              ) : (
+                minhasRequisicoes.slice(0, 5).map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low transition-colors"
+                  >
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-primary">
+                          #{req.numeroSequencial}
+                        </span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
+                        <span className="text-xs font-semibold text-on-surface truncate">
+                          {req.area?.obra?.codigo} - {req.area?.nome}
+                        </span>
+                      </div>
+                      <div className="text-xs text-on-surface-variant">
+                        {req.itens.length} item(ns) solicitado(s)
+                        {req.itens[0]?.material && ` • ${req.itens[0].material.descricao}`}
+                        {req.itens[0]?.ferramenta && ` • ${req.itens[0].ferramenta.nome}`}
+                        {req.itens.length > 1 && ` (+${req.itens.length - 1} outro(s))`}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                          req.status === 'SOLICITADA' || req.status === 'EM_SEPARACAO'
+                            ? 'bg-tertiary-fixed text-on-tertiary-fixed'
+                            : req.status === 'PRONTA'
+                              ? 'bg-primary-fixed text-on-primary-fixed'
+                              : req.status === 'ATENDIDA'
+                                ? 'bg-secondary-container text-on-secondary-container'
+                                : 'bg-error-container text-on-error-container'
+                        }`}
+                      >
+                        {req.status === 'SOLICITADA'
+                          ? 'Aguardando Almoxarifado'
+                          : req.status === 'EM_SEPARACAO'
+                            ? 'Em Separação'
+                            : req.status === 'PRONTA'
+                              ? 'Pronta para Retirada'
+                              : req.status === 'ATENDIDA'
+                                ? 'Entregue no Canteiro'
+                                : 'Cancelada'}
+                      </span>
+
+                      <Link
+                        to="/requisicoes"
+                        className="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs font-semibold shadow-sm transition-all"
+                      >
+                        Ver Detalhes
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
         {/* Status Canteiro Visual Highlight Card */}
         <div className="relative rounded-2xl overflow-hidden shadow-sm p-4 sm:p-5 bg-surface-container-high text-on-surface border border-surface-container">
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 w-full">
@@ -475,54 +695,20 @@ export function HomePage() {
                 {obraPrincipalNome} • Estrutura & Alvenaria em Execução
               </p>
             </div>
-            <Link
-              to="/obras"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-on-surface text-xs font-semibold border border-surface-container transition-all"
-            >
-              <span>Ver Torres</span>
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            </Link>
+            {podeVerObras && (
+              <Link
+                to="/obras"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-on-surface text-xs font-semibold border border-surface-container transition-all"
+              >
+                <span>Ver Torres</span>
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </Link>
+            )}
           </div>
         </div>
-
-        {/* Rodapé Técnico: Status de Integração com a API */}
-        <section className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-surface-container">
-          <h2 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px] text-primary">dns</span>
-            Status de Integracao com a API
-          </h2>
-
-          {isLoading && (
-            <p className="text-xs text-primary">Verificando comunicacao com o servidor...</p>
-          )}
-
-          {isError && (
-            <div className="p-3 rounded-xl bg-error-container text-on-error-container text-xs border border-error/20">
-              <strong>Falha na conexao com a API:</strong>{' '}
-              {error instanceof Error ? error.message : 'Erro desconhecido'}
-            </div>
-          )}
-
-          {data && (
-            <div className="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant bg-surface-container-low p-3.5 rounded-xl">
-              <p className="m-0">
-                <strong className="text-on-surface">Status do Back-end:</strong> {data.status}
-              </p>
-              <p className="m-0">
-                <strong className="text-on-surface">Servico:</strong> {data.servico}
-              </p>
-              <p className="m-0">
-                <strong className="text-on-surface">Versao:</strong> {data.versao}
-              </p>
-              <p className="m-0 text-secondary">
-                <strong className="text-on-surface">Sincronizado em:</strong>{' '}
-                {new Date(data.timestamp).toLocaleString('pt-BR')}
-              </p>
-            </div>
-          )}
-        </section>
       </div>
     </main>
   )
 }
+
 export default HomePage

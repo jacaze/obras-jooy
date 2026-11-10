@@ -42,6 +42,7 @@ export function Navbar() {
   }
 
   const podeVerEstoque = usuario.perfil !== 'ENCARREGADO'
+  const podeVerFerramentas = usuario.perfil !== 'ENCARREGADO'
   const podeVerOrcamento =
     usuario.perfil === 'ADMIN' ||
     usuario.perfil === 'ENGENHARIA' ||
@@ -88,10 +89,12 @@ export function Navbar() {
                   Estoque
                 </NavLink>
               )}
-              <NavLink to="/ferramentas">
-                <span className="material-symbols-outlined">construction</span>
-                Ferramentas
-              </NavLink>
+              {podeVerFerramentas && (
+                <NavLink to="/ferramentas">
+                  <span className="material-symbols-outlined">construction</span>
+                  Ferramentas
+                </NavLink>
+              )}
 
               {/* Dropdown de Gestão para Obras, Materiais, Orçamento e Usuários */}
               {temItensGestao && (
@@ -221,10 +224,12 @@ export function Navbar() {
           </NavLink>
         )}
 
-        <NavLink to="/ferramentas">
-          <span className="material-symbols-outlined text-[24px]">construction</span>
-          <span>Ferram.</span>
-        </NavLink>
+        {podeVerFerramentas && (
+          <NavLink to="/ferramentas">
+            <span className="material-symbols-outlined text-[24px]">construction</span>
+            <span>Ferram.</span>
+          </NavLink>
+        )}
 
         <button
           type="button"
