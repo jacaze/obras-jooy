@@ -1,9 +1,11 @@
 import { useOfflineSync } from '../hooks/useOfflineSync'
+import { useAuth } from '../hooks/useAuth'
 
 export function OfflineBanner() {
   const { isOnline, pendentes, isSincronizando, sincronizar } = useOfflineSync()
+  const { isOfflineLogin } = useAuth()
 
-  if (isOnline && pendentes.length === 0) {
+  if (isOnline && pendentes.length === 0 && !isOfflineLogin) {
     return null
   }
 
@@ -24,13 +26,18 @@ export function OfflineBanner() {
         <span>
           {!isOnline ? (
             <>
-              <strong className="font-semibold">Modo Offline (Canteiro sem internet):</strong> Seus pedidos
-              serão salvos localmente e sincronizados de forma automática assim que a conexão retornar.
+              <strong className="font-semibold">Modo Offline (Canteiro sem internet):</strong>{' '}
+              {isOfflineLogin ? 'Sessão autenticada localmente. ' : ''}
+              Seus pedidos serão salvos localmente e sincronizados de forma automática assim que a conexão retornar.
               {pendentes.length > 0 && (
                 <span className="ml-1.5 font-bold">
                   ({pendentes.length} {pendentes.length === 1 ? 'pedido pendente' : 'pedidos pendentes'})
                 </span>
               )}
+            </>
+          ) : isOfflineLogin ? (
+            <>
+              <strong className="font-semibold">Sessão Offline:</strong> Conexão retornou. O sistema sincronizará os dados com o servidor.
             </>
           ) : (
             <>

@@ -5,8 +5,9 @@ import React from 'react'
 import { OfflineBanner } from './OfflineBanner'
 import { salvarRequisicaoOffline, limparRequisicoesOffline } from '../services/offlineStorage'
 import * as apiClient from '../api/client'
+import { AuthContext } from '../contexts/auth-context'
 
-function renderBanner() {
+function renderBanner(isOfflineLogin = false) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -14,7 +15,18 @@ function renderBanner() {
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      <OfflineBanner />
+      <AuthContext.Provider
+        value={{
+          usuario: null,
+          token: null,
+          carregando: false,
+          isOfflineLogin,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <OfflineBanner />
+      </AuthContext.Provider>
     </QueryClientProvider>
   )
 }

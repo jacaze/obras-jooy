@@ -6,6 +6,16 @@ export const CHAVE_REQUISICOES_OFFLINE = 'obras_offline_requisicoes_pendentes'
 export const CHAVE_CACHE_OBRAS = 'obras_offline_cache_obras'
 export const CHAVE_CACHE_MATERIAIS = 'obras_offline_cache_materiais'
 export const CHAVE_CACHE_ETAPAS_PREFIX = 'obras_offline_cache_etapas_'
+export const CHAVE_CREDENCIAIS_OFFLINE = 'obras_offline_credenciais_usuarios'
+
+export interface CredencialUsuarioOffline {
+  login: string
+  salt: string
+  hashSenha: string
+  token: string
+  usuario: any
+  atualizadoEm: string
+}
 
 export interface ItemExibicaoOffline {
   descricao: string
@@ -219,6 +229,119 @@ export function obterCacheEtapas(areaId: string): EtapaArea[] {
     return raw ? JSON.parse(raw) : []
   } catch (err) {
     console.error('Erro ao ler cache de etapas', err)
+    return []
+  }
+}
+
+/**
+ * Funcao auxiliar para calcular SHA-256 com salt utilizando Web Crypto API
+ * com fallback seguro para ambientes de teste (Node / JSDOM).
+ */
+export async function calcularHashCredencial(senha: string, salt: string): Promise<string> {
+  const texto = `${salt}:${senha}:jooy-offline`
+  if (typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.digest === 'function') {
+    try {
+      const encoder = new TextEncoder()
+      const data = encoder.encode(texto)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+    } catch {
+      // continua para fallback
+    }
+  }
+
+  // Fallback portavel sem dependencias externas
+  let hash = 0
+  for (let i = 0; i < texto.length; i++) {
+    const char = texto.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash |= 0
+  }
+  return `h_${Math.abs(hash).toString(16)}`
+}
+
+/**
+ * Salva credenciais seguras para autenticacao offline no dispositivo.
+ */
+export async function salvarCredencialOffline(
+  login: string,
+  senhaStr: string,
+  token: string,
+  usuario: any
+): Promise<void> {
+  const storage = getStorage()
+  if (!storage) return
+
+  try {
+    const loginFormatado = login.trim().toLowerCase()
+    const salt = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`
+    const hashSenha = await calcularHashCredencial(senhaStr, salt)
+
+    const raw = storage.getItem(CHAVE_CREDENCIAIS_OFFLINE)
+    const mapa: Record<string, CredencialUsuarioOffline> = raw ? JSON.parse(raw) : {}
+
+    mapa[loginFormatado] = {
+      login: loginFormatado,
+      salt,
+      hashSenha,
+      token,
+      usuario,
+      atualizadoEm: new Date().toISOString(),
+    }
+
+    storage.setItem(CHAVE_CREDENCIAIS_OFFLINE, JSON.stringify(mapa))
+  } catch (err) {
+    console.error('Erro ao salvar credenciais offline', err)
+  }
+}
+
+/**
+ * Valida credenciais do usuario localmente no dispositivo para login sem internet.
+ */
+export async function autenticarOffline(
+  loginStr: string,
+  senhaStr: string
+): Promise<{ token: string; usuario: any } | null> {
+  const storage = getStorage()
+  if (!storage) return null
+
+  try {
+    const loginFormatado = loginStr.trim().toLowerCase()
+    const raw = storage.getItem(CHAVE_CREDENCIAIS_OFFLINE)
+    if (!raw) return null
+
+    const mapa: Record<string, CredencialUsuarioOffline> = JSON.parse(raw)
+    const credencial = mapa[loginFormatado]
+    if (!credencial) return null
+
+    const hashCalculado = await calcularHashCredencial(senhaStr, credencial.salt)
+    if (hashCalculado === credencial.hashSenha) {
+      return {
+        token: credencial.token,
+        usuario: credencial.usuario,
+      }
+    }
+    return null
+  } catch (err) {
+    console.error('Erro ao autenticar offline', err)
+    return null
+  }
+}
+
+/**
+ * Retorna os logins com credenciais disponiveis neste dispositivo.
+ */
+export function obterLoginsDisponiveisOffline(): string[] {
+  const storage = getStorage()
+  if (!storage) return []
+
+  try {
+    const raw = storage.getItem(CHAVE_CREDENCIAIS_OFFLINE)
+    if (!raw) return []
+    const mapa: Record<string, CredencialUsuarioOffline> = JSON.parse(raw)
+    return Object.keys(mapa)
+  } catch {
     return []
   }
 }

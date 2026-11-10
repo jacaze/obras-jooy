@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { obterLoginsDisponiveisOffline } from '../services/offlineStorage'
 
 const CONTAS_DEMO_MVP = [
   {
@@ -40,9 +41,28 @@ export function LoginPage() {
   const [senhaVal, setSenhaVal] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [submetendo, setSubmetendo] = useState(false)
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false
+  )
+  const [loginsSalvos, setLoginsSalvos] = useState<string[]>([])
 
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    function atualizarStatusRede() {
+      setIsOffline(!navigator.onLine)
+    }
+
+    setLoginsSalvos(obterLoginsDisponiveisOffline())
+
+    window.addEventListener('online', atualizarStatusRede)
+    window.addEventListener('offline', atualizarStatusRede)
+    return () => {
+      window.removeEventListener('online', atualizarStatusRede)
+      window.removeEventListener('offline', atualizarStatusRede)
+    }
+  }, [])
 
   async function autenticar(usuarioLogin: string, usuarioSenha: string) {
     setErro(null)
@@ -52,7 +72,10 @@ export function LoginPage() {
       await login(usuarioLogin, usuarioSenha)
       navigate('/')
     } catch (err: any) {
-      const msg = err.response?.data?.erro || 'Falha na autenticacao. Verifique login e senha.'
+      const msg =
+        err.message ||
+        err.response?.data?.erro ||
+        'Falha na autenticacao. Verifique login e senha.'
       setErro(msg)
     } finally {
       setSubmetendo(false)
@@ -75,9 +98,15 @@ export function LoginPage() {
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container shadow-sm mb-3">
-            <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isOffline ? 'bg-amber-500' : 'bg-secondary animate-pulse'
+              }`}
+            />
             <span className="text-caption-1 font-semibold text-on-surface tracking-tight">
-              JOOY Construtora • MVP Almoxarifado
+              {isOffline
+                ? 'Modo Offline • Autenticacao Local'
+                : 'JOOY Construtora • MVP Almoxarifado'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface">
@@ -87,6 +116,23 @@ export function LoginPage() {
             Acesso ao Sistema de Almoxarifado e Controle de Obras
           </p>
         </div>
+
+        {isOffline && (
+          <div className="bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 p-3.5 rounded-xl mb-4 text-xs font-medium space-y-1">
+            <div className="flex items-center gap-2 font-semibold">
+              <span className="material-symbols-outlined text-[18px]">wifi_off</span>
+              <span>Dispositivo sem conexao com a internet</span>
+            </div>
+            <p className="text-[11px] leading-relaxed opacity-90">
+              Voce pode entrar normalmente usando sua senha se ja tiver acessado este aparelho anteriormente.
+            </p>
+            {loginsSalvos.length > 0 && (
+              <div className="pt-1 text-[11px]">
+                <strong>Usuarios disponiveis offline:</strong> {loginsSalvos.join(', ')}
+              </div>
+            )}
+          </div>
+        )}
 
         {erro && (
           <div className="bg-error-container/20 border border-error/30 text-error p-3.5 rounded-xl mb-4 text-caption-1 font-medium flex items-center gap-2">

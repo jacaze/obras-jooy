@@ -115,11 +115,34 @@ describe('LoginPage Component', () => {
       </AuthContext.Provider>
     )
 
-    const btnAlmoxarife = screen.getByRole('button', { name: /Almoxarife/i })
-    fireEvent.click(btnAlmoxarife)
+    const btnAdmin = screen.getByRole('button', { name: /Admin Geral/i })
+    fireEvent.click(btnAdmin)
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith('almoxarife', 'admin123456')
+      expect(mockLogin).toHaveBeenCalledWith('admin', 'admin123456')
     })
+  })
+
+  it('deve exibir indicador de modo offline quando o navegador estiver desconectado', () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+
+    render(
+      <AuthContext.Provider
+        value={{
+          usuario: null,
+          token: null,
+          carregando: false,
+          login: vi.fn(),
+          logout: vi.fn(),
+        }}
+      >
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>
+      </AuthContext.Provider>
+    )
+
+    expect(screen.getByText(/Modo Offline • Autenticacao Local/i)).toBeInTheDocument()
+    expect(screen.getByText(/Dispositivo sem conexao com a internet/i)).toBeInTheDocument()
   })
 })
