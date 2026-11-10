@@ -17,6 +17,7 @@ const envSchema = z.object({
   ADMIN_LOGIN: z.string().default('admin'),
   ADMIN_PASSWORD: z.string().min(6).default('admin123456'),
   ADMIN_NOME: z.string().default('Administrador do Sistema'),
+  FEATURE_ORCAMENTO_ENABLED: z.coerce.boolean().default(false),
 })
 
 const _env = envSchema.safeParse(process.env)

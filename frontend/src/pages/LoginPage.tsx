@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { obterLoginsDisponiveisOffline } from '../services/offlineStorage'
+import { EXIBIR_ACESSO_RAPIDO_TESTE } from '../config/features'
 
 const CONTAS_DEMO_MVP = [
   {
@@ -36,7 +37,11 @@ const CONTAS_DEMO_MVP = [
   },
 ]
 
-export function LoginPage() {
+interface LoginPageProps {
+  exibirAcessoRapido?: boolean
+}
+
+export function LoginPage({ exibirAcessoRapido = EXIBIR_ACESSO_RAPIDO_TESTE }: LoginPageProps = {}) {
   const [loginVal, setLoginVal] = useState('')
   const [senhaVal, setSenhaVal] = useState('')
   const [erro, setErro] = useState<string | null>(null)
@@ -188,31 +193,33 @@ export function LoginPage() {
           </button>
         </form>
 
-        {/* Painel de Acesso Rapido para Apresentacao do MVP */}
-        <div className="mt-6 pt-5 border-t border-surface-container">
-          <div className="text-caption-2 uppercase font-semibold tracking-wider text-on-surface-variant mb-3 text-center sm:text-left">
-            Acesso Rapido de Demonstracao (1 Clique por Perfil)
-          </div>
+        {/* Painel de Acesso Rapido para Apresentacao do MVP (Isolado/Desativado em Producao) */}
+        {exibirAcessoRapido && (
+          <div className="mt-6 pt-5 border-t border-surface-container">
+            <div className="text-caption-2 uppercase font-semibold tracking-wider text-on-surface-variant mb-3 text-center sm:text-left">
+              Acesso Rapido de Demonstracao (1 Clique por Perfil)
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {CONTAS_DEMO_MVP.map((conta) => (
-              <button
-                key={conta.login}
-                type="button"
-                disabled={submetendo}
-                onClick={() => handleAcessoRapidoDemo(conta)}
-                className="flex flex-col items-start justify-center min-h-[48px] p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container text-left transition-all active:scale-[0.98] cursor-pointer"
-              >
-                <div className="text-caption-1 font-semibold text-primary">
-                  {conta.rotulo}
-                </div>
-                <div className="text-caption-2 text-on-surface-variant line-clamp-1">
-                  {conta.papel}
-                </div>
-              </button>
-            ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {CONTAS_DEMO_MVP.map((conta) => (
+                <button
+                  key={conta.login}
+                  type="button"
+                  disabled={submetendo}
+                  onClick={() => handleAcessoRapidoDemo(conta)}
+                  className="flex flex-col items-start justify-center min-h-[48px] p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container text-left transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <div className="text-caption-1 font-semibold text-primary">
+                    {conta.rotulo}
+                  </div>
+                  <div className="text-caption-2 text-on-surface-variant line-clamp-1">
+                    {conta.papel}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
