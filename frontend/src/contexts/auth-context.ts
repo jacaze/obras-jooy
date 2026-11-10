@@ -5,6 +5,7 @@ export interface AuthContextType {
   usuario: UsuarioAuth | null
   token: string | null
   carregando: boolean
+  isOfflineLogin?: boolean
   login: (loginStr: string, senhaStr: string) => Promise<void>
   logout: () => void
 }

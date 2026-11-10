@@ -101,4 +101,39 @@ describe('offlineStorage Service (F05 - PWA e Modo Offline)', () => {
     limparRequisicoesOffline()
     expect(obterRequisicoesOffline()).toHaveLength(0)
   })
+
+  it('deve salvar e autenticar credenciais offline com hash seguro', async () => {
+    const {
+      salvarCredencialOffline,
+      autenticarOffline,
+      obterLoginsDisponiveisOffline,
+    } = await import('./offlineStorage')
+
+    const mockUsuario = {
+      id: 'usr-1',
+      nome: 'Encarregado Teste',
+      login: 'encarregado',
+      perfil: 'ENCARREGADO',
+      cargo: 'Mestre',
+    }
+
+    await salvarCredencialOffline('encarregado', 'admin123456', 'mock-token-xyz', mockUsuario)
+
+    const logins = obterLoginsDisponiveisOffline()
+    expect(logins).toContain('encarregado')
+
+    // Senha correta deve autenticar
+    const authOk = await autenticarOffline('encarregado', 'admin123456')
+    expect(authOk).not.toBeNull()
+    expect(authOk?.token).toBe('mock-token-xyz')
+    expect(authOk?.usuario.nome).toBe('Encarregado Teste')
+
+    // Senha incorreta deve recusar
+    const authErro = await autenticarOffline('encarregado', 'senha-errada')
+    expect(authErro).toBeNull()
+
+    // Usuario nao cadastrado deve recusar
+    const authInexistente = await autenticarOffline('outro-user', 'admin123456')
+    expect(authInexistente).toBeNull()
+  })
 })
