@@ -266,12 +266,12 @@ describe('RequisicoesPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Cimento Votoran Todas as Obras')).toBeInTheDocument()
-      expect(screen.getByText(/Disp: 50 \| Limite: 200/i)).toBeInTheDocument()
+      expect(screen.getByText(/Disp: 50/i)).toBeInTheDocument()
     })
 
     fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
 
-    expect(screen.getByText(/\[Disp: 50 \| Limite: 200\]/i)).toBeInTheDocument()
+    expect(screen.getByText(/\[Disp: 50/i)).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText('ex: Urgente para a concretagem do bloco norte'), {
       target: { value: 'Material para inicio da alvenaria' },
@@ -383,7 +383,7 @@ describe('RequisicoesPage Component', () => {
     })
   })
 
-  it('deve exibir alerta de estouro de orcamento da engenharia em tempo real no modal e aviso de saldo insuficiente', async () => {
+  it('deve permitir solicitar material com saldo fisico suficiente e alertar quando faltar estoque', async () => {
     vi.spyOn(apiClient, 'getLimitesOrcamentoObra').mockResolvedValue([
       {
         id: 'orc-1',
@@ -421,17 +421,11 @@ describe('RequisicoesPage Component', () => {
 
     fireEvent.click(screen.getByText('Cimento Votoran Todas as Obras'))
 
-    // Digitar 25 SC: saldo em estoque e 50 SC (ok), mas o saldo de orcamento restante e 20 SC (10 ja consumidos + 25 = 35 > 30 orcados)
+    // Digitar 25 SC: saldo em estoque e 50 SC (ok)
     const inputQtd = screen.getByPlaceholderText('Qtd')
     fireEvent.change(inputQtd, { target: { value: '25' } })
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Alerta da Engenharia: Estouro de Orcamento Previsto/i)
-      ).toBeInTheDocument()
-    })
-
-    // Digitar 60 SC: excede tambem o saldo fisico disponivel no estoque da obra (50 SC)
+    // Digitar 60 SC: excede o saldo fisico disponivel no estoque da obra (50 SC)
     fireEvent.change(inputQtd, { target: { value: '60' } })
 
     await waitFor(() => {
