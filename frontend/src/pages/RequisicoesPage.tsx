@@ -32,6 +32,7 @@ import type {
   StatusRequisicao,
 } from '../types/requisicao'
 import { SeletorItemPesquisavel } from '../components/SeletorItemPesquisavel'
+import { FEATURE_ORCAMENTO_ATIVO } from '../config/features'
 
 function extrairErro(err: any, fallback: string): string {
   const data = err.response?.data
@@ -1195,7 +1196,7 @@ export function RequisicoesPage() {
                                     </span>
                                   </span>
                                 )}
-                                {excedeLimiteCard && infoOrcCard && (
+                                {FEATURE_ORCAMENTO_ATIVO && excedeLimiteCard && infoOrcCard && (
                                   <span className="ml-2 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold">
                                     Excede Limite Orcado ({infoOrcCard.quantidadeOrcada}{' '}
                                     {it.material.unidadeConsumo.sigla})
@@ -1566,7 +1567,9 @@ export function RequisicoesPage() {
                             descricao: m.descricao,
                             unidade: m.unidadeConsumo?.sigla,
                             saldoDisponivel: disponivel,
-                            limiteOrcamento: mapaLimitesOrcamento.get(m.id),
+                            limiteOrcamento: FEATURE_ORCAMENTO_ATIVO
+                              ? mapaLimitesOrcamento.get(m.id)
+                              : undefined,
                             detalheExtra: m.categoria?.nome ? `Categoria: ${m.categoria.nome}` : undefined,
                           }))}
                           valorSelecionadoId={linha.materialId}
@@ -1661,7 +1664,7 @@ export function RequisicoesPage() {
                   </div>
                 )}
 
-                {alertasModalPorMaterial.listaEstouroOrcamento.length > 0 && (
+                {FEATURE_ORCAMENTO_ATIVO && alertasModalPorMaterial.listaEstouroOrcamento.length > 0 && (
                   <div
                     role="status"
                     className="mt-4 bg-tertiary-fixed text-on-tertiary-fixed border border-tertiary/20 rounded-xl p-4 text-sm font-body"
