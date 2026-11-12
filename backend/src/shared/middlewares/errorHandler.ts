@@ -37,9 +37,7 @@ export function errorHandler(
     })
   }
 
-  if (env.NODE_ENV !== 'production') {
-    console.error('Unhandled Internal Error:', error)
-  }
+  console.error('Unhandled Internal Error:', error)
 
   return reply.status(500).send({
     erro: 'Erro interno do servidor',
