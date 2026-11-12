@@ -1,7 +1,6 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
 import { ZodError } from 'zod'
 import { AppError } from '../errors/AppError.js'
-import { env } from '../../config/env.js'
 
 export function errorHandler(
   error: FastifyError | Error,
