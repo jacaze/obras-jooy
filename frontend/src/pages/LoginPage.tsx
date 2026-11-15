@@ -102,6 +102,15 @@ export function LoginPage({ exibirAcessoRapido = EXIBIR_ACESSO_RAPIDO_TESTE }: L
     <div className="min-h-screen flex items-center justify-center bg-surface p-4 sm:p-6 font-body text-on-surface">
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container">
         <div className="text-center mb-6">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-white p-2 shadow-sm border border-surface-container flex items-center justify-center">
+              <img
+                src="/logo-icon.png"
+                alt="Logo Obras Jooy"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container shadow-sm mb-3">
             <span
               className={`w-2 h-2 rounded-full ${

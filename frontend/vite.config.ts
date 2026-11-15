@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons.svg'],
+      includeAssets: ['favicon.svg', 'favicon.png', 'logo-icon.png', 'icons.svg'],
       manifest: {
         name: 'Obras Jooy - Gestao de Canteiro e Almoxarifado',
         short_name: 'Obras Jooy',
@@ -27,6 +27,12 @@ export default defineConfig({
             src: '/favicon.svg',
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
+            purpose: 'any maskable',
+          },
+          {
+            src: '/favicon.png',
+            sizes: '192x192 512x512',
+            type: 'image/png',
             purpose: 'any maskable',
           },
         ],

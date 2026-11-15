@@ -67,8 +67,12 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6 min-w-0">
             <Link to="/" className="flex items-center gap-2 group text-decoration-none shrink-0">
-              <span className="ob-icon-tile">
-                <span className="material-symbols-outlined text-[20px]">domain</span>
+              <span className="ob-icon-tile overflow-hidden p-0.5 bg-white">
+                <img
+                  src="/logo-icon.png"
+                  alt="Logo Obras Jooy"
+                  className="w-full h-full object-contain rounded"
+                />
               </span>
               <div className="flex flex-col">
                 <span className="font-heading text-[18px] font-semibold text-on-surface tracking-tight leading-none">
