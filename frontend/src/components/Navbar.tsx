@@ -63,7 +63,7 @@ export function Navbar() {
   return (
     <>
       {/* Top Header com estilo do Design System Obras */}
-      <header className="sticky top-0 w-full z-40 bg-surface/85 backdrop-blur-xl border-b border-surface-container-high shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+      <header className="sticky top-0 w-full z-40 bg-surface/85 backdrop-blur-xl border-b border-surface-container-high shadow-[0_1px_8px_rgba(0,0,0,0.03)] pt-safe">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6 min-w-0">
             <Link to="/" className="flex items-center gap-2 group text-decoration-none shrink-0">

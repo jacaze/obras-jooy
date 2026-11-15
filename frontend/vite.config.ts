@@ -18,15 +18,15 @@ export default defineConfig({
         short_name: 'Obras Jooy',
         description: 'Aplicativo PWA para gestao de estoque, canteiro e requisicoes offline da Construtora Jooy',
         theme_color: '#09090B',
-        background_color: '#FFFFFF',
+        background_color: '#09090B',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         icons: [
           {
-            src: '/pwa-icon.svg',
+            src: '/favicon.png',
             sizes: '192x192 512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any',
           },
           {
@@ -34,12 +34,6 @@ export default defineConfig({
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
             purpose: 'maskable',
-          },
-          {
-            src: '/logo-icon.png',
-            sizes: '192x192 512x512',
-            type: 'image/png',
-            purpose: 'any',
           },
         ],
       },
