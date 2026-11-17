@@ -12,7 +12,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'favicon.png', 'pwa-icon.svg', 'logo-icon.png', 'icons.svg'],
+      includeAssets: [
+        'favicon.svg',
+        'favicon.png',
+        'pwa-icon.svg',
+        'logo-icon.png',
+        'icons.svg',
+        'sw-background-sync.js',
+      ],
       manifest: {
         name: 'Obras Jooy - Gestao de Canteiro e Almoxarifado',
         short_name: 'Obras Jooy',
@@ -38,6 +45,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        importScripts: ['sw-background-sync.js'],
         globPatterns: ['**/*.{js,css,html,svg,png,woff,woff2}'],
         runtimeCaching: [
           {

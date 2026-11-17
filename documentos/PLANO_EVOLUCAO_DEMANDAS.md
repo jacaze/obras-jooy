@@ -21,6 +21,10 @@ Este documento organiza a evolução do projeto incorporando os feedbacks reais 
    - Módulo de exportação de dados com filtros por período de data, material, código e etapa de aplicação para conferência externa.
 6. **Modo Offline com PWA (Progressive Web App):**
    - Capacidade de o encarregado gerar pedidos mesmo no subsolo ou sem sinal 4G, com sincronização automática assim que houver conexão.
+7. **Sincronização em Segundo Plano Nativa (Background Sync & Periodic Sync - Feedback do Professor):**
+   - Agendamento de tarefas nativas no navegador (`SyncManager` / `PeriodicSyncManager` + `IndexedDB` no Service Worker) para que as requisições pendentes sejam enviadas automaticamente assim que o aparelho recuperar sinal, sem exigir que o usuário abra o aplicativo, além de atualização periódica silenciosa do catálogo a cada 5 minutos em uso.
+8. **Banner Inteligente de Instalação Mobile (User-Agent & Display Mode - Feedback do Professor):**
+   - Identificação automática quando o usuário acessa o sistema pelo navegador do celular (Android ou iOS) fora do modo instalado (`standalone`), exibindo um banner interativo que orienta o compartilhamento/adição à tela de início para funcionamento completo do PWA.
 
 ---
 
@@ -30,16 +34,17 @@ Este documento organiza a evolução do projeto incorporando os feedbacks reais 
 | :--- | :--- | :--- | :--- |
 | **SETUP - T08** | Setup, Autenticação, Obras, Materiais e Estoque Físico/Kardex | **Concluído** | PRs #1 ao #9 mergeados na `develop`. |
 | **T11 - T12** | Requisições no Canteiro, Baixa Atômica e CSV SIENGE | **Concluído** | PR #10 mergeado na `develop`. |
-| **T13** | Orçamento e Limites de Material por Obra | **Concluído** | PR #11 mergeado. Será preservado em branch específica e ocultado na entrega real. |
-| **F01 (Nova)** | Vínculo Usuário $\leftrightarrow$ Obra e Eliminação de Seleção | **Pendente** | Encarregado e Almoxarife operam direto na sua obra. |
-| **F02 (Nova)** | Etapas de Execução por Pavimento com Trava ao Encerrar | **Pendente** | Substitui o controle de teto por controle de fase de obra. |
-| **F03 (Nova)** | Código SIENGE Opcional no Catálogo de Materiais | **Pendente** | Permite cadastrar qualquer item sem esperar código do ERP. |
-| **F04 (Nova)** | Relatório Analítico e Exportação para Engenharia | **Pendente** | Filtros avançados por data, item, código e etapa. |
-| **T09** | Recebimento com Conversão e Entrada sem Documento | **Pendente** | Entrada rápida de suprimentos com conversão de embalagem. |
-| **T10** | Parâmetros de Estoque Mínimo e Reposição | **Pendente** | Alertas visuais de material acabando no canteiro. |
-| **T14 - T16** | Ferramentas: Rastreamento, Empréstimo e Vistoria de Devolução | **Pendente** | Já estruturado na interface do Stitch, pendente fluxo operacional. |
-| **F05 (Nova)** | Modo Offline com PWA (Service Worker + Sync) | **Pendente** | Pedidos offline com sincronização em segundo plano. |
-| **T17 - T20** | Auditoria, E2E e Documentação Final | **Pendente** | Fechamento para entrega acadêmica e institucional. |
+| **T13** | Orçamento e Limites de Material por Obra | **Concluído** | PR #11 mergeado. Isolado por feature flag (`FEATURE_ORCAMENTO_ATIVO`). |
+| **F01** | Vínculo Usuário $\leftrightarrow$ Obra e Eliminação de Seleção | **Concluído** | PR #12 mergeado. Encarregado e Almoxarife operam direto na sua obra. |
+| **F02** | Etapas de Execução por Pavimento com Trava ao Encerrar | **Concluído** | PR #14 mergeado. Substitui o controle de teto por controle de fase de obra. |
+| **F03** | Código SIENGE Opcional no Catálogo de Materiais | **Concluído** | PR #13 mergeado. Permite cadastrar qualquer item sem esperar código do ERP. |
+| **F04** | Relatório Analítico e Exportação para Engenharia | **Concluído** | PR #15 mergeado. Filtros avançados por data, item, código e etapa. |
+| **F05** | Modo Offline com PWA (Service Worker + Login Offline) | **Concluído** | PRs #16 e #19 mergeados. Pedidos e autenticação local offline. |
+| **F06** | Cautela e Devolução de Ferramentas com Teste Obrigatório | **Concluído** | PR #17 mergeado. Empréstimo e devolução exclusiva pelo almoxarife. |
+| **UI / PWA** | Busca Pesquisável no Estoque, Perfil Encarregado e Logo Oficial PWA | **Concluído** | PRs #18, #20, #23, #24 e #25 mergeados. |
+| **F07 (Nova)** | Sincronização em Segundo Plano Nativa (Background Sync + Periodic Sync) | **Em Execução** | Envio em background via Service Worker + IndexedDB sem precisar abrir o app e sync periódico de catálogo (5 min). |
+| **F08 (Nova)** | Banner Inteligente de Instalação Mobile (User-Agent + Standalone) | **Pendente** | Detecta acesso via navegador mobile e orienta adicionar à tela inicial (Android `beforeinstallprompt` e iOS Safari). |
+| **T17 - T20** | Auditoria, E2E e Documentação Final | **Concluído / Contínuo** | README, Manual do Usuário e Deploy Render concluídos (PR #21). |
 
 ---
 
@@ -54,16 +59,17 @@ flowchart TD
     end
 
     subgraph Bloco2["Bloco 2: Análise de Dados e Gestão de Estoque"]
-        B1["2.1 Exportação e Relatório para Engenharia (F04)"] --> B2["2.2 Recebimento com Conversão de Embalagem (T09)"]
-        B2 --> B3["2.3 Parâmetros de Estoque Mínimo / Alertas (T10)"]
+        B1["2.1 Exportação e Relatório para Engenharia (F04)"] --> B2["2.2 Busca Pesquisável e Movimentações de Estoque"]
     end
 
     subgraph Bloco3["Bloco 3: Ativos e Ferramentas"]
-        C1["3.1 Ciclo de Ferramentas: Empréstimo e Devolução com Vistoria (T14-T16)"]
+        C1["3.1 Ciclo de Ferramentas: Cautela, Empréstimo e Devolução com Vistoria (F06)"]
     end
 
-    subgraph Bloco4["Bloco 4: PWA Offline e Fechamento"]
-        D1["4.1 PWA: Instalação e Pedidos Offline (F05)"] --> D2["4.2 Auditoria, Testes Finais e Entrega (T17-T20)"]
+    subgraph Bloco4["Bloco 4: PWA Offline Avançado e Experiência Mobile"]
+        D1["4.1 PWA Base: Pedidos e Login Offline (F05)"] --> D2["4.2 Background Sync Nativo e Sync Periódico no Service Worker (F07)"]
+        D2 --> D3["4.3 Banner de Instalação Mobile via User-Agent (F08)"]
+        D3 --> D4["4.4 Auditoria, Testes Finais e Entrega (T17-T20)"]
     end
 
     Bloco1 --> Bloco2
@@ -75,20 +81,26 @@ flowchart TD
 
 ### Detalhamento dos Blocos:
 
-### Bloco 1: Governança do Canteiro e Alinhamento com a Jooy (Imediato)
-1. **Branch de Portfólio:** Criar a branch `portfolio/com-orcamento-obra` com o estado atual. Na `develop`, ocultar o link de orçamento da navbar.
-2. **Vínculo Usuário $\leftrightarrow$ Obra (F01):** Adicionar `obraId` opcional no usuário. Encarregados e almoxarifes passam a ter sua obra fixada automaticamente nas requisições e no estoque.
-3. **Código SIENGE Opcional (F03):** O material passa a ter `codigo` (código interno Jooy obrigatório) e `codigoSienge` (opcional/editável a qualquer momento).
-4. **Etapas por Local (F02):** Criar tabela `EtapaArea` vinculada à Área/Pavimento. Na requisição, o encarregado escolhe a etapa. Etapas com status `ENCERRADA` ficam bloqueadas para novos pedidos.
+### Bloco 1: Governança do Canteiro e Alinhamento com a Jooy (Concluído)
+1. **Isolamento de Orçamento:** Módulo de orçamento isolado por feature flag (`FEATURE_ORCAMENTO_ATIVO`).
+2. **Vínculo Usuário $\leftrightarrow$ Obra (F01):** Adicionado `obraId` opcional no usuário. Encarregados e almoxarifes têm sua obra fixada automaticamente nas requisições e no estoque.
+3. **Código SIENGE Opcional (F03):** O material possui `codigo` (código interno Jooy obrigatório) e `codigoSienge` (opcional/editável a qualquer momento).
+4. **Etapas por Local (F02):** Tabela `EtapaArea` vinculada à Área/Pavimento. Etapas com status `ENCERRADA` ficam bloqueadas para novos pedidos.
 
-### Bloco 2: Inteligência para Engenharia e Controle de Entrada
-1. **Exportação Analítica da Engenharia (F04):** Modal na tela de requisições ou página própria para baixar CSV com filtros de data inicial/final, código/nome do material e etapa da obra.
-2. **Recebimento e Conversão (T09):** Entrada simplificada de mercadoria com conferência física e conversão de caixas/fardos em unidades de consumo.
-3. **Estoque Mínimo (T10):** Definição de ponto de pedido para insumos críticos (cimento, areia, luvas) com alerta visual quando o saldo baixar do limite.
+### Bloco 2: Inteligência para Engenharia e Controle de Entrada (Concluído)
+1. **Exportação Analítica da Engenharia (F04):** Exportação CSV com filtros de data inicial/final, código/nome do material e etapa da obra.
+2. **Busca Pesquisável no Estoque:** Seletor dinâmico por código ou descrição para inserção e consulta rápida de insumos.
 
-### Bloco 3: Ferramentas e Equipamentos (T14 a T16)
-1. Conectar a interface moderna já existente com o fluxo de empréstimo (associado ao encarregado/operário) e devolução com apontamento de ferramentas danificadas.
+### Bloco 3: Ferramentas e Equipamentos (Concluído)
+1. **Cautela de Ferramentas (F06):** Empréstimo vinculado ao colaborador e devolução exclusiva pelo almoxarife com checklist obrigatório de teste de funcionamento na saída e no retorno.
 
-### Bloco 4: PWA Offline e Polimento Final
-1. **PWA Offline (F05):** Configuração do Vite PWA (`vite-plugin-pwa`), armazenamento local no IndexedDB e sincronização automática em segundo plano quando a conexão voltar.
-2. **Entrega Final (T17 a T20):** Validação dos fluxos ponta a ponta e preparação da documentação acadêmica e profissional.
+### Bloco 4: PWA Offline Avançado e Polimento Final
+1. **PWA Offline Base (F05 - Concluído):** Armazenamento local, login offline com hash SHA-256 + salt e fila de requisições offline.
+2. **Sincronização em Segundo Plano Nativa (F07 - Task 1 Atual):**
+   - Espelhamento da fila offline e credenciais de sincronização no **IndexedDB** (`obras_jooy_offline_db`) para acesso direto pelo **Service Worker** em segundo plano.
+   - Registro automático na **Background Sync API** (`registration.sync.register('obras-sync-requisicoes')`) ao criar pedidos sem sinal, permitindo que o navegador envie os pedidos automaticamente assim que a conexão voltar, mesmo com o aplicativo fechado.
+   - Sincronização periódica do catálogo de obras, materiais e ferramentas a cada **5 minutos** enquanto em uso, ao retomar o foco da tela (`visibilitychange`) e via **Periodic Background Sync API** (`obras-periodic-catalog-sync`).
+3. **Banner Inteligente de Instalação Mobile via User-Agent (F08 - Task 2):**
+   - Detecção de acesso em navegadores móveis (Android e iOS) via `navigator.userAgent` combinado à checagem de modo standalone (`display-mode: standalone`).
+   - Exibição de banner instrucional para instalar o aplicativo na tela de início (botão direto via `beforeinstallprompt` no Chrome/Android e passo a passo de compartilhamento no Safari/iOS).
+4. **Entrega Final (T17 a T20):** Validação dos fluxos ponta a ponta e atualização da documentação acadêmica e profissional.
