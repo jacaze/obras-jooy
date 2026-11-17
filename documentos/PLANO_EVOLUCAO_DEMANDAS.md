@@ -42,8 +42,8 @@ Este documento organiza a evolução do projeto incorporando os feedbacks reais 
 | **F05** | Modo Offline com PWA (Service Worker + Login Offline) | **Concluído** | PRs #16 e #19 mergeados. Pedidos e autenticação local offline. |
 | **F06** | Cautela e Devolução de Ferramentas com Teste Obrigatório | **Concluído** | PR #17 mergeado. Empréstimo e devolução exclusiva pelo almoxarife. |
 | **UI / PWA** | Busca Pesquisável no Estoque, Perfil Encarregado e Logo Oficial PWA | **Concluído** | PRs #18, #20, #23, #24 e #25 mergeados. |
-| **F07 (Nova)** | Sincronização em Segundo Plano Nativa (Background Sync + Periodic Sync) | **Em Execução** | Envio em background via Service Worker + IndexedDB sem precisar abrir o app e sync periódico de catálogo (5 min). |
-| **F08 (Nova)** | Banner Inteligente de Instalação Mobile (User-Agent + Standalone) | **Pendente** | Detecta acesso via navegador mobile e orienta adicionar à tela inicial (Android `beforeinstallprompt` e iOS Safari). |
+| **F07 (Nova)** | Sincronização em Segundo Plano Nativa (Background Sync + Periodic Sync) | **Concluído** | PR #26 mergeado. Envio em background via Service Worker + IndexedDB e sync periódico de catálogo (5 min). |
+| **F08 (Nova)** | Banner Inteligente de Instalação Mobile (User-Agent + Standalone) | **Concluído** | Detecta acesso via navegador mobile e orienta adicionar à tela inicial (Android `beforeinstallprompt` e iOS Safari). |
 | **T17 - T20** | Auditoria, E2E e Documentação Final | **Concluído / Contínuo** | README, Manual do Usuário e Deploy Render concluídos (PR #21). |
 
 ---
