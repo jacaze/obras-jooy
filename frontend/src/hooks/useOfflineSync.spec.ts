@@ -3,7 +3,13 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { useOfflineSync } from './useOfflineSync'
-import { salvarRequisicaoOffline, limparRequisicoesOffline } from '../services/offlineStorage'
+import {
+  salvarRequisicaoOffline,
+  limparRequisicoesOffline,
+  obterCacheObras,
+  obterCacheMateriais,
+  obterCacheFerramentas,
+} from '../services/offlineStorage'
 import * as apiClient from '../api/client'
 
 function createWrapper() {
@@ -117,5 +123,69 @@ describe('useOfflineSync Hook (F05 - PWA e Modo Offline)', () => {
     expect(relatorio.falhas).toBe(1)
     expect(relatorio.erros[0]).toContain('Saldo indisponivel')
     expect(result.current.pendentes).toHaveLength(1)
+  })
+
+  it('deve sincronizar o catalogo offline silenciosamente (obras, materiais e ferramentas)', async () => {
+    vi.spyOn(apiClient, 'getObras').mockResolvedValue([
+      { id: 'obra-1', codigo: 'JY-01', nome: 'Jooy Reserva', cidade: 'Campo Grande', ativa: true },
+    ] as any)
+    vi.spyOn(apiClient, 'getMateriais').mockResolvedValue([
+      { id: 'mat-1', codigo: 'MAT-001', descricao: 'Cimento CP-II' },
+    ] as any)
+    vi.spyOn(apiClient, 'getFerramentas').mockResolvedValue([
+      { id: 'fer-1', codigo: 'FER-001', nome: 'Martelete 800W', status: 'DISPONIVEL', ativo: true },
+    ] as any)
+
+    const { result } = renderHook(() => useOfflineSync(), { wrapper: createWrapper() })
+
+    let ok = false
+    await act(async () => {
+      ok = await result.current.sincronizarCatalogo()
+    })
+
+    expect(ok).toBe(true)
+    expect(obterCacheObras()).toHaveLength(1)
+    expect(obterCacheMateriais()).toHaveLength(1)
+    expect(obterCacheFerramentas()).toHaveLength(1)
+    expect(result.current.ultimaSyncCatalogo).not.toBeNull()
+  })
+
+  it('deve disparar sincronizacao automatica quando a aba recuperar foco (visibilitychange)', async () => {
+    const createSpy = vi.spyOn(apiClient, 'createRequisicao').mockResolvedValue({
+      id: 'req-servidor-vis',
+      numeroSequencial: 110,
+    } as any)
+    vi.spyOn(apiClient, 'getObras').mockResolvedValue([] as any)
+    vi.spyOn(apiClient, 'getMateriais').mockResolvedValue([] as any)
+    vi.spyOn(apiClient, 'getFerramentas').mockResolvedValue([] as any)
+
+    salvarRequisicaoOffline({
+      dados: {
+        areaId: 'area-1',
+        etapaId: 'etapa-1',
+        itens: [{ materialId: 'mat-1', quantidade: 1 }],
+      },
+      dadosExibicao: {
+        obraNome: 'Jooy Reserva',
+        itens: [],
+      },
+    })
+
+    const { result } = renderHook(() => useOfflineSync(), { wrapper: createWrapper() })
+    expect(result.current.pendentes).toHaveLength(1)
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'visible',
+    })
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    await waitFor(() => {
+      expect(createSpy).toHaveBeenCalledTimes(1)
+      expect(result.current.pendentes).toHaveLength(0)
+    })
   })
 })

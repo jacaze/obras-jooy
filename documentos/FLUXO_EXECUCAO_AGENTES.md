@@ -97,17 +97,15 @@ Esta seção deve ser mantida atualizada pelo agente a cada tarefa realizada:
 | **T08** | `feature/T08-estoque-livro-razao` | Estoque Fisico, Saldos, Locacoes Opcionais e Livro-Razao Imutavel (Kardex) | 19 testes Vitest (15 backend + 4 frontend) | Concluido | Sim (PR #9 mergeado) |
 | **T12** | `feature/T12-atendimento-requisicoes-sienge` | Validacao de Saldo na Requisicao, Atendimento com Baixa Atomica no Estoque e Exportacao CSV para SIENGE | 19 testes Vitest (14 backend + 5 frontend) | Concluido | Sim (PR #10 mergeado) |
 | **T13** | `feature/T13-orcamento-obra` | Orcamento e Limites de Material por Obra, Exibicao de Limite na Requisicao e Painel Grafico para Engenharia/Administracao | 9 testes Vitest (7 backend + 2 frontend) | Concluido | Sim (PR #11 mergeado - preservado em branch de portfolio) |
-| **F01** | `feature/F01-vinculo-usuario-obra` | Vinculo de usuario a obra (lotação fixa para Encarregado e Almoxarife sem seleção manual) | Vitest | Pendente | Não |
-| **F02** | `feature/F02-etapas-por-local` | Etapas de execucao por pavimento/area com bloqueio de requisicoes quando encerradas | Vitest | Pendente | Não |
-| **F03** | `feature/F03-codigo-sienge-opcional` | Codigo proprio do material obrigatorio e codigo SIENGE opcional e editavel | Vitest | Pendente | Não |
-| **F04** | `feature/F04-exportacao-analitica-engenharia` | Relatorio analitico e exportacao CSV com filtros por data, material, codigo e etapa | Vitest | Pendente | Não |
-| **T09** | *(a criar)* | Recebimento com conversão e controle sem documento | Vitest | Pendente | Não |
-| **T10** | *(a criar)* | Parâmetros de Estoque Mínimo e Máximo | Vitest | Pendente | Não |
-| **T14** | *(a criar)* | Ativos e Ferramentas (próprias, locadas, terceiros) | Vitest | Pendente | Não |
-| **T15** | *(a criar)* | Empréstimo e Teste de Saída da Ferramenta | Vitest | Pendente | Não |
-| **T16** | *(a criar)* | Devolução, Teste Pós-Retorno e Ocorrências | Vitest | Pendente | Não |
-| **F05** | `feature/F05-pwa-offline` | Modo Offline PWA para requisicoes sem conexao e sincronizacao automatica em background | Vitest / E2E | Pendente | Não |
-| **T17** | *(a criar)* | Relatórios Operacionais e Kardex | Vitest | Pendente | Não |
-| **T18** | *(a criar)* | Auditoria e Rate Limiting avançado | Vitest | Pendente | Não |
-| **T19** | *(a criar)* | Testes de Integração Ponta a Ponta | E2E | Pendente | Não |
-| **T20** | *(a criar)* | Documentação Final e Entrega | N/A | Pendente | Não |
+| **F01** | `feature/F01-vinculo-usuario-obra` | Vinculo de usuario a obra (lotacao fixa para Encarregado e Almoxarife sem selecao manual) | 11 testes Vitest | Concluido | Sim (PR #12 mergeado) |
+| **F03** | `feature/F03-codigo-sienge-opcional` | Codigo proprio do material obrigatorio e codigo SIENGE opcional e editavel | 9 testes Vitest | Concluido | Sim (PR #13 mergeado) |
+| **F02** | `feature/F02-etapas-por-local` | Etapas de execucao por pavimento/area com bloqueio de requisicoes quando encerradas | 13 testes Vitest | Concluido | Sim (PR #14 mergeado) |
+| **F04** | `feature/F04-exportacao-analitica-engenharia` | Relatorio analitico e exportacao CSV com filtros por data, material, codigo e etapa | 12 testes Vitest | Concluido | Sim (PR #15 mergeado) |
+| **F05** | `feature/F05-pwa-requisicoes-offline` | Modo Offline PWA para requisicoes sem conexao e sincronizacao automatica | 15 testes Vitest | Concluido | Sim (PR #16 mergeado) |
+| **F06** | `feature/F06-cautela-ferramentas` | Cautela e devolucao de ferramentas exclusiva do almoxarife com teste obrigatorio | 14 testes Vitest | Concluido | Sim (PR #17 mergeado) |
+| **UI-EST** | `feature/busca-pesquisavel-inserir-estoque` | Seletor com filtro de busca pesquisavel para inserir itens ao estoque | 4 testes Vitest | Concluido | Sim (PR #18 mergeado) |
+| **PWA-AUTH** | `feature/login-offline-pwa` | Autenticacao e login offline com hash de credencial seguro no dispositivo | 9 testes Vitest | Concluido | Sim (PR #19 mergeado) |
+| **UI-ENC** | `feature/ajustes-perfil-encarregado-home` | Ajuste de tela inicial e navegacao para perfil encarregado e remocao de debug | 10 testes Vitest | Concluido | Sim (PR #20 mergeado) |
+| **REL-1.0** | `develop` -> `main` | Release v1.0.0, Manual do Usuario, README, Render Blueprint e Feature Flags | 212 testes (129 BE + 83 FE) | Concluido | Sim (PRs #21 a #25 mergeados) |
+| **F07** | `feature/F07-background-sync-nativo` | Sincronizacao em segundo plano nativa no Service Worker (Background Sync API + Periodic Sync + fila IndexedDB + timer de 5 min para catalogo) | Vitest (backgroundSync, useOfflineSync, offlineStorage) | Em execucao | Aguardando aprovacao do PR |
+| **F08** | `feature/F08-banner-instalacao-pwa` | Banner inteligente de instalacao mobile detectando dispositivo via User-Agent (Android/iOS) e modo standalone | Vitest | Pendente (Proxima Task) | Nao |

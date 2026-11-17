@@ -84,6 +84,10 @@ flowchart LR
    - Construir formulários com validação síncrona visual usando Zod e React Hook Form.
 4. **Experiência do Almoxarifado:**
    - Telas de separação rápida, contadores de pedidos, geração e leitura de código de retirada/QR Code e ficha de conferência de materiais.
+5. **PWA, Service Worker e Operação Offline Avançada (F05, F07, F08):**
+   - Persistir requisições offline e configuração de autenticação no **IndexedDB** (`obras_jooy_offline_db`) em espelho com o `localStorage` para permitir acesso direto pelo **Service Worker** em segundo plano.
+   - Registrar tarefas na **Background Sync API** (`SyncManager` / tag `obras-sync-requisicoes`) e na **Periodic Background Sync API** (`PeriodicSyncManager` / tag `obras-periodic-catalog-sync`), além de manter sincronização periódica de catálogo a cada 5 minutos em uso e ao recuperar foco (`visibilitychange`).
+   - Detectar dispositivos móveis via `User-Agent` combinados à verificação de modo instalado (`display-mode: standalone`) para exibir o banner inteligente de instalação do aplicativo na tela de início.
 
 #### O que NÃO faz:
 - Não implementa lógica de persistência direta;
@@ -109,6 +113,8 @@ flowchart LR
    - Validar item por item do arquivo [`documentos/VERIFICACAO_SEGURANCA.md`](file:///c:/Users/Guilherme/Documents/Faculdade/Projetos/obras-jooy/documentos/VERIFICACAO_SEGURANCA.md) (SQLi, rate limit, CORS, RBAC, ausência de dados sensíveis em logs/respostas).
 5. **Geração do Relatório de Evidências:**
    - Rodar a suíte completa (`npm run test`), extrair logs de aprovação e compor a seção de "Evidências" do Pull Request.
+6. **Testes de PWA, Background Sync e Detecção Mobile:**
+   - Validar o registro de tarefas no `SyncManager` (`obras-sync-requisicoes`) e `PeriodicSyncManager` (`obras-periodic-catalog-sync`), a reconciliação da fila entre `IndexedDB` e `localStorage`, o disparo automático em `visibilitychange` e timers periódicos de 5 minutos, além dos cenários de `User-Agent` (Android, iOS e Desktop) e `display-mode: standalone`.
 
 #### O que NÃO faz:
 - Não dá uma tarefa como concluída sem a execução real dos testes automatizados;

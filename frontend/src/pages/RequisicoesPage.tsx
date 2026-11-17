@@ -23,6 +23,8 @@ import {
   obterCacheObras,
   salvarCacheEtapas,
   obterCacheEtapas,
+  salvarCacheFerramentas,
+  obterCacheFerramentas,
 } from '../services/offlineStorage'
 import type {
   AtenderRequisicaoInput,
@@ -386,10 +388,19 @@ export function RequisicoesPage() {
     return mapa
   })()
 
-  const { data: ferramentas = [] } = useQuery({
+  const { data: ferramentasServidor = [] } = useQuery({
     queryKey: ['ferramentas-disponiveis'],
     queryFn: () => getFerramentas({ status: 'DISPONIVEL', somenteAtivas: true }),
   })
+
+  useEffect(() => {
+    if (ferramentasServidor.length > 0) {
+      salvarCacheFerramentas(ferramentasServidor)
+    }
+  }, [ferramentasServidor])
+
+  const ferramentas =
+    ferramentasServidor.length > 0 ? ferramentasServidor : obterCacheFerramentas()
 
   // Itens em estoque na obra selecionada com saldo disponivel positivo (> 0)
   const materiaisEmEstoqueNaObra = (() => {

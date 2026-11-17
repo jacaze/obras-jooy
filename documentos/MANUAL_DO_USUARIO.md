@@ -12,16 +12,18 @@ Guia prático de utilização das rotinas do sistema **Obras Jooy (Almoxarifado 
 3. Clique no botão **Entrar no Sistema**.
 
 ### 1.2 Instalação no Celular / Tablet (Modo PWA)
-O Obras Jooy foi concebido como um Progressive Web App (PWA):
-- **No Android (Google Chrome)**: Toque no menu de três pontos no canto superior direito e selecione **Adicionar à tela inicial** (ou **Instalar aplicativo**).
+O Obras Jooy foi concebido como um Progressive Web App (PWA) com detecção inteligente de dispositivo:
+- **Banner Inteligente de Instalação**: Ao abrir o endereço pelo navegador do celular (fora do aplicativo instalado), o sistema detecta automaticamente o sistema operacional (`User-Agent`) e exibe um banner orientando a instalação na tela inicial.
+- **No Android (Google Chrome)**: Toque no botão de instalação rápida do banner ou no menu de três pontos no canto superior direito e selecione **Adicionar à tela inicial** (ou **Instalar aplicativo**).
 - **No iOS (Safari)**: Toque no ícone de compartilhamento (quadrado com seta para cima) e selecione **Adicionar à Tela de Início**.
 
-### 1.3 Operação Offline no Canteiro
-- Quando o colaborador realiza login ao menos uma vez online no aparelho, suas credenciais seguras (criptografadas localmente) são preservadas.
+### 1.3 Operação Offline e Sincronização em Segundo Plano no Canteiro
+- Quando o colaborador realiza login ao menos uma vez online no aparelho, suas credenciais seguras (criptografadas localmente com SHA-256 + salt) são preservadas.
 - Se a equipe descer para o subsolo ou perder o sinal de internet/Wi-Fi:
   - O sistema exibe o alerta superior **Modo Offline - Autenticação Local**.
   - O encarregado pode abrir e autenticar no aplicativo normalmente usando sua senha salva.
-  - As requisições criadas em campo são guardadas no aparelho e sincronizadas automaticamente assim que o sinal for restabelecido.
+  - **Subida Automática em Segundo Plano (Background Sync)**: As requisições criadas em campo são gravadas no banco local (`IndexedDB` + `localStorage`) e agendadas no Service Worker (`obras-sync-requisicoes`). Assim que o celular recuperar o sinal 4G/Wi-Fi, os pedidos são enviados automaticamente em segundo plano — mesmo que o usuário não esteja com o aplicativo aberto.
+  - **Atualização Periódica de Catálogo**: O catálogo local de obras, materiais e ferramentas é atualizado automaticamente ao abrir o aplicativo e repetido silenciosamente a cada **5 minutos** enquanto houver conexão, além de utilizar o *Periodic Background Sync* quando suportado pelo navegador.
 
 ---
 
