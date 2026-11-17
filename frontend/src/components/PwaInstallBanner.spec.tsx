@@ -73,7 +73,7 @@ describe('PwaInstallBanner e usePwaInstallPrompt (F08 - Deteccao Mobile via User
     expect(container.firstChild).toBeNull()
   })
 
-  it('deve exibir o banner com instrucoes de Compartilhar quando aberto no navegador do iPhone (iOS)', () => {
+  it('deve exibir o banner flutuante compacto no iPhone e expandir tutorial ao tocar em Como instalar', () => {
     mockUserAgent(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
       false
@@ -81,14 +81,17 @@ describe('PwaInstallBanner e usePwaInstallPrompt (F08 - Deteccao Mobile via User
 
     render(<PwaInstallBanner />)
 
-    expect(
-      screen.getByText(/Instale o aplicativo Obras Jooy na Tela de Inicio/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Instale o aplicativo Obras Jooy/i)).toBeInTheDocument()
+    const btnComoInstalar = screen.getByRole('button', { name: /Como instalar/i })
+    expect(btnComoInstalar).toBeInTheDocument()
+
+    // Ao clicar em Como instalar, exibe os passos de Compartilhar -> Adicionar a Tela de Inicio
+    fireEvent.click(btnComoInstalar)
     expect(screen.getByText(/Compartilhar/i)).toBeInTheDocument()
     expect(screen.getByText(/Adicionar a Tela de Inicio/i)).toBeInTheDocument()
   })
 
-  it('deve exibir o banner com instrucoes do menu quando aberto no navegador do Android', () => {
+  it('deve exibir o banner flutuante compacto no Android e expandir instrucoes do menu ao clicar em Como instalar', () => {
     mockUserAgent(
       'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/122.0.0.0 Mobile Safari/537.36',
       false
@@ -96,9 +99,10 @@ describe('PwaInstallBanner e usePwaInstallPrompt (F08 - Deteccao Mobile via User
 
     render(<PwaInstallBanner />)
 
-    expect(
-      screen.getByText(/Instale o aplicativo Obras Jooy na Tela de Inicio/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Instale o aplicativo Obras Jooy/i)).toBeInTheDocument()
+    const btnComoInstalar = screen.getByRole('button', { name: /Como instalar/i })
+    fireEvent.click(btnComoInstalar)
+
     expect(screen.getByText(/Adicionar a tela inicial \/ Instalar app/i)).toBeInTheDocument()
   })
 
@@ -139,7 +143,7 @@ describe('PwaInstallBanner e usePwaInstallPrompt (F08 - Deteccao Mobile via User
     expect(promptMock).toHaveBeenCalledTimes(1)
   })
 
-  it('deve permitir dispensar o banner clicando em Agora nao e persistir na sessao', () => {
+  it('deve permitir dispensar o banner clicando no botao de fechar e persistir na sessao', () => {
     mockUserAgent(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
       false
@@ -150,9 +154,7 @@ describe('PwaInstallBanner e usePwaInstallPrompt (F08 - Deteccao Mobile via User
     const btnFechar = screen.getByRole('button', { name: /Fechar aviso de instalacao/i })
     fireEvent.click(btnFechar)
 
-    expect(
-      screen.queryByText(/Instale o aplicativo Obras Jooy na Tela de Inicio/i)
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/Instale o aplicativo Obras Jooy/i)).not.toBeInTheDocument()
     expect(sessionStorage.getItem(CHAVE_BANNER_PWA_DISPENSADO)).toBe('true')
   })
 })
