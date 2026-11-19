@@ -322,8 +322,8 @@ export async function materialRoutes(app: FastifyInstance) {
 
       const where: any = {}
 
-      if (somenteAtivos !== undefined) {
-        where.ativo = somenteAtivos
+      if (somenteAtivos === true) {
+        where.ativo = true
       }
 
       if (categoriaId) {
