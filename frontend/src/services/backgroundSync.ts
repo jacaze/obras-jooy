@@ -73,7 +73,7 @@ function abrirBanco(): Promise<IDBDatabase | null> {
 function obterTokenAtual(): string | null {
   try {
     if (typeof localStorage !== 'undefined') {
-      return localStorage.getItem('@ObrasJooy:token')
+      return localStorage.getItem('almox.token') || localStorage.getItem('@ObrasJooy:token')
     }
   } catch {
     // Ignorar erro de storage

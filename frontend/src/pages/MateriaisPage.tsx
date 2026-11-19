@@ -95,7 +95,7 @@ export function MateriaisPage() {
       setMensagemSucesso('Material cadastrado com sucesso no catalogo.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao cadastrar material.')
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao cadastrar material.')
     },
   })
 
@@ -107,7 +107,7 @@ export function MateriaisPage() {
       setMensagemSucesso('Material atualizado com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao atualizar material.')
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao atualizar material.')
     },
   })
 
@@ -119,7 +119,7 @@ export function MateriaisPage() {
       setMensagemSucesso('Situacao do material alterada com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao alterar situacao do material.')
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao alterar situacao do material.')
     },
   })
 
@@ -131,15 +131,20 @@ export function MateriaisPage() {
       }
       return createCategoriaMaterial({ nome: nomeCategoriaInput.trim() })
     },
-    onSuccess: () => {
+    onSuccess: (categoriaSalva) => {
       queryClient.invalidateQueries({ queryKey: ['categorias-material'] })
       queryClient.invalidateQueries({ queryKey: ['materiais'] })
+      if (categoriaSalva?.id) {
+        setFormCategoriaId(categoriaSalva.id)
+      }
       setCategoriaEmEdicao(null)
       setNomeCategoriaInput('')
+      setMensagemErro(null)
       setMensagemSucesso('Categoria salva com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao salvar categoria.')
+      setMensagemSucesso(null)
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao salvar categoria.')
     },
   })
 
@@ -147,10 +152,12 @@ export function MateriaisPage() {
     mutationFn: deleteCategoriaMaterial,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias-material'] })
+      setMensagemErro(null)
       setMensagemSucesso('Categoria excluida com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao excluir categoria.')
+      setMensagemSucesso(null)
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao excluir categoria.')
     },
   })
 
@@ -173,10 +180,12 @@ export function MateriaisPage() {
       setUnidadeEmEdicao(null)
       setSiglaUnidadeInput('')
       setDescricaoUnidadeInput('')
+      setMensagemErro(null)
       setMensagemSucesso('Unidade de medida salva com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao salvar unidade.')
+      setMensagemSucesso(null)
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao salvar unidade.')
     },
   })
 
@@ -184,10 +193,12 @@ export function MateriaisPage() {
     mutationFn: deleteUnidadeMedida,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medida'] })
+      setMensagemErro(null)
       setMensagemSucesso('Unidade de medida excluida com sucesso.')
     },
     onError: (err: any) => {
-      setMensagemErro(err.response?.data?.message || 'Erro ao excluir unidade.')
+      setMensagemSucesso(null)
+      setMensagemErro(err.response?.data?.erro || err.response?.data?.message || 'Erro ao excluir unidade.')
     },
   })
 
@@ -641,12 +652,27 @@ export function MateriaisPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label
-                    htmlFor="material-categoria"
-                    className="ob-label"
-                  >
-                    Categoria *
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label
+                      htmlFor="material-categoria"
+                      className="ob-label mb-0"
+                    >
+                      Categoria *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoriaEmEdicao(null)
+                        setNomeCategoriaInput('')
+                        setMensagemErro(null)
+                        setMensagemSucesso(null)
+                        setModalGerenciarCategorias(true)
+                      }}
+                      className="text-xs font-semibold text-accent-text dark:text-primary hover:underline"
+                    >
+                      + Nova categoria
+                    </button>
+                  </div>
                   <select
                     id="material-categoria"
                     required
@@ -825,6 +851,18 @@ export function MateriaisPage() {
                 X
               </button>
             </div>
+
+            {mensagemSucesso && (
+              <div className="p-3 mb-4 rounded-xl bg-secondary-container text-on-secondary-container border border-secondary text-xs font-medium">
+                {mensagemSucesso}
+              </div>
+            )}
+
+            {mensagemErro && (
+              <div className="p-3 mb-4 rounded-xl bg-error-container text-on-error-container border border-error text-xs font-medium">
+                {mensagemErro}
+              </div>
+            )}
 
             <form
               onSubmit={(e) => {

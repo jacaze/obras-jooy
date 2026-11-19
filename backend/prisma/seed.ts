@@ -1,8 +1,6 @@
 import {
   PrismaClient,
   PerfilUsuario,
-  StatusRequisicao,
-  TipoMovimentacao,
   StatusEtapa,
 } from '@prisma/client'
 import bcrypt from 'bcryptjs'
@@ -31,7 +29,7 @@ export async function seedDatabase() {
     cargosMap[nomeCargo] = cargo.id
   }
 
-  // 3. Seed da Obra Inicial e Pavimentos/Setores (T05)
+  // 2. Seed da Obra Inicial e Pavimentos/Setores (T05)
   const obraInicial = await prisma.obra.upsert({
     where: { codigo: 'JOOY-01' },
     update: {},
@@ -43,7 +41,7 @@ export async function seedDatabase() {
     },
   })
 
-  // 2. Seed de Usuarios para Apresentacao do MVP (Todos os 5 Perfis)
+  // 3. Seed de Usuarios para Apresentacao do MVP (Todos os 5 Perfis)
   const senhaHashPadrao = await bcrypt.hash(env.ADMIN_PASSWORD, 10)
 
   const usuariosDemo = [
@@ -89,14 +87,7 @@ export async function seedDatabase() {
   for (const usr of usuariosDemo) {
     const criado = await prisma.usuario.upsert({
       where: { login: usr.login },
-      update: {
-        nome: usr.nome,
-        senhaHash: senhaHashPadrao,
-        perfil: usr.perfil,
-        cargoId: usr.cargoId,
-        obraId: usr.obraId,
-        ativo: true,
-      },
+      update: {},
       create: {
         nome: usr.nome,
         login: usr.login,
@@ -234,23 +225,29 @@ export async function seedDatabase() {
   for (const un of unidadesIniciais) {
     const criada = await prisma.unidadeMedida.upsert({
       where: { sigla: un.sigla },
-      update: { descricao: un.descricao },
+      update: {},
       create: { sigla: un.sigla, descricao: un.descricao },
     })
     unidadesMap[un.sigla] = criada.id
   }
 
-  // 5. Seed de Categorias de Materiais (T07)
+  // 5. Seed de Categorias de Materiais (incluindo categorias criadas no site pelo usuario)
   const categoriasIniciais = [
-    'Alvenaria e Cimento',
+    'Aço - barras',
+    'Aço - telas',
     'Aco e Estrutura',
+    'Alvenaria e Cimento',
+    'Complementos de armação',
+    'Concreto',
     'Eletrica',
-    'Hidraulica',
-    'Pintura e Acabamento',
     'EPIs e Seguranca',
-    'Ferramentas Manuais',
     'Ferramentas Eletricas',
+    'Ferramentas Manuais',
+    'Formas e acessórios',
+    'Hidraulica',
+    'Higiene, Limpeza e Copa',
     'Madeiras e Formas',
+    'Pintura e Acabamento',
   ]
 
   const categoriasMap: Record<string, string> = {}
@@ -263,80 +260,87 @@ export async function seedDatabase() {
     categoriasMap[cat] = criada.id
   }
 
-  // 6. Seed de Materiais Iniciais Demonstrativos (T07 / F03)
-  const materiaisIniciais = [
-    {
-      codigo: 'MAT-001',
-      codigoSienge: '74201',
-      descricao: 'Cimento CP-II F 32 50kg',
-      categoriaId: categoriasMap['Alvenaria e Cimento'],
-      unidadeCompraId: unidadesMap['SC'],
-      unidadeConsumoId: unidadesMap['KG'],
-      fatorConversao: 50.0,
-      ehKit: false,
-      exigeTesteQualidade: true,
-      ativo: true,
-    },
-    {
-      codigo: 'MAT-002',
-      codigoSienge: null,
-      descricao: 'Areia Media Lavada',
-      categoriaId: categoriasMap['Alvenaria e Cimento'],
-      unidadeCompraId: null,
-      unidadeConsumoId: unidadesMap['M3'],
-      fatorConversao: 1.0,
-      ehKit: false,
-      exigeTesteQualidade: false,
-      ativo: true,
-    },
-    {
-      codigo: 'MAT-003',
-      codigoSienge: '88340',
-      descricao: 'Cabo Flexivel 2,5mm 750V Azul',
-      categoriaId: categoriasMap['Eletrica'],
-      unidadeCompraId: unidadesMap['RL'],
-      unidadeConsumoId: unidadesMap['M'],
-      fatorConversao: 100.0,
-      ehKit: false,
-      exigeTesteQualidade: false,
-      ativo: true,
-    },
-    {
-      codigo: 'MAT-004',
-      codigoSienge: null,
-      descricao: 'Luva de Vaqueta Mista',
-      categoriaId: categoriasMap['EPIs e Seguranca'],
-      unidadeCompraId: null,
-      unidadeConsumoId: unidadesMap['PAR'],
-      fatorConversao: 1.0,
-      ehKit: false,
-      exigeTesteQualidade: false,
-      ativo: true,
-    },
+  // 6. Seed dos 49 Materiais da Planilha estoque.xlsx (vinculados as categorias e unidades devidas, sem saldo inicial)
+  const listaPlanilhaMateriais: Array<{
+    codigo: string
+    descricao: string
+    unidadeSigla: string
+    categoriaNome: string
+  }> = [
+    { codigo: 'MAT-001', descricao: 'Disco p/ferro 115 x 1,0mm x 22', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-002', descricao: 'Disco p/ ferro 115mm x 1,0 x 2', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-003', descricao: 'Rebolo diamantado 115mm / R', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-004', descricao: 'Tenda 3x3', unidadeSigla: 'UN', categoriaNome: 'EPIs e Seguranca' },
+    { codigo: 'MAT-005', descricao: 'Corda poliéster 100m', unidadeSigla: 'M', categoriaNome: 'EPIs e Seguranca' },
+    { codigo: 'MAT-006', descricao: 'Fio de nylon', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Manuais' },
+    { codigo: 'MAT-007', descricao: 'Mangueira preta', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-008', descricao: 'Serra copo 127mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-009', descricao: 'Suporte de serra copo com bro', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-010', descricao: 'Serra copo 40mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-011', descricao: 'Serra copo 38mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-012', descricao: 'Serra copo 32mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-013', descricao: 'Serra copo 19mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-014', descricao: 'Serra copo 25mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-015', descricao: 'Serra copo diamantada 50mm', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-016', descricao: 'Serra copo diamantada', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Eletricas' },
+    { codigo: 'MAT-017', descricao: 'Pasta lubrificante', unidadeSigla: 'KG', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-018', descricao: 'T. 85x75mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-019', descricao: 'T. 75mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-020', descricao: 'Cotovelo 90° - 85mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-021', descricao: 'Bucha redutora 110 x 75mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-022', descricao: 'Curva 90° - DN 50 Esgoto', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-023', descricao: 'T. DN 50 esgoto', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-024', descricao: 'T. DN 75x50mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-025', descricao: 'T. DN 100x50mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-026', descricao: 'T. DN 100mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-027', descricao: 'T. DN 150', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-028', descricao: 'Y. DN 75x50mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-029', descricao: 'Y. DN 100x 50mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-030', descricao: 'Y. 150x100mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-031', descricao: 'Y. DN 150mm', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-032', descricao: 'Luva de correr - esgoto DN 100', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-033', descricao: 'Veda rosca 18mm x 50m', unidadeSigla: 'UN', categoriaNome: 'Hidraulica' },
+    { codigo: 'MAT-034', descricao: 'Sika AnchorFix', unidadeSigla: 'UN', categoriaNome: 'Alvenaria e Cimento' },
+    { codigo: 'MAT-035', descricao: 'Selante PU', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-036', descricao: 'Copo descartável', unidadeSigla: 'UN', categoriaNome: 'Higiene, Limpeza e Copa' },
+    { codigo: 'MAT-037', descricao: 'Porta copo descartável', unidadeSigla: 'UN', categoriaNome: 'Higiene, Limpeza e Copa' },
+    { codigo: 'MAT-038', descricao: 'Papel higiênico', unidadeSigla: 'UN', categoriaNome: 'Higiene, Limpeza e Copa' },
+    { codigo: 'MAT-039', descricao: 'Spray vermelho', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-040', descricao: 'Spray amarelo', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-041', descricao: 'Spray rosa', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-042', descricao: 'Spray verde claro', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-043', descricao: 'Spray azul claro', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-044', descricao: 'Spray azul escuro', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-045', descricao: 'Spray dourado metal', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-046', descricao: 'Spray 400ml azul claro', unidadeSigla: 'UN', categoriaNome: 'Pintura e Acabamento' },
+    { codigo: 'MAT-047', descricao: 'WD - 40', unidadeSigla: 'UN', categoriaNome: 'Ferramentas Manuais' },
+    { codigo: 'MAT-048', descricao: 'Álcool líquido 5l', unidadeSigla: 'L', categoriaNome: 'Higiene, Limpeza e Copa' },
+    { codigo: 'MAT-049', descricao: 'Desinfetante Bio- kriss', unidadeSigla: 'UN', categoriaNome: 'Higiene, Limpeza e Copa' },
   ]
 
-  const materiaisMap: Record<string, string> = {}
+  for (const item of listaPlanilhaMateriais) {
+    const categoriaId = categoriasMap[item.categoriaNome]
+    const unidadeConsumoId = unidadesMap[item.unidadeSigla]
 
-  for (const mat of materiaisIniciais) {
-    const criado = await prisma.material.upsert({
-      where: { codigo: mat.codigo },
-      update: {
-        codigoSienge: mat.codigoSienge,
-        descricao: mat.descricao,
-        categoriaId: mat.categoriaId,
-        unidadeCompraId: mat.unidadeCompraId,
-        unidadeConsumoId: mat.unidadeConsumoId,
-        fatorConversao: mat.fatorConversao,
-        ehKit: mat.ehKit,
-        exigeTesteQualidade: mat.exigeTesteQualidade,
-        ativo: mat.ativo,
+    await prisma.material.upsert({
+      where: { codigo: item.codigo },
+      update: {},
+      create: {
+        codigo: item.codigo,
+        codigoSienge: null,
+        descricao: item.descricao,
+        categoriaId,
+        unidadeCompraId: null,
+        unidadeConsumoId,
+        fatorConversao: 1.0,
+        ehKit: false,
+        exigeTesteQualidade: false,
+        ativo: true,
       },
-      create: mat,
     })
-    materiaisMap[mat.codigo] = criado.id
   }
 
-  // 7. Seed de Ferramentas Iniciais Demonstrativas (incluindo 1 emprestada para o Encarregado)
+  // 7. Seed de Ferramentas Iniciais Demonstrativas (nao sobrescreve status caso ja exista)
   const ferramentasIniciais = [
     {
       codigo: 'FER-001',
@@ -371,25 +375,20 @@ export async function seedDatabase() {
   for (const fer of ferramentasIniciais) {
     await prisma.ferramenta.upsert({
       where: { codigo: fer.codigo },
-      update: {
-        nome: fer.nome,
-        status: fer.status,
-        emprestadoParaId: fer.emprestadoParaId,
-        ativo: fer.ativo,
-      },
+      update: {},
       create: fer,
     })
   }
 
-  // 8. Seed de Local de Estoque e Saldos Iniciais na Obra JOOY-01
-  const localPrincipal = await prisma.localEstoque.upsert({
+  // 8. Seed do Local de Estoque Central na Obra JOOY-01 (sem saldos iniciais nem requisicoes demo)
+  await prisma.localEstoque.upsert({
     where: {
       local_estoque_obra_nome_unico: {
         obraId: obraInicial.id,
         nome: 'Almoxarifado Central - JOOY-01',
       },
     },
-    update: { ativo: true },
+    update: {},
     create: {
       obraId: obraInicial.id,
       nome: 'Almoxarifado Central - JOOY-01',
@@ -397,172 +396,7 @@ export async function seedDatabase() {
     },
   })
 
-  const saldosIniciais = [
-    {
-      codigoMat: 'MAT-001',
-      quantidade: 2500, // 2500 KG (50 sacos de 50kg)
-      chaveIdemp: 'seed-receb-mat-001',
-      obs: 'Recebimento NF 4510 - Lote inicial de Cimento CP-II (50 sacos)',
-    },
-    {
-      codigoMat: 'MAT-002',
-      quantidade: 45, // 45 M3 de Areia
-      chaveIdemp: 'seed-receb-mat-002',
-      obs: 'Recebimento NF 4512 - Areia Media Lavada para alvenaria',
-    },
-    {
-      codigoMat: 'MAT-003',
-      quantidade: 800, // 800 Metros de Cabo Flexivel
-      chaveIdemp: 'seed-receb-mat-003',
-      obs: 'Recebimento NF 4520 - 8 rolos de 100m Cabo 2,5mm',
-    },
-    {
-      codigoMat: 'MAT-004',
-      quantidade: 180, // 180 Pares de Luva de Vaqueta
-      chaveIdemp: 'seed-receb-mat-004',
-      obs: 'Recebimento NF 4530 - Lote trimestral de EPIs',
-    },
-  ]
-
-  for (const item of saldosIniciais) {
-    const materialId = materiaisMap[item.codigoMat]
-    await prisma.estoqueSaldo.upsert({
-      where: {
-        localId_materialId: {
-          localId: localPrincipal.id,
-          materialId,
-        },
-      },
-      update: {},
-      create: {
-        localId: localPrincipal.id,
-        materialId,
-        quantidade: item.quantidade,
-        reservado: 0,
-      },
-    })
-
-    await prisma.movimentacaoEstoque.upsert({
-      where: { chaveIdempotencia: item.chaveIdemp },
-      update: {},
-      create: {
-        localId: localPrincipal.id,
-        materialId,
-        tipo: TipoMovimentacao.ENTRADA_RECEB,
-        quantidade: item.quantidade,
-        usuarioId: usuariosMap['almoxarife'],
-        chaveIdempotencia: item.chaveIdemp,
-        observacao: item.obs,
-      },
-    })
-  }
-
-  // 9. Seed de Limites de Orcamento da Engenharia para a Obra JOOY-01 (T13)
-  const orcamentosDemo = [
-    {
-      codigoMat: 'MAT-001',
-      quantidadeOrcada: 3000, // Dentro do limite
-      observacao: 'Meta prevista para concretagem e alvenaria dos 3 primeiros pavimentos',
-    },
-    {
-      codigoMat: 'MAT-003',
-      quantidadeOrcada: 500, // Em atencao (>80% consumido)
-      observacao: 'Teto de cabeamento eletrico etapa 1',
-    },
-    {
-      codigoMat: 'MAT-004',
-      quantidadeOrcada: 100, // Ultrapassado (consumido 125 pares > 100 pares orcados!)
-      observacao: 'Meta inicial de EPIs (Luva de Vaqueta) definida pela Engenharia',
-    },
-  ]
-
-  for (const orc of orcamentosDemo) {
-    const materialId = materiaisMap[orc.codigoMat]
-    await prisma.orcamentoObraMaterial.upsert({
-      where: {
-        orcamento_obra_material_unico: {
-          obraId: obraInicial.id,
-          materialId,
-        },
-      },
-      update: {
-        quantidadeOrcada: orc.quantidadeOrcada,
-        observacao: orc.observacao,
-      },
-      create: {
-        obraId: obraInicial.id,
-        materialId,
-        quantidadeOrcada: orc.quantidadeOrcada,
-        observacao: orc.observacao,
-      },
-    })
-  }
-
-  // 10. Seed de Requisicoes Demonstrativas (Atendida pendente de exportacao SIENGE + Solicitada na fila)
-  const reqAtendidaExistente = await prisma.requisicao.findUnique({
-    where: { chaveIdempotencia: 'seed-req-atendida-01' },
-  })
-
-  if (!reqAtendidaExistente) {
-    await prisma.requisicao.create({
-      data: {
-        areaId: areasMap['1o Pavimento'],
-        requisitanteId: usuariosMap['encarregado'],
-        status: StatusRequisicao.ATENDIDA,
-        chaveIdempotencia: 'seed-req-atendida-01',
-        observacao: 'EPIs para equipe de alvenaria e instalacao eletrica do 1o pavimento',
-        retiradoPor: 'Jose Carlos - Mestre de Obras',
-        atendidoPorId: usuariosMap['almoxarife'],
-        atendidoEm: new Date(),
-        retiradaEm: new Date(),
-        exportadaSienge: false,
-        itens: {
-          create: [
-            {
-              materialId: materiaisMap['MAT-004'],
-              quantidade: 95,
-              quantidadeEntregue: 95,
-            },
-            {
-              materialId: materiaisMap['MAT-003'],
-              quantidade: 420,
-              quantidadeEntregue: 420,
-            },
-          ],
-        },
-      },
-    })
-  }
-
-  const reqPendenteExistente = await prisma.requisicao.findUnique({
-    where: { chaveIdempotencia: 'seed-req-pendente-02' },
-  })
-
-  if (!reqPendenteExistente) {
-    await prisma.requisicao.create({
-      data: {
-        areaId: areasMap['2o Pavimento'],
-        requisitanteId: usuariosMap['encarregado'],
-        status: StatusRequisicao.SOLICITADA,
-        chaveIdempotencia: 'seed-req-pendente-02',
-        observacao: 'Reforco de EPIs e cimento para inicio da alvenaria no 2o pavimento',
-        itens: {
-          create: [
-            {
-              materialId: materiaisMap['MAT-004'],
-              quantidade: 30, // 95 entregues + 30 pendentes = 125 (> 100 orcados -> estouro!)
-            },
-            {
-              materialId: materiaisMap['MAT-001'],
-              quantidade: 500,
-            },
-          ],
-        },
-      },
-    })
-  }
-
-  console.log('Seed demonstrativo do MVP concluido com sucesso!')
+  console.log('Seed do catalogo de materiais e configuracoes base concluido com sucesso!')
 }
 
 if (process.env.NODE_ENV !== 'test') {
