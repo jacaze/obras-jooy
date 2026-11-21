@@ -782,18 +782,18 @@ export function FerramentasPage() {
                   </span>
                 </label>
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setFerramentaParaEmprestimo(null)}
-                    className="ob-btn ob-btn--outline"
+                    className="ob-btn ob-btn--outline w-full sm:w-auto justify-center"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={emprestarFerramentaMutation.isPending || !testadoNaSaida}
-                    className="ob-btn ob-btn--solid disabled:opacity-50"
+                    className="ob-btn ob-btn--solid w-full sm:w-auto justify-center disabled:opacity-50"
                   >
                     {emprestarFerramentaMutation.isPending
                       ? 'Registrando...'
@@ -941,18 +941,18 @@ export function FerramentasPage() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setFerramentaParaDevolucao(null)}
-                    className="ob-btn ob-btn--outline"
+                    className="ob-btn ob-btn--outline w-full sm:w-auto justify-center"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={devolverFerramentaMutation.isPending || !testadoNoRetorno}
-                    className={`ob-btn disabled:opacity-50 ${
+                    className={`ob-btn w-full sm:w-auto justify-center disabled:opacity-50 ${
                       devolucaoComDefeito ? 'ob-btn--solid text-error' : 'ob-btn--primary'
                     }`}
                   >
@@ -1129,18 +1129,18 @@ export function FerramentasPage() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setModalFerramentaAberto(false)}
-                    className="ob-btn ob-btn--outline"
+                    className="ob-btn ob-btn--outline w-full sm:w-auto justify-center"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={salvarFerramentaMutation.isPending}
-                    className="ob-btn ob-btn--primary"
+                    className="ob-btn ob-btn--primary w-full sm:w-auto justify-center"
                   >
                     {salvarFerramentaMutation.isPending ? 'Salvando...' : 'Salvar Ferramenta'}
                   </button>
