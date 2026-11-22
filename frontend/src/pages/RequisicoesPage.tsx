@@ -1236,12 +1236,12 @@ export function RequisicoesPage() {
                       {r.observacao ? `Obs: ${r.observacao}` : 'Sem observacoes adicionais'}
                     </span>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full sm:w-auto sm:ml-auto">
                       {podeAtender && (
                         <button
                           type="button"
                           onClick={() => handleAbrirModalAtendimento(r)}
-                          className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px]"
+                          className="ob-btn ob-btn--primary ob-btn--sm min-h-[44px] w-full sm:w-auto justify-center"
                         >
                           Atender / Entregar Material
                         </button>
@@ -1260,7 +1260,7 @@ export function RequisicoesPage() {
                               cancelarRequisicaoMutation.mutate(r.id)
                             }
                           }}
-                          className="ob-btn ob-btn--outline ob-btn--sm min-h-[44px] text-error border-error/30 hover:bg-error-container/20"
+                          className="ob-btn ob-btn--outline ob-btn--sm min-h-[44px] w-full sm:w-auto justify-center text-error border-error/30 hover:bg-error-container/20"
                         >
                           Cancelar Requisicao
                         </button>
@@ -1276,8 +1276,8 @@ export function RequisicoesPage() {
 
       {/* MODAL: ATENDER REQUISICAO (ALMOXARIFE / ADMIN) */}
       {requisicaoEmAtendimento && (
-        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-up">
-          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
+        <div className="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-up">
+          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-4 sm:p-8 shadow-2xl border border-surface-container-high max-h-[90vh] overflow-y-auto font-body text-on-surface">
             <h2 className="ob-heading text-xl font-bold text-on-surface mb-2">
               Atender Requisicao #{requisicaoEmAtendimento.numeroSequencial}
             </h2>
@@ -1394,11 +1394,11 @@ export function RequisicoesPage() {
                 </label>
               )}
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setRequisicaoEmAtendimento(null)}
-                  className="ob-btn ob-btn--outline"
+                  className="ob-btn ob-btn--outline w-full sm:w-auto justify-center"
                 >
                   Cancelar
                 </button>
@@ -1409,7 +1409,7 @@ export function RequisicoesPage() {
                     (requisicaoEmAtendimento.itens.some((it) => Boolean(it.ferramenta || it.ferramentaId)) &&
                       !testadoFerramentaAtendimento)
                   }
-                  className="ob-btn ob-btn--primary disabled:opacity-50"
+                  className="ob-btn ob-btn--primary w-full sm:w-auto justify-center whitespace-normal text-center leading-snug py-2.5 px-4 disabled:opacity-50"
                 >
                   {atenderRequisicaoMutation.isPending
                     ? 'Confirmando...'
@@ -1721,18 +1721,18 @@ export function RequisicoesPage() {
               </div>
 
               {/* Botoes do Modal */}
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-3">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalNovaRequisicaoAberto(false)}
-                  className="ob-btn ob-btn--outline"
+                  className="ob-btn ob-btn--outline w-full sm:w-auto justify-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarRequisicaoMutation.isPending || !etapaIdSelecionada || etapaEstaEncerrada}
-                  className="ob-btn ob-btn--primary ob-btn--lg"
+                  className="ob-btn ob-btn--primary w-full sm:w-auto justify-center font-semibold"
                 >
                   {criarRequisicaoMutation.isPending ? 'Enviando...' : 'Enviar Requisicao'}
                 </button>
@@ -1928,18 +1928,18 @@ export function RequisicoesPage() {
               </div>
 
               {/* Botoes do Modal */}
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-3">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalExportacaoAnaliticaAberto(false)}
-                  className="ob-btn ob-btn--outline"
+                  className="ob-btn ob-btn--outline w-full sm:w-auto justify-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={exportarAnaliticoMutation.isPending}
-                  className="ob-btn ob-btn--primary ob-btn--lg"
+                  className="ob-btn ob-btn--primary w-full sm:w-auto justify-center whitespace-normal text-center leading-snug py-2.5 px-4 font-semibold"
                 >
                   <span className="material-symbols-outlined text-[18px]">download</span>
                   <span>

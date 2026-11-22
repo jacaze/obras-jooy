@@ -1055,18 +1055,18 @@ export function EstoquePage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 mt-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 mt-2">
                 <button
                   type="button"
                   onClick={() => setModalMovAberto(false)}
-                  className="ob-btn ob-btn--outline ob-btn--sm"
+                  className="ob-btn ob-btn--outline ob-btn--sm w-full sm:w-auto justify-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={registrarMovMutation.isPending}
-                  className="ob-btn ob-btn--primary ob-btn--sm"
+                  className="ob-btn ob-btn--primary ob-btn--sm w-full sm:w-auto justify-center"
                 >
                   {registrarMovMutation.isPending ? 'Registrando...' : 'Confirmar Lancamento'}
                 </button>
@@ -1134,21 +1134,21 @@ export function EstoquePage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 mt-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3 mt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setModalLocalAberto(false)
                     setLocalEditando(null)
                   }}
-                  className="ob-btn ob-btn--outline ob-btn--sm"
+                  className="ob-btn ob-btn--outline ob-btn--sm w-full sm:w-auto justify-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={criarLocalMutation.isPending || editarLocalMutation.isPending}
-                  className="ob-btn ob-btn--primary ob-btn--sm"
+                  className="ob-btn ob-btn--primary ob-btn--sm w-full sm:w-auto justify-center"
                 >
                   {criarLocalMutation.isPending || editarLocalMutation.isPending
                     ? 'Salvando...'
